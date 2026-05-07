@@ -1,4 +1,4 @@
-import type { Appointment as AppointmentType, TeamMember } from '../../types'
+import type { Appointment as AppointmentType, Host } from '../../types'
 
 import CalendarClient from './CalendarClient'
 import './styles.scss'
@@ -6,22 +6,25 @@ import './styles.scss'
 interface CalendarProps {
   apiRoute: string
   collectionSlug: string
+  hostSlug: string
   initialAppointments: AppointmentType[]
-  initialTeamMembers: TeamMember[]
+  initialHosts: Host[]
 }
 
 export default function Calendar({
   apiRoute,
   collectionSlug,
+  hostSlug,
   initialAppointments,
-  initialTeamMembers,
+  initialHosts,
 }: CalendarProps) {
   return (
     <CalendarClient
       apiRoute={apiRoute}
       collectionSlug={collectionSlug}
+      hostSlug={hostSlug}
       initialAppointments={initialAppointments}
-      initialTeamMembers={initialTeamMembers}
+      initialHosts={initialHosts}
     />
   )
 }

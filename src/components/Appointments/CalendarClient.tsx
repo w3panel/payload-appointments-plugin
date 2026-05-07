@@ -12,7 +12,7 @@ import type {
   Appointment as AppointmentType,
   AppointmentStatus,
   BigCalendarAppointment,
-  TeamMember,
+  Host,
 } from '../../types';
 
 import Appointment from './Appointment';
@@ -21,13 +21,14 @@ import StatsCard from './StatsCard';
 import Toolbar from './Toolbar';
 
 const localizer = momentLocalizer(moment);
-const DnDCalendar = withDragAndDrop<BigCalendarAppointment, TeamMember>(ReactBigCalendar);
+const DnDCalendar = withDragAndDrop<BigCalendarAppointment, Host>(ReactBigCalendar);
 
 interface CalendarClientProps {
   apiRoute: string;
   collectionSlug: string;
+  hostSlug: string;
   initialAppointments: AppointmentType[];
-  initialTeamMembers: TeamMember[];
+  initialHosts: Host[];
 }
 
 function getDateRangeForView(date: Date, view: View): { start: Date; end: Date } {
@@ -48,7 +49,7 @@ export default function CalendarClient({
   apiRoute,
   collectionSlug,
   initialAppointments,
-  initialTeamMembers,
+  initialHosts,
 }: CalendarClientProps) {
   const [view, setView] = useState<View>('day');
   const [currentDate, setCurrentDate] = useState<Date>(new Date());
@@ -58,13 +59,13 @@ export default function CalendarClient({
   const [isLoading, setIsLoading] = useState(false);
 
   const takingAppointments = useMemo(
-    () => initialTeamMembers.filter((user: TeamMember) => user.takingAppointments),
-    [initialTeamMembers],
+    () => initialHosts.filter((host: Host) => host.takingAppointments),
+    [initialHosts],
   );
 
-  const filteredTeamMembers = useMemo(() => {
+  const filteredHosts = useMemo(() => {
     if (teamFilter === 'all') return takingAppointments;
-    return takingAppointments.filter((member) => String(member.id) === teamFilter);
+    return takingAppointments.filter((host) => String(host.id) === teamFilter);
   }, [takingAppointments, teamFilter]);
 
   const [DocumentDrawer, , { isDrawerOpen, toggleDrawer }] = useDocumentDrawer({
@@ -107,7 +108,7 @@ export default function CalendarClient({
       .map((doc: AppointmentType) => ({
         ...doc,
         end: moment(doc.end).toDate(),
-        hostId: doc.host.id,
+        hostId: String(doc.host?.id ?? ''),
         start: moment(doc.start).toDate(),
       }));
   }, [appointments, statusFilter]);
@@ -148,7 +149,7 @@ export default function CalendarClient({
     toggleDrawer();
   }, [toggleDrawer]);
 
-  const components: Components<BigCalendarAppointment, TeamMember> = useMemo(
+  const components: Components<BigCalendarAppointment, Host> = useMemo(
     () => ({
       event: ({ event }) => {
         if (event.appointmentType === 'appointment') {
@@ -167,13 +168,13 @@ export default function CalendarClient({
     <React.Fragment>
       <Toolbar
         currentDate={currentDate}
+        hosts={takingAppointments}
         onDateChange={handleDateChange}
         onNewAppointment={handleNewAppointment}
         onStatusFilterChange={setStatusFilter}
         onTeamFilterChange={setTeamFilter}
         statusFilter={statusFilter}
         teamFilter={teamFilter}
-        teamMembers={takingAppointments}
       />
 
       <StatsCard appointments={appointments} currentDate={currentDate} />
@@ -194,7 +195,7 @@ export default function CalendarClient({
           resizable={false}
           resourceAccessor="hostId"
           resourceIdAccessor="id"
-          resources={filteredTeamMembers}
+          resources={filteredHosts}
           resourceTitleAccessor="preferredNameAppointments"
           selectable
           step={15}

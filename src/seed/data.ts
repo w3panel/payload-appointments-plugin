@@ -32,8 +32,8 @@ export const openingTimesSeed = {
   },
   sunday: {
     isOpen: false,
-    opening: null,
-    closing: null,
+    opening: null as string | null,
+    closing: null as string | null,
   },
 };
 

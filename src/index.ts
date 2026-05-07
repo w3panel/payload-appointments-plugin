@@ -1,25 +1,27 @@
 import type { Config } from 'payload';
 
-import Appointments from './collections/Appointments';
+import { buildAppointments } from './collections/Appointments';
 import GuestCustomers from './collections/GuestCustomers';
 import SentEmails from './collections/SentEmails';
 import Services from './collections/Services';
 import TeamMembers from './collections/TeamMembers';
-import Waitlist from './collections/Waitlist';
+import { buildWaitlist } from './collections/Waitlist';
 import { cancelAppointment } from './endpoints/cancelAppointment';
 import { cancelAppointmentByToken } from './endpoints/cancelAppointmentByToken';
 import { cancelRecurringAppointment } from './endpoints/cancelRecurringAppointment';
 import { getAnalytics } from './endpoints/getAnalytics';
 import { getAppointmentByToken } from './endpoints/getAppointmentByToken';
-import { getAppointmentsForDayAndHost } from './endpoints/getAppointmentsForDayAndHost';
-import { getICalFeed } from './endpoints/getICalFeed';
-import { paymentWebhook } from './endpoints/paymentWebhook';
+import { buildGetAppointmentsForDayAndHost } from './endpoints/getAppointmentsForDayAndHost';
+import { buildGetICalFeed } from './endpoints/getICalFeed';
+import { buildPaymentWebhook } from './endpoints/paymentWebhook';
 import { updateRecurringAppointment } from './endpoints/updateRecurringAppointment';
 import { waitlistJoin } from './endpoints/waitlistJoin';
 import { waitlistLeave } from './endpoints/waitlistLeave';
 import { waitlistPosition } from './endpoints/waitlistPosition';
 import OpeningTimes from './globals/OpeningTimes';
 import { seedAppointmentsData } from './seed';
+import { CUSTOM_CONFIG_KEY, DEFAULT_BUILD_CONFIG } from './types/config';
+import type { AppointmentsBuildConfig } from './types/config';
 
 import type { PaymentHooks } from './types';
 
@@ -29,7 +31,44 @@ export type AppointmentsPluginConfig = {
   seedData?: boolean;
   showDashboardCards?: boolean;
   showNavItems?: boolean;
+  /**
+   * Slug of the consumer collection that will own host (provider/practitioner)
+   * documents. The collection must expose at least: `id`, `firstName`,
+   * `lastName`, `preferredNameAppointments`, `takingAppointments`,
+   * `useCustomHours`, `customHours`, `maxAppointmentsPerDay`, `icalToken`.
+   *
+   * @default 'teamMembers'
+   */
+  hostCollectionSlug?: string;
+  /**
+   * Slug of the consumer collection used as the customer relation on
+   * appointments and waitlist entries.
+   *
+   * @default 'users'
+   */
+  customerCollectionSlug?: string;
+  /**
+   * When `true` (default) the plugin registers its built-in `TeamMembers`
+   * collection as the host. Set to `false` when supplying your own
+   * `hostCollectionSlug`.
+   *
+   * @default true
+   */
+  registerHostCollection?: boolean;
+  /**
+   * Whether to register the built-in `GuestCustomers` collection.
+   *
+   * @default true
+   */
+  registerGuestCustomerCollection?: boolean;
+  /** ISO 4217 currency passed to `paymentHooks` (e.g. 'USD', 'INR'). */
+  currency?: string;
+  /** Free-form payment provider id passed through to `paymentHooks` context. */
+  paymentProvider?: string;
 };
+
+export type { AppointmentsBuildConfig } from './types/config';
+export type { Appointment, Host, PaymentHooks, PaymentHookContext } from './types';
 
 export const appointmentsPlugin =
   ({
@@ -38,7 +77,13 @@ export const appointmentsPlugin =
     seedData = false,
     showDashboardCards = true,
     showNavItems = true,
-  }: AppointmentsPluginConfig) =>
+    hostCollectionSlug,
+    customerCollectionSlug,
+    registerHostCollection = true,
+    registerGuestCustomerCollection = true,
+    currency,
+    paymentProvider,
+  }: AppointmentsPluginConfig = {}) =>
   (config: Config): Config => {
     if (!config.collections) {
       config.collections = [];
@@ -60,12 +105,30 @@ export const appointmentsPlugin =
       config.admin.components = {};
     }
 
+    const buildConfig: AppointmentsBuildConfig = {
+      ...DEFAULT_BUILD_CONFIG,
+      hostSlug: hostCollectionSlug ?? DEFAULT_BUILD_CONFIG.hostSlug,
+      customerSlug: customerCollectionSlug ?? DEFAULT_BUILD_CONFIG.customerSlug,
+      currency: currency ?? DEFAULT_BUILD_CONFIG.currency,
+      paymentProvider,
+    };
+
+    // Stash the resolved config on `payload.config.custom` so server admin
+    // views (and any consumer code) can read the active slugs at runtime.
+    (config as Config & { custom?: Record<string, unknown> }).custom = {
+      ...((config as Config & { custom?: Record<string, unknown> }).custom || {}),
+      [CUSTOM_CONFIG_KEY]: buildConfig,
+    };
+
+    const Appointments = buildAppointments(buildConfig, paymentHooks);
+    const Waitlist = buildWaitlist(buildConfig);
+
     config.collections = [
       ...(config.collections || []),
       Appointments,
-      GuestCustomers,
+      ...(registerGuestCustomerCollection ? [GuestCustomers] : []),
       SentEmails,
-      TeamMembers,
+      ...(registerHostCollection ? [TeamMembers] : []),
       Services,
       Waitlist,
     ];
@@ -102,7 +165,7 @@ export const appointmentsPlugin =
     config.endpoints = [
       ...(config.endpoints || []),
       {
-        handler: getAppointmentsForDayAndHost,
+        handler: buildGetAppointmentsForDayAndHost(buildConfig),
         method: 'get',
         path: '/get-available-appointment-slots',
       },
@@ -127,7 +190,7 @@ export const appointmentsPlugin =
         path: '/appointments-analytics',
       },
       {
-        handler: paymentWebhook,
+        handler: buildPaymentWebhook(buildConfig, paymentHooks),
         method: 'post',
         path: '/appointments-payment-webhook',
       },
@@ -142,7 +205,7 @@ export const appointmentsPlugin =
         path: '/cancel-recurring-appointment',
       },
       {
-        handler: getICalFeed,
+        handler: buildGetICalFeed(buildConfig),
         method: 'get',
         path: '/appointments-ical',
       },
@@ -171,7 +234,7 @@ export const appointmentsPlugin =
       }
 
       if (seedData) {
-        await seedAppointmentsData(payload);
+        await seedAppointmentsData(payload, buildConfig);
       }
     };
 

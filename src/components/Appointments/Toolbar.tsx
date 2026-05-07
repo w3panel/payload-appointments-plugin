@@ -1,18 +1,18 @@
 'use client';
 
-import type { TeamMember, AppointmentStatus } from '../../types';
+import type { Host, AppointmentStatus } from '../../types';
 
 import React from 'react';
 
 interface ToolbarProps {
   currentDate: Date;
+  hosts: Host[];
   onDateChange: (date: Date) => void;
   onNewAppointment: () => void;
   onStatusFilterChange: (status: AppointmentStatus | 'all') => void;
-  onTeamFilterChange: (teamMemberId: string | 'all') => void;
+  onTeamFilterChange: (hostId: string | 'all') => void;
   statusFilter: AppointmentStatus | 'all';
   teamFilter: string | 'all';
-  teamMembers: TeamMember[];
 }
 
 const statusOptions: { label: string; value: AppointmentStatus | 'all' }[] = [
@@ -26,13 +26,13 @@ const statusOptions: { label: string; value: AppointmentStatus | 'all' }[] = [
 
 const Toolbar: React.FC<ToolbarProps> = ({
   currentDate,
+  hosts,
   onDateChange,
   onNewAppointment,
   onStatusFilterChange,
   onTeamFilterChange,
   statusFilter,
   teamFilter,
-  teamMembers,
 }) => {
   const handleDateInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const date = new Date(e.target.value);
@@ -97,10 +97,10 @@ const Toolbar: React.FC<ToolbarProps> = ({
           onChange={(e) => onTeamFilterChange(e.target.value)}
           value={teamFilter}
         >
-          <option value="all">All Team Members</option>
-          {teamMembers.map((member) => (
-            <option key={member.id} value={member.id}>
-              {member.preferredNameAppointments || `${member.firstName} ${member.lastName}`}
+          <option value="all">All Hosts</option>
+          {hosts.map((host) => (
+            <option key={host.id} value={host.id}>
+              {host.preferredNameAppointments || `${host.firstName ?? ''} ${host.lastName ?? ''}`.trim() || `Host ${host.id}`}
             </option>
           ))}
         </select>

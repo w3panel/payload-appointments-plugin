@@ -30,6 +30,22 @@ export interface GuestCustomer {
 
 export type AppointmentStatus = 'pending' | 'confirmed' | 'cancelled' | 'completed' | 'no-show';
 
+/**
+ * Generic shape for the appointment "host" relation.
+ *
+ * The plugin ships a built-in `TeamMember` host collection but consumers can
+ * point the host relation at their own collection (e.g. `Doctor`). Any host
+ * doc that satisfies this shape can act as a host.
+ */
+export interface Host {
+  id: string | number;
+  email?: string;
+  firstName?: null | string;
+  lastName?: null | string;
+  preferredNameAppointments?: null | string;
+  takingAppointments?: boolean | null;
+}
+
 export interface Appointment {
   appointmentType: 'appointment' | 'blockout';
   bookedBy?: 'customer' | 'guest';
@@ -39,7 +55,7 @@ export interface Appointment {
   customerNotes?: string;
   end: string;
   guestCustomer?: GuestCustomer;
-  host: User;
+  host: Host;
   hostId?: string;
   id: string;
   internalNotes?: string;
@@ -59,7 +75,7 @@ export type BigCalendarAppointment = {
   customerNotes?: string;
   end: Date;
   guestCustomer?: GuestCustomer;
-  host: User;
+  host: Host;
   hostId: string;
   id: string;
   internalNotes?: string;
@@ -148,12 +164,29 @@ export interface Payment {
   amountDue?: number;
   amountPaid?: number;
   externalPaymentId?: string;
+  /** Hosted checkout / payment page URL returned by the provider, if any. */
+  paymentUrl?: string;
   paidAt?: string;
   status: PaymentStatus;
 }
 
+export interface PaymentHookContext {
+  /** ISO 4217 currency code resolved from plugin config (e.g. 'USD', 'INR'). */
+  currency: string;
+  /** Free-form provider id passed through from plugin config (e.g. 'stripe'). */
+  paymentProvider?: string;
+}
+
 export type PaymentHooks = {
-  onPaymentRequired?: (appointment: Appointment) => Promise<{
+  /**
+   * Invoked when an appointment is created with `payment.status === 'pending'`
+   * and no external payment id yet. Return a hosted payment URL + provider
+   * payment id; the plugin will persist them on `appointment.payment`.
+   */
+  onPaymentRequired?: (
+    appointment: Appointment,
+    ctx: PaymentHookContext,
+  ) => Promise<{
     paymentUrl: string;
     paymentId: string;
   }>;

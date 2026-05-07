@@ -3,22 +3,24 @@
 import { useStepNav } from '@payloadcms/ui';
 import { useEffect } from 'react';
 
-import type { Appointment, TeamMember } from '../../types';
+import type { Appointment, Host } from '../../types';
 
 import Calendar from '../../components/Appointments/index';
 
 interface AppointmentsListClientProps {
   apiRoute: string;
   collectionSlug: string;
+  hostSlug: string;
   initialAppointments: Appointment[];
-  initialTeamMembers: TeamMember[];
+  initialHosts: Host[];
 }
 
 const AppointmentsListClient: React.FC<AppointmentsListClientProps> = ({
   apiRoute,
   collectionSlug,
+  hostSlug,
   initialAppointments,
-  initialTeamMembers,
+  initialHosts,
 }) => {
   const { setStepNav } = useStepNav();
 
@@ -38,8 +40,9 @@ const AppointmentsListClient: React.FC<AppointmentsListClientProps> = ({
       <Calendar
         apiRoute={apiRoute}
         collectionSlug={collectionSlug}
+        hostSlug={hostSlug}
         initialAppointments={initialAppointments}
-        initialTeamMembers={initialTeamMembers}
+        initialHosts={initialHosts}
       />
     </div>
   );

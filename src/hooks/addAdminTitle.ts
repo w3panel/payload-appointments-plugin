@@ -1,33 +1,45 @@
 import type { FieldHook } from 'payload'
 
-export const addAdminTitle: FieldHook = async ({ req, siblingData }) => {
-  if (siblingData.appointmentType === 'appointment' && siblingData.bookedBy === 'customer') {
-    const customer = (
-      await req.payload.find({
-        collection: 'users',
-        where: {
-          id: {
-            equals: siblingData.customer,
-          },
-        },
-      })
-    ).docs
+import type { AppointmentsBuildConfig } from '../types/config'
+import { DEFAULT_BUILD_CONFIG } from '../types/config'
 
-    return `${customer[0].firstName} ${customer[0].lastName}`
-  } else if (siblingData.appointmentType === 'appointment' && siblingData.bookedBy === 'guest') {
-    const guest = (
-      await req.payload.find({
-        collection: 'guestCustomers',
-        where: {
-          id: {
-            equals: siblingData.guestCustomer,
+export const buildAddAdminTitle = (config: AppointmentsBuildConfig): FieldHook => {
+  return async ({ req, siblingData }) => {
+    if (siblingData.appointmentType === 'appointment' && siblingData.bookedBy === 'customer') {
+      const customer = (
+        await req.payload.find({
+          collection: config.customerSlug as 'users',
+          where: {
+            id: {
+              equals: siblingData.customer,
+            },
           },
-        },
-      })
-    ).docs
+        })
+      ).docs
 
-    return `${guest[0].firstName} ${guest[0].lastName}`
-  } else if (siblingData.appointmentType === 'blockout') {
-    return null
+      const first = (customer[0] as { firstName?: string } | undefined)?.firstName ?? ''
+      const last = (customer[0] as { lastName?: string } | undefined)?.lastName ?? ''
+      return `${first} ${last}`.trim() || 'Customer'
+    } else if (siblingData.appointmentType === 'appointment' && siblingData.bookedBy === 'guest') {
+      const guest = (
+        await req.payload.find({
+          collection: config.guestCustomerSlug as 'guestCustomers',
+          where: {
+            id: {
+              equals: siblingData.guestCustomer,
+            },
+          },
+        })
+      ).docs
+
+      const first = (guest[0] as { firstName?: string } | undefined)?.firstName ?? ''
+      const last = (guest[0] as { lastName?: string } | undefined)?.lastName ?? ''
+      return `${first} ${last}`.trim() || 'Guest'
+    } else if (siblingData.appointmentType === 'blockout') {
+      return null
+    }
   }
 }
+
+/** Backwards-compatible default export bound to the default slugs. */
+export const addAdminTitle: FieldHook = buildAddAdminTitle(DEFAULT_BUILD_CONFIG)

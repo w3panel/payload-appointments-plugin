@@ -1,9 +1,11 @@
 import type { CollectionConfig } from 'payload';
 
 import { anyone } from '../access/anyone';
+import type { AppointmentsBuildConfig } from '../types/config';
+import { DEFAULT_BUILD_CONFIG } from '../types/config';
 
-const Waitlist: CollectionConfig = {
-  slug: 'waitlist',
+export const buildWaitlist = (config: AppointmentsBuildConfig): CollectionConfig => ({
+  slug: config.waitlistSlug,
   access: {
     create: anyone,
     read: anyone,
@@ -19,23 +21,23 @@ const Waitlist: CollectionConfig = {
       name: 'service',
       type: 'relationship',
       label: 'Service',
-      relationTo: 'services',
+      relationTo: config.servicesSlug as any,
       required: true,
     },
     {
       name: 'host',
       type: 'relationship',
       admin: {
-        description: 'Preferred team member (optional)',
+        description: 'Preferred host (optional)',
       },
       label: 'Preferred Host',
-      relationTo: 'teamMembers',
+      relationTo: config.hostSlug as any,
     },
     {
       name: 'customer',
       type: 'relationship',
       label: 'Customer',
-      relationTo: 'users',
+      relationTo: config.customerSlug as any,
     },
     {
       name: 'guestCustomer',
@@ -44,7 +46,7 @@ const Waitlist: CollectionConfig = {
         condition: (siblingData) => !siblingData.customer,
       },
       label: 'Guest Customer',
-      relationTo: 'guestCustomers',
+      relationTo: config.guestCustomerSlug as any,
     },
     {
       name: 'preferredDates',
@@ -142,6 +144,8 @@ const Waitlist: CollectionConfig = {
     singular: 'Waitlist Entry',
   },
   timestamps: true,
-};
+});
+
+const Waitlist = buildWaitlist(DEFAULT_BUILD_CONFIG);
 
 export default Waitlist;

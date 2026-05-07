@@ -1,9 +1,10 @@
 import type { CollectionConfig } from 'payload';
 
 import { anyone } from '../access/anyone';
-import { addAdminTitle } from '../hooks/addAdminTitle';
+import { buildAddAdminTitle } from '../hooks/addAdminTitle';
 import { autoCompleteAppointments } from '../hooks/autoCompleteAppointments';
 import { calculatePaymentAmount } from '../hooks/calculatePaymentAmount';
+import { buildDispatchPaymentRequired } from '../hooks/dispatchPaymentRequired';
 import { generateCancellationToken } from '../hooks/generateCancellationToken';
 import { generateRecurringAppointments } from '../hooks/generateRecurringAppointments';
 import { notifyWaitlist } from '../hooks/notifyWaitlist';
@@ -11,9 +12,14 @@ import { sendCustomerEmail } from '../hooks/sendCustomerEmail';
 import { setEndDateTime } from '../hooks/setEndDateTime';
 import { validateCustomerOrGuest } from '../hooks/validateCustomerOrGuest';
 import { validateNoOverlap } from '../hooks/validateNoOverlap';
+import type { PaymentHooks } from '../types';
+import type { AppointmentsBuildConfig } from '../types/config';
 
-const Appointments: CollectionConfig = {
-  slug: 'appointments',
+export const buildAppointments = (
+  config: AppointmentsBuildConfig,
+  paymentHooks?: PaymentHooks,
+): CollectionConfig => ({
+  slug: config.appointmentsSlug,
   access: {
     create: anyone,
   },
@@ -79,7 +85,7 @@ const Appointments: CollectionConfig = {
           return false;
         },
       },
-      filterOptions: ({ data }) => {
+      filterOptions: () => {
         return {
           takingAppointments: {
             equals: true,
@@ -87,7 +93,8 @@ const Appointments: CollectionConfig = {
         };
       },
       label: 'Host',
-      relationTo: 'teamMembers',
+      // `relationTo` is intentionally loose so consumers can supply their own host collection.
+      relationTo: config.hostSlug as any,
       required: true,
     },
     {
@@ -102,7 +109,7 @@ const Appointments: CollectionConfig = {
         },
       },
       label: 'Customer',
-      relationTo: 'users',
+      relationTo: config.customerSlug as any,
     },
     {
       name: 'guestCustomer',
@@ -116,7 +123,7 @@ const Appointments: CollectionConfig = {
         },
       },
       label: 'Guest Customer',
-      relationTo: 'guestCustomers',
+      relationTo: config.guestCustomerSlug as any,
     },
     {
       name: 'bookedBy',
@@ -149,7 +156,7 @@ const Appointments: CollectionConfig = {
       },
       hasMany: true,
       label: 'Services',
-      relationTo: 'services',
+      relationTo: config.servicesSlug as any,
       required: true,
     },
     {
@@ -240,7 +247,7 @@ const Appointments: CollectionConfig = {
         hidden: true,
       },
       hooks: {
-        beforeValidate: [addAdminTitle],
+        beforeValidate: [buildAddAdminTitle(config)],
       },
     },
     {
@@ -307,6 +314,15 @@ const Appointments: CollectionConfig = {
             description: 'Payment ID from external provider (Stripe, etc.)',
           },
           label: 'External Payment ID',
+        },
+        {
+          name: 'paymentUrl',
+          type: 'text',
+          admin: {
+            description: 'Hosted payment URL returned by the provider',
+            readOnly: true,
+          },
+          label: 'Payment URL',
         },
         {
           name: 'paidAt',
@@ -404,6 +420,7 @@ const Appointments: CollectionConfig = {
       autoCompleteAppointments,
       generateRecurringAppointments,
       notifyWaitlist,
+      buildDispatchPaymentRequired(config, paymentHooks),
     ],
     beforeChange: [calculatePaymentAmount],
     beforeValidate: [validateCustomerOrGuest, validateNoOverlap],
@@ -412,6 +429,13 @@ const Appointments: CollectionConfig = {
     plural: 'Appointments',
     singular: 'Appointment',
   },
-};
+});
+
+/**
+ * Backwards-compatible default export. Uses the default slug configuration.
+ * Prefer importing `buildAppointments` and passing your resolved config.
+ */
+import { DEFAULT_BUILD_CONFIG } from '../types/config';
+const Appointments = buildAppointments(DEFAULT_BUILD_CONFIG);
 
 export default Appointments;

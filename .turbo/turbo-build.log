@@ -12,4 +12,4 @@
 > payload-appointments-plugin@3.0.0 build:swc /Users/w3/projects/doctors-app/packages/payload-appointments-plugin
 > swc ./src -d ./dist --config-file .swcrc --strip-leading-paths
 
-Successfully compiled: 70 files with swc (42.52ms)
+Successfully compiled: 70 files with swc (51.41ms)

@@ -74,6 +74,10 @@ export const buildAppointments = (
     {
       name: 'host',
       type: 'relationship',
+      // Workaround for D1/Drizzle schema sync occasionally attempting to create an
+      // already-existing index (`appointments_host_idx`) and failing Payload init.
+      // This index is an optimization; disabling it avoids a hard startup failure.
+      index: false,
       admin: {
         condition: (siblingData) => {
           if (siblingData.appointmentType === 'appointment') {

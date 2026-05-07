@@ -1,10 +1,9 @@
 'use client'
 
 import type { ReactElement } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 
 import { NavGroup, useConfig, useNav } from '@payloadcms/ui'
-import Link from 'next/link'
-import { usePathname } from 'next/navigation'
 
 import { links } from '../../lib/links'
 
@@ -16,26 +15,36 @@ export default function BeforeNavLinks(): ReactElement {
       routes: { admin: adminRoute },
     },
   } = useConfig()
-  const pathname = usePathname()
   const { navOpen } = useNav()
+  const [pathname, setPathname] = useState<string>('')
+
+  useEffect(() => {
+    setPathname(window.location.pathname)
+  }, [])
+
+  const normalizedAdminRoute = useMemo(() => {
+    const route = adminRoute || '/admin'
+    return route.endsWith('/') ? route.slice(0, -1) : route
+  }, [adminRoute])
 
   return (
     <NavGroup label="Appointments">
       {links.map((link) => {
-        const activeCollection = pathname === adminRoute + link.url
+        const href = `${normalizedAdminRoute}${link.url}`
+        const activeCollection = pathname === href
 
         return (
-          <Link
+          <a
             className={[`${baseClass}__link`, activeCollection && `active`]
               .filter(Boolean)
               .join(' ')}
-            href={adminRoute + link.url}
+            href={href}
             key={link.url}
             tabIndex={!navOpen ? -1 : undefined}
           >
             {activeCollection && <div className={`${baseClass}__link-indicator`} />}
             <span className={`${baseClass}__link-label`}>{link.title}</span>
-          </Link>
+          </a>
         )
       })}
     </NavGroup>

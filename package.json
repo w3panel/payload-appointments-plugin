@@ -15,6 +15,16 @@
       "types": "./src/index.ts",
       "default": "./src/index.ts"
     },
+    "./types": {
+      "import": "./src/exports/types.ts",
+      "types": "./src/exports/types.ts",
+      "default": "./src/exports/types.ts"
+    },
+    "./client": {
+      "import": "./src/exports/client.ts",
+      "types": "./src/exports/client.ts",
+      "default": "./src/exports/client.ts"
+    },
     "./BeforeDashboard": {
       "import": "./src/components/BeforeDashboard/index.tsx",
       "types": "./src/components/BeforeDashboard/index.tsx",
@@ -48,6 +58,11 @@
         "types": "./dist/index.d.ts",
         "default": "./dist/index.js"
       },
+      "./types": {
+        "import": "./dist/exports/types.js",
+        "types": "./dist/exports/types.d.ts",
+        "default": "./dist/exports/types.js"
+      },
       "./client": {
         "import": "./dist/exports/client.js",
         "types": "./dist/exports/client.d.ts",
@@ -68,10 +83,6 @@
     "build:types": "tsc --outDir dist --rootDir ./src",
     "clean": "rimraf {dist,*.tsbuildinfo}",
     "copyfiles": "copyfiles -u 1 \"src/**/*.{html,css,scss,ttf,woff,woff2,eot,svg,jpg,png,json}\" dist/",
-    "dev": "next dev dev --turbo",
-    "dev:generate-importmap": "bun run dev:payload generate:importmap",
-    "dev:generate-types": "bun run dev:payload generate:types",
-    "dev:payload": "cross-env PAYLOAD_CONFIG_PATH=./dev/payload.config.ts payload",
     "generate:importmap": "echo \"skip (handled by host app)\"",
     "generate:types": "echo \"skip (handled by host app)\"",
     "lint": "bunx oxlint src --tsconfig ../../tsconfig.oxlint.json",
@@ -83,8 +94,7 @@
     "test:int": "vitest"
   },
   "dependencies": {
-    "@payloadcms/next": "3.84.1",
-    "@payloadcms/ui": "3.84.1",
+    "@payloadcms/ui": "catalog:",
     "@react-email/components": "^1.0.1",
     "@react-email/render": "^2.0.8",
     "clsx": "^2.1.1",
@@ -95,37 +105,36 @@
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.3.3",
-    "@payloadcms/db-postgres": "3.84.1",
+    "@payloadcms/db-postgres": "catalog:",
     "@payloadcms/eslint-config": "3.28.0",
-    "@payloadcms/richtext-lexical": "3.84.1",
-    "@playwright/test": "1.59.1",
+    "@payloadcms/richtext-lexical": "catalog:",
+    "@playwright/test": "catalog:",
     "@swc-node/register": "1.11.1",
     "@swc/cli": "0.8.1",
     "@types/node": "^25.0.1",
-    "@types/react": "19.2.14",
+    "@types/react": "catalog:",
     "@types/react-big-calendar": "^1.16.3",
-    "@types/react-dom": "19.2.3",
+    "@types/react-dom": "catalog:",
     "copyfiles": "2.4.1",
     "cross-env": "^10.1.0",
-    "eslint": "^10.3.0",
-    "eslint-config-next": "16.2.5",
+    "eslint": "catalog:",
+    "eslint-config-next": "catalog:",
     "graphql": "^16.14.0",
-    "next": "^16.2.5",
     "open": "^11.0.0",
-    "payload": "3.84.1",
+    "oxfmt": "catalog:",
+    "payload": "catalog:",
     "prettier": "^3.7.4",
     "qs-esm": "8.0.1",
-    "react": "19.2.6",
-    "react-dom": "19.2.6",
+    "react": "catalog:",
+    "react-dom": "catalog:",
     "rimraf": "6.1.3",
     "sharp": "0.34.5",
     "sort-package-json": "^3.5.1",
-    "typescript": "6.0.3",
+    "typescript": "catalog:",
     "vite-tsconfig-paths": "^6.1.1",
     "vitest": "^4.0.15"
   },
   "peerDependencies": {
-    "next": "^16.2.5",
     "payload": "^3.84.0",
     "react": "^19.2.6",
     "react-dom": "^19.2.6"

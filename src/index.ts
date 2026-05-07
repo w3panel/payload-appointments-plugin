@@ -32,6 +32,15 @@ export type AppointmentsPluginConfig = {
   showDashboardCards?: boolean
   showNavItems?: boolean
   /**
+   * Override admin view component paths. Useful when the host app needs to wrap
+   * plugin views with framework-specific templates (e.g. `@payloadcms/next`),
+   * while keeping this plugin framework-agnostic.
+   */
+  adminViews?: {
+    appointmentsList?: string
+    analytics?: string
+  }
+  /**
    * Slug of the consumer collection that will own host (provider/practitioner)
    * documents. The collection must expose at least: `id`, `firstName`,
    * `lastName`, `preferredNameAppointments`, `takingAppointments`,
@@ -77,6 +86,7 @@ export const appointmentsPlugin =
     seedData = false,
     showDashboardCards = true,
     showNavItems = true,
+    adminViews,
     hostCollectionSlug,
     customerCollectionSlug,
     registerHostCollection = true,
@@ -149,12 +159,12 @@ export const appointmentsPlugin =
         views: {
           ...config.admin.components.views,
           AppointmentsList: {
-            Component: 'payload-appointments-plugin/AppointmentsList',
+            Component: adminViews?.appointmentsList ?? 'payload-appointments-plugin/AppointmentsList',
             exact: true,
             path: '/appointments/schedule',
           },
           AnalyticsView: {
-            Component: 'payload-appointments-plugin/AnalyticsView',
+            Component: adminViews?.analytics ?? 'payload-appointments-plugin/AnalyticsView',
             exact: true,
             path: '/appointments/analytics',
           },

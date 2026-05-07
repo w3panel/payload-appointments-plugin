@@ -1,7 +1,5 @@
 import type { AdminViewProps } from 'payload'
 
-import { DefaultTemplate } from '@payloadcms/next/templates'
-
 import type { Appointment, Host } from '../../types'
 
 import { AppointmentProvider } from '../../providers/AppointmentsProvider'
@@ -58,24 +56,13 @@ const AppointmentsList: React.FC<AdminViewProps> = async ({
 
   return (
     <AppointmentProvider>
-      <DefaultTemplate
-        i18n={initPageResult.req.i18n}
-        locale={initPageResult.locale}
-        params={params}
-        payload={payload}
-        permissions={initPageResult.permissions}
-        searchParams={searchParams}
-        user={initPageResult.req.user || undefined}
-        visibleEntities={initPageResult.visibleEntities}
-      >
-        <AppointmentsListClient
-          apiRoute={apiRoute}
-          collectionSlug={buildConfig.appointmentsSlug}
-          hostSlug={buildConfig.hostSlug}
-          initialAppointments={appointmentsRes.docs as unknown as Appointment[]}
-          initialHosts={hostsRes.docs as unknown as Host[]}
-        />
-      </DefaultTemplate>
+      <AppointmentsListClient
+        apiRoute={apiRoute}
+        collectionSlug={buildConfig.appointmentsSlug}
+        hostSlug={buildConfig.hostSlug}
+        initialAppointments={appointmentsRes.docs as unknown as Appointment[]}
+        initialHosts={hostsRes.docs as unknown as Host[]}
+      />
     </AppointmentProvider>
   )
 }

@@ -1,0 +1,5 @@
+export { default as BeforeDashboard } from '../components/BeforeDashboard'
+export { default as BeforeNavLinks } from '../components/BeforeNavLinks'
+export { default as EmailHtmlPreview } from '../components/EmailHtmlPreview'
+export { default as AnalyticsView } from '../views/Analytics'
+export { default as AppointmentsList } from '../views/AppointmentsList'

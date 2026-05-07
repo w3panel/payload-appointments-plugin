@@ -1,15 +1,15 @@
-import moment from 'moment';
-import Link from 'next/link';
+import moment from 'moment'
+import Link from 'next/link'
 
-import type { Appointment, Service } from '../../payload-types';
+import type { Appointment, Service } from '../../payload-types'
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card'
 
-type AppointmentStatus = 'pending' | 'confirmed' | 'cancelled' | 'completed' | 'no-show';
+type AppointmentStatus = 'pending' | 'confirmed' | 'cancelled' | 'completed' | 'no-show'
 
 type Props = {
-  appointments: Appointment[];
-};
+  appointments: Appointment[]
+}
 
 const statusConfig: Record<
   AppointmentStatus,
@@ -45,14 +45,14 @@ const statusConfig: Record<
     textColor: 'text-red-700',
     iconBg: 'bg-red-500',
   },
-};
+}
 
 const Appointments = ({ appointments }: Props) =>
   appointments && appointments.length ? (
     appointments.map((appointment: Appointment, index: number) => {
-      const status = (appointment.status as AppointmentStatus) || 'confirmed';
-      const isCancelled = status === 'cancelled';
-      const statusInfo = statusConfig[status];
+      const status = (appointment.status as AppointmentStatus) || 'confirmed'
+      const isCancelled = status === 'cancelled'
+      const statusInfo = statusConfig[status]
 
       return (
         <Link href={`/booking/${appointment.id}`} key={appointment.id}>
@@ -132,7 +132,7 @@ const Appointments = ({ appointments }: Props) =>
               <div className="space-y-3 border-t border-gray-100 pt-4">
                 {appointment.services?.map((service, index) => {
                   if (typeof service === 'string') {
-                    return;
+                    return
                   }
                   const previousServicesDuration = appointment
                     .services!.slice(0, index)
@@ -140,12 +140,12 @@ const Appointments = ({ appointments }: Props) =>
                       (total: number, s) =>
                         total + (typeof s === 'string' ? 0 : (s as unknown as Service).duration),
                       0,
-                    );
+                    )
                   const serviceStartTime = moment(appointment.start).add(
                     previousServicesDuration,
                     'minutes',
-                  );
-                  const startsAt = serviceStartTime.format('HH:mm');
+                  )
+                  const startsAt = serviceStartTime.format('HH:mm')
                   return (
                     <div
                       className="flex items-center gap-3 p-3 rounded-xl bg-gray-50/80"
@@ -180,13 +180,13 @@ const Appointments = ({ appointments }: Props) =>
                         </p>
                       </div>
                     </div>
-                  );
+                  )
                 })}
               </div>
             </CardContent>
           </Card>
         </Link>
-      );
+      )
     })
   ) : (
     <div className="text-center py-16 animate-fade-in-up">
@@ -210,6 +210,6 @@ const Appointments = ({ appointments }: Props) =>
         Book your first appointment to get started with your schedule
       </p>
     </div>
-  );
+  )
 
-export default Appointments;
+export default Appointments

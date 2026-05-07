@@ -1,49 +1,49 @@
-import type { PayloadHandler, PayloadRequest } from 'payload';
+import type { PayloadHandler, PayloadRequest } from 'payload'
 
-import type { Appointment, PaymentHooks } from '../types';
-import type { AppointmentsBuildConfig } from '../types/config';
-import { DEFAULT_BUILD_CONFIG } from '../types/config';
+import type { Appointment, PaymentHooks } from '../types'
+import type { AppointmentsBuildConfig } from '../types/config'
+import { DEFAULT_BUILD_CONFIG } from '../types/config'
 
 export type PaymentWebhookPayload = {
-  appointmentId: string;
-  paymentId: string;
-  status: 'success' | 'failed' | 'refunded' | 'partial-refund';
-  amountPaid: number;
-  refundAmount?: number;
-};
+  appointmentId: string
+  paymentId: string
+  status: 'success' | 'failed' | 'refunded' | 'partial-refund'
+  amountPaid: number
+  refundAmount?: number
+}
 
 export const buildPaymentWebhook =
   (config: AppointmentsBuildConfig, paymentHooks?: PaymentHooks): PayloadHandler =>
   async (req: PayloadRequest) => {
     try {
-      const body = (await req.json?.()) as PaymentWebhookPayload | undefined;
+      const body = (await req.json?.()) as PaymentWebhookPayload | undefined
 
       if (!body || !body.appointmentId || !body.paymentId || !body.status) {
         return Response.json(
           { error: 'Missing required fields: appointmentId, paymentId, status' },
           { status: 400 },
-        );
+        )
       }
 
-      const { appointmentId, paymentId, status, amountPaid, refundAmount } = body;
+      const { appointmentId, paymentId, status, amountPaid, refundAmount } = body
 
       const appointment = await req.payload.findByID({
         collection: config.appointmentsSlug as 'appointments',
         id: appointmentId,
         depth: 0,
-      });
+      })
 
       if (!appointment) {
-        return Response.json({ error: 'Appointment not found' }, { status: 404 });
+        return Response.json({ error: 'Appointment not found' }, { status: 404 })
       }
 
       const currentPayment = ((appointment as any).payment || {}) as {
-        status?: string;
-        amountDue?: number;
-        amountPaid?: number;
-        externalPaymentId?: string;
-        paidAt?: string;
-      };
+        status?: string
+        amountDue?: number
+        amountPaid?: number
+        externalPaymentId?: string
+        paidAt?: string
+      }
 
       let newPaymentStatus:
         | 'pending'
@@ -51,29 +51,29 @@ export const buildPaymentWebhook =
         | 'deposit-paid'
         | 'paid'
         | 'refunded'
-        | 'partial-refund';
-      let newAmountPaid = currentPayment.amountPaid || 0;
+        | 'partial-refund'
+      let newAmountPaid = currentPayment.amountPaid || 0
 
       switch (status) {
         case 'success': {
-          newAmountPaid += amountPaid || 0;
-          const amountDue = currentPayment.amountDue || 0;
-          newPaymentStatus = newAmountPaid >= amountDue ? 'paid' : 'deposit-paid';
-          break;
+          newAmountPaid += amountPaid || 0
+          const amountDue = currentPayment.amountDue || 0
+          newPaymentStatus = newAmountPaid >= amountDue ? 'paid' : 'deposit-paid'
+          break
         }
         case 'failed':
-          newPaymentStatus = 'pending';
-          break;
+          newPaymentStatus = 'pending'
+          break
         case 'refunded':
-          newPaymentStatus = 'refunded';
-          newAmountPaid = 0;
-          break;
+          newPaymentStatus = 'refunded'
+          newAmountPaid = 0
+          break
         case 'partial-refund':
-          newAmountPaid = Math.max(0, newAmountPaid - (refundAmount || 0));
-          newPaymentStatus = newAmountPaid > 0 ? 'partial-refund' : 'refunded';
-          break;
+          newAmountPaid = Math.max(0, newAmountPaid - (refundAmount || 0))
+          newPaymentStatus = newAmountPaid > 0 ? 'partial-refund' : 'refunded'
+          break
         default:
-          return Response.json({ error: 'Invalid status' }, { status: 400 });
+          return Response.json({ error: 'Invalid status' }, { status: 400 })
       }
 
       const updated = await req.payload.update({
@@ -91,21 +91,21 @@ export const buildPaymentWebhook =
             paidAt: status === 'success' ? new Date().toISOString() : currentPayment.paidAt,
           },
         } as any,
-      });
+      })
 
       // Provider-agnostic payment lifecycle dispatch.
       if (paymentHooks) {
         try {
           if (status === 'success' && paymentHooks.onPaymentReceived) {
-            await paymentHooks.onPaymentReceived(updated as unknown as Appointment, body);
+            await paymentHooks.onPaymentReceived(updated as unknown as Appointment, body)
           } else if (
             (status === 'refunded' || status === 'partial-refund') &&
             paymentHooks.onRefundRequested
           ) {
-            await paymentHooks.onRefundRequested(updated as unknown as Appointment);
+            await paymentHooks.onRefundRequested(updated as unknown as Appointment)
           }
         } catch (hookErr) {
-          req.payload.logger.error(`paymentHooks dispatch error: ${hookErr}`);
+          req.payload.logger.error(`paymentHooks dispatch error: ${hookErr}`)
         }
       }
 
@@ -114,12 +114,12 @@ export const buildPaymentWebhook =
         appointmentId,
         paymentStatus: newPaymentStatus,
         amountPaid: newAmountPaid,
-      });
+      })
     } catch (error) {
-      req.payload.logger.error(`Payment webhook error: ${error}`);
-      return Response.json({ error: 'Internal server error' }, { status: 500 });
+      req.payload.logger.error(`Payment webhook error: ${error}`)
+      return Response.json({ error: 'Internal server error' }, { status: 500 })
     }
-  };
+  }
 
 /** Backwards-compatible default export bound to default slugs and no payment hooks. */
-export const paymentWebhook: PayloadHandler = buildPaymentWebhook(DEFAULT_BUILD_CONFIG);
+export const paymentWebhook: PayloadHandler = buildPaymentWebhook(DEFAULT_BUILD_CONFIG)

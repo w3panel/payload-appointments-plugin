@@ -7,4 +7,4 @@ export const links = [
     title: 'Analytics',
     url: '/appointments/analytics',
   },
-];
+]

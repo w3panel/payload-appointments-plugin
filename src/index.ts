@@ -1,36 +1,36 @@
-import type { Config } from 'payload';
+import type { Config } from 'payload'
 
-import { buildAppointments } from './collections/Appointments';
-import GuestCustomers from './collections/GuestCustomers';
-import SentEmails from './collections/SentEmails';
-import Services from './collections/Services';
-import TeamMembers from './collections/TeamMembers';
-import { buildWaitlist } from './collections/Waitlist';
-import { cancelAppointment } from './endpoints/cancelAppointment';
-import { cancelAppointmentByToken } from './endpoints/cancelAppointmentByToken';
-import { cancelRecurringAppointment } from './endpoints/cancelRecurringAppointment';
-import { getAnalytics } from './endpoints/getAnalytics';
-import { getAppointmentByToken } from './endpoints/getAppointmentByToken';
-import { buildGetAppointmentsForDayAndHost } from './endpoints/getAppointmentsForDayAndHost';
-import { buildGetICalFeed } from './endpoints/getICalFeed';
-import { buildPaymentWebhook } from './endpoints/paymentWebhook';
-import { updateRecurringAppointment } from './endpoints/updateRecurringAppointment';
-import { waitlistJoin } from './endpoints/waitlistJoin';
-import { waitlistLeave } from './endpoints/waitlistLeave';
-import { waitlistPosition } from './endpoints/waitlistPosition';
-import OpeningTimes from './globals/OpeningTimes';
-import { seedAppointmentsData } from './seed';
-import { CUSTOM_CONFIG_KEY, DEFAULT_BUILD_CONFIG } from './types/config';
-import type { AppointmentsBuildConfig } from './types/config';
+import { buildAppointments } from './collections/Appointments'
+import GuestCustomers from './collections/GuestCustomers'
+import SentEmails from './collections/SentEmails'
+import Services from './collections/Services'
+import TeamMembers from './collections/TeamMembers'
+import { buildWaitlist } from './collections/Waitlist'
+import { cancelAppointment } from './endpoints/cancelAppointment'
+import { cancelAppointmentByToken } from './endpoints/cancelAppointmentByToken'
+import { cancelRecurringAppointment } from './endpoints/cancelRecurringAppointment'
+import { getAnalytics } from './endpoints/getAnalytics'
+import { getAppointmentByToken } from './endpoints/getAppointmentByToken'
+import { buildGetAppointmentsForDayAndHost } from './endpoints/getAppointmentsForDayAndHost'
+import { buildGetICalFeed } from './endpoints/getICalFeed'
+import { buildPaymentWebhook } from './endpoints/paymentWebhook'
+import { updateRecurringAppointment } from './endpoints/updateRecurringAppointment'
+import { waitlistJoin } from './endpoints/waitlistJoin'
+import { waitlistLeave } from './endpoints/waitlistLeave'
+import { waitlistPosition } from './endpoints/waitlistPosition'
+import OpeningTimes from './globals/OpeningTimes'
+import { seedAppointmentsData } from './seed'
+import { CUSTOM_CONFIG_KEY, DEFAULT_BUILD_CONFIG } from './types/config'
+import type { AppointmentsBuildConfig } from './types/config'
 
-import type { PaymentHooks } from './types';
+import type { PaymentHooks } from './types'
 
 export type AppointmentsPluginConfig = {
-  disabled?: boolean;
-  paymentHooks?: PaymentHooks;
-  seedData?: boolean;
-  showDashboardCards?: boolean;
-  showNavItems?: boolean;
+  disabled?: boolean
+  paymentHooks?: PaymentHooks
+  seedData?: boolean
+  showDashboardCards?: boolean
+  showNavItems?: boolean
   /**
    * Slug of the consumer collection that will own host (provider/practitioner)
    * documents. The collection must expose at least: `id`, `firstName`,
@@ -39,14 +39,14 @@ export type AppointmentsPluginConfig = {
    *
    * @default 'teamMembers'
    */
-  hostCollectionSlug?: string;
+  hostCollectionSlug?: string
   /**
    * Slug of the consumer collection used as the customer relation on
    * appointments and waitlist entries.
    *
    * @default 'users'
    */
-  customerCollectionSlug?: string;
+  customerCollectionSlug?: string
   /**
    * When `true` (default) the plugin registers its built-in `TeamMembers`
    * collection as the host. Set to `false` when supplying your own
@@ -54,21 +54,21 @@ export type AppointmentsPluginConfig = {
    *
    * @default true
    */
-  registerHostCollection?: boolean;
+  registerHostCollection?: boolean
   /**
    * Whether to register the built-in `GuestCustomers` collection.
    *
    * @default true
    */
-  registerGuestCustomerCollection?: boolean;
+  registerGuestCustomerCollection?: boolean
   /** ISO 4217 currency passed to `paymentHooks` (e.g. 'USD', 'INR'). */
-  currency?: string;
+  currency?: string
   /** Free-form payment provider id passed through to `paymentHooks` context. */
-  paymentProvider?: string;
-};
+  paymentProvider?: string
+}
 
-export type { AppointmentsBuildConfig } from './types/config';
-export type { Appointment, Host, PaymentHooks, PaymentHookContext } from './types';
+export type { AppointmentsBuildConfig } from './types/config'
+export type { Appointment, Host, PaymentHooks, PaymentHookContext } from './types'
 
 export const appointmentsPlugin =
   ({
@@ -86,23 +86,23 @@ export const appointmentsPlugin =
   }: AppointmentsPluginConfig = {}) =>
   (config: Config): Config => {
     if (!config.collections) {
-      config.collections = [];
+      config.collections = []
     }
 
     if (disabled) {
-      return config;
+      return config
     }
 
     if (!config.endpoints) {
-      config.endpoints = [];
+      config.endpoints = []
     }
 
     if (!config.admin) {
-      config.admin = {};
+      config.admin = {}
     }
 
     if (!config.admin.components) {
-      config.admin.components = {};
+      config.admin.components = {}
     }
 
     const buildConfig: AppointmentsBuildConfig = {
@@ -111,17 +111,17 @@ export const appointmentsPlugin =
       customerSlug: customerCollectionSlug ?? DEFAULT_BUILD_CONFIG.customerSlug,
       currency: currency ?? DEFAULT_BUILD_CONFIG.currency,
       paymentProvider,
-    };
+    }
 
     // Stash the resolved config on `payload.config.custom` so server admin
     // views (and any consumer code) can read the active slugs at runtime.
-    (config as Config & { custom?: Record<string, unknown> }).custom = {
+    ;(config as Config & { custom?: Record<string, unknown> }).custom = {
       ...((config as Config & { custom?: Record<string, unknown> }).custom || {}),
       [CUSTOM_CONFIG_KEY]: buildConfig,
-    };
+    }
 
-    const Appointments = buildAppointments(buildConfig, paymentHooks);
-    const Waitlist = buildWaitlist(buildConfig);
+    const Appointments = buildAppointments(buildConfig, paymentHooks)
+    const Waitlist = buildWaitlist(buildConfig)
 
     config.collections = [
       ...(config.collections || []),
@@ -131,8 +131,8 @@ export const appointmentsPlugin =
       ...(registerHostCollection ? [TeamMembers] : []),
       Services,
       Waitlist,
-    ];
-    config.globals = [...(config.globals || []), OpeningTimes];
+    ]
+    config.globals = [...(config.globals || []), OpeningTimes]
 
     config.admin = {
       ...config.admin,
@@ -160,7 +160,7 @@ export const appointmentsPlugin =
           },
         },
       },
-    };
+    }
 
     config.endpoints = [
       ...(config.endpoints || []),
@@ -224,19 +224,19 @@ export const appointmentsPlugin =
         method: 'get',
         path: '/waitlist/position',
       },
-    ];
+    ]
 
-    const incomingOnInit = config.onInit;
+    const incomingOnInit = config.onInit
 
     config.onInit = async (payload) => {
       if (incomingOnInit) {
-        await incomingOnInit(payload);
+        await incomingOnInit(payload)
       }
 
       if (seedData) {
-        await seedAppointmentsData(payload, buildConfig);
+        await seedAppointmentsData(payload, buildConfig)
       }
-    };
+    }
 
-    return config;
-  };
+    return config
+  }

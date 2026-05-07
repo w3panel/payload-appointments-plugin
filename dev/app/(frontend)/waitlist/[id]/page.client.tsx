@@ -1,57 +1,62 @@
-'use client';
+'use client'
 
-import moment from 'moment';
-import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import React, { useState } from 'react';
+import moment from 'moment'
+import Link from 'next/link'
+import { useRouter } from 'next/navigation'
+import React, { useState } from 'react'
 
-import { leaveWaitlist } from '../../actions/appointment';
-import { Button } from '../../../../components/ui/button';
+import { leaveWaitlist } from '../../actions/appointment'
+import { Button } from '../../../../components/ui/button'
 
 interface WaitlistEntry {
-  id: string | number;
-  status?: string | null;
-  notifiedAt?: string | null;
-  expiresAt?: string | null;
-  createdAt: string;
-  service: number | {
-    id: string | number;
-    title: string;
-  };
-  host?: number | {
-    id: string | number;
-    firstName?: string;
-    lastName?: string;
-    preferredNameAppointments?: string;
-  } | null;
-  preferredDates?: { date: string }[] | null;
-  notes?: string | null;
+  id: string | number
+  status?: string | null
+  notifiedAt?: string | null
+  expiresAt?: string | null
+  createdAt: string
+  service:
+    | number
+    | {
+        id: string | number
+        title: string
+      }
+  host?:
+    | number
+    | {
+        id: string | number
+        firstName?: string
+        lastName?: string
+        preferredNameAppointments?: string
+      }
+    | null
+  preferredDates?: { date: string }[] | null
+  notes?: string | null
 }
 
 interface WaitlistStatusClientProps {
-  entry: WaitlistEntry;
-  position: number;
+  entry: WaitlistEntry
+  position: number
 }
 
 export default function WaitlistStatusClient({ entry, position }: WaitlistStatusClientProps) {
-  const router = useRouter();
-  const [leaving, setLeaving] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const router = useRouter()
+  const [leaving, setLeaving] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
   const handleLeaveWaitlist = async () => {
-    setLeaving(true);
-    setError(null);
+    setLeaving(true)
+    setError(null)
 
-    const result = await leaveWaitlist(entry.id);
+    const result = await leaveWaitlist(entry.id)
 
     if (result.success) {
-      router.refresh();
+      router.refresh()
     } else {
-      setError(result.message);
+      setError(result.message)
     }
 
-    setLeaving(false);
-  };
+    setLeaving(false)
+  }
 
   const getStatusBadge = () => {
     switch (entry.status) {
@@ -61,46 +66,46 @@ export default function WaitlistStatusClient({ entry, position }: WaitlistStatus
             <span className="w-2 h-2 rounded-full bg-blue-500 animate-pulse" />
             Waiting
           </span>
-        );
+        )
       case 'notified':
         return (
           <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-medium bg-amber-100 text-amber-700">
             <span className="w-2 h-2 rounded-full bg-amber-500" />
             Notified - Slot Available!
           </span>
-        );
+        )
       case 'booked':
         return (
           <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-700">
             <span className="w-2 h-2 rounded-full bg-green-500" />
             Booked
           </span>
-        );
+        )
       case 'expired':
         return (
           <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-medium bg-gray-100 text-gray-600">
             <span className="w-2 h-2 rounded-full bg-gray-400" />
             Expired
           </span>
-        );
+        )
       case 'cancelled':
         return (
           <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-medium bg-red-100 text-red-700">
             <span className="w-2 h-2 rounded-full bg-red-500" />
             Cancelled
           </span>
-        );
+        )
       default:
-        return null;
+        return null
     }
-  };
+  }
 
-  const host = typeof entry.host === 'object' ? entry.host : null;
+  const host = typeof entry.host === 'object' ? entry.host : null
   const hostName = host
     ? host.preferredNameAppointments || `${host.firstName} ${host.lastName}`
-    : null;
-  const service = typeof entry.service === 'object' ? entry.service : null;
-  const serviceTitle = service?.title || 'Unknown Service';
+    : null
+  const service = typeof entry.service === 'object' ? entry.service : null
+  const serviceTitle = service?.title || 'Unknown Service'
 
   return (
     <div className="max-w-lg mx-auto py-8">
@@ -245,6 +250,5 @@ export default function WaitlistStatusClient({ entry, position }: WaitlistStatus
         </div>
       </div>
     </div>
-  );
+  )
 }
-

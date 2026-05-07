@@ -1,8 +1,8 @@
-import * as React from 'react';
+import * as React from 'react'
 
-import { cn } from '../../lib/utils';
+import { cn } from '../../lib/utils'
 
-export type LabelProps = React.LabelHTMLAttributes<HTMLLabelElement>;
+export type LabelProps = React.LabelHTMLAttributes<HTMLLabelElement>
 
 const Label = ({
   className,
@@ -18,8 +18,8 @@ const Label = ({
       ref={ref}
       {...props}
     />
-  );
-};
-Label.displayName = 'Label';
+  )
+}
+Label.displayName = 'Label'
 
-export { Label };
+export { Label }

@@ -1,13 +1,13 @@
-import Link from 'next/link';
-import React from 'react';
+import Link from 'next/link'
+import React from 'react'
 
-import { logout } from '../../app/(frontend)/actions/auth';
-import { Button } from '../../components/ui/button';
-import { getDashboardData } from '../../lib/dashboardData';
+import { logout } from '../../app/(frontend)/actions/auth'
+import { Button } from '../../components/ui/button'
+import { getDashboardData } from '../../lib/dashboardData'
 
 export default async function Header() {
-  const dashboardData = await getDashboardData();
-  const isLoggedIn = dashboardData && dashboardData.id;
+  const dashboardData = await getDashboardData()
+  const isLoggedIn = dashboardData && dashboardData.id
 
   return (
     <header className="sticky top-0 z-50 bg-white/70 backdrop-blur-xl border-b border-gray-100/80 shadow-sm shadow-gray-900/5">
@@ -121,5 +121,5 @@ export default async function Header() {
         </div>
       </div>
     </header>
-  );
+  )
 }

@@ -1,19 +1,19 @@
-import moment from 'moment';
-import React from 'react';
+import moment from 'moment'
+import React from 'react'
 
-import { cn } from '../../lib/utils';
+import { cn } from '../../lib/utils'
 
 const TimeSelectButton = ({
   availability,
   selectedTime,
   setSelectedTime,
 }: {
-  availability: string;
-  selectedTime: string | null;
-  setSelectedTime: (time: string | null) => void;
+  availability: string
+  selectedTime: string | null
+  setSelectedTime: (time: string | null) => void
 }) => {
   const isSelected =
-    selectedTime && moment(availability).format('HH:mm') === moment(selectedTime).format('HH:mm');
+    selectedTime && moment(availability).format('HH:mm') === moment(selectedTime).format('HH:mm')
 
   return (
     <button
@@ -32,7 +32,7 @@ const TimeSelectButton = ({
     >
       {moment(availability).format('HH:mm')}
     </button>
-  );
-};
+  )
+}
 
-export default TimeSelectButton;
+export default TimeSelectButton

@@ -1,9 +1,9 @@
-'use client';
+'use client'
 
-import Link from 'next/link';
-import { useState } from 'react';
+import Link from 'next/link'
+import { useState } from 'react'
 
-import { Button } from '../../../components/ui/button';
+import { Button } from '../../../components/ui/button'
 import {
   Card,
   CardContent,
@@ -11,27 +11,27 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from '../../../components/ui/card';
-import { Input } from '../../../components/ui/input';
-import { Label } from '../../../components/ui/label';
-import { login } from '../actions/auth';
+} from '../../../components/ui/card'
+import { Input } from '../../../components/ui/input'
+import { Label } from '../../../components/ui/label'
+import { login } from '../actions/auth'
 
 export default function LoginPageClient() {
-  const [error, setError] = useState<null | string>(null);
-  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<null | string>(null)
+  const [loading, setLoading] = useState(false)
 
   async function handleSubmit(formData: FormData) {
-    setLoading(true);
-    setError(null);
+    setLoading(true)
+    setError(null)
     try {
-      const result = await login(formData);
+      const result = await login(formData)
       if (result?.error) {
-        setError(result.error);
+        setError(result.error)
       }
     } catch {
-      setError('An error occurred while logging in');
+      setError('An error occurred while logging in')
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
   }
 
@@ -164,5 +164,5 @@ export default function LoginPageClient() {
         </form>
       </Card>
     </div>
-  );
+  )
 }

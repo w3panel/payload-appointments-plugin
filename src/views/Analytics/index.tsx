@@ -1,15 +1,15 @@
-import type { AdminViewProps } from 'payload';
+import type { AdminViewProps } from 'payload'
 
-import { DefaultTemplate } from '@payloadcms/next/templates';
+import { DefaultTemplate } from '@payloadcms/next/templates'
 
-import AnalyticsClient from './index.client';
+import AnalyticsClient from './index.client'
 
 const AnalyticsView: React.FC<AdminViewProps> = async ({
   initPageResult,
   params,
   searchParams,
 }) => {
-  const { payload } = initPageResult.req;
+  const { payload } = initPageResult.req
 
   return (
     <DefaultTemplate
@@ -24,7 +24,7 @@ const AnalyticsView: React.FC<AdminViewProps> = async ({
     >
       <AnalyticsClient />
     </DefaultTemplate>
-  );
-};
+  )
+}
 
-export default AnalyticsView;
+export default AnalyticsView

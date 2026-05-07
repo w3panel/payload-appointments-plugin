@@ -1,38 +1,38 @@
-'use client';
+'use client'
 
-import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useRouter } from 'next/navigation'
+import { useState } from 'react'
 
-import { Button } from '../../../../components/ui/button';
-import { cancelAppointmentByToken } from '../../actions/appointment';
+import { Button } from '../../../../components/ui/button'
+import { cancelAppointmentByToken } from '../../actions/appointment'
 
 interface CancelByTokenButtonProps {
-  token: string;
+  token: string
 }
 
 export function CancelByTokenButton({ token }: CancelByTokenButtonProps) {
-  const router = useRouter();
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const router = useRouter()
+  const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
   const handleCancel = async () => {
-    setIsLoading(true);
-    setError(null);
+    setIsLoading(true)
+    setError(null)
 
     try {
-      const result = await cancelAppointmentByToken(token);
+      const result = await cancelAppointmentByToken(token)
 
       if (result.success) {
-        router.refresh();
+        router.refresh()
       } else {
-        setError(result.message);
+        setError(result.message)
       }
     } catch {
-      setError('An error occurred while cancelling');
+      setError('An error occurred while cancelling')
     } finally {
-      setIsLoading(false);
+      setIsLoading(false)
     }
-  };
+  }
 
   return (
     <div className="space-y-3">
@@ -95,6 +95,5 @@ export function CancelByTokenButton({ token }: CancelByTokenButtonProps) {
         )}
       </Button>
     </div>
-  );
+  )
 }
-

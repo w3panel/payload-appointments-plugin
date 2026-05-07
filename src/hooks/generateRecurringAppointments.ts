@@ -1,24 +1,24 @@
-import type { CollectionAfterChangeHook } from 'payload';
+import type { CollectionAfterChangeHook } from 'payload'
 
-import crypto from 'crypto';
-import moment from 'moment';
+import crypto from 'crypto'
+import moment from 'moment'
 
-const MAX_OCCURRENCES = 52;
+const MAX_OCCURRENCES = 52
 
-type RecurrencePattern = 'weekly' | 'biweekly' | 'monthly';
+type RecurrencePattern = 'weekly' | 'biweekly' | 'monthly'
 
 const getNextDate = (currentDate: moment.Moment, pattern: RecurrencePattern): moment.Moment => {
   switch (pattern) {
     case 'weekly':
-      return currentDate.clone().add(1, 'week');
+      return currentDate.clone().add(1, 'week')
     case 'biweekly':
-      return currentDate.clone().add(2, 'weeks');
+      return currentDate.clone().add(2, 'weeks')
     case 'monthly':
-      return currentDate.clone().add(1, 'month');
+      return currentDate.clone().add(1, 'month')
     default:
-      return currentDate.clone().add(1, 'week');
+      return currentDate.clone().add(1, 'week')
   }
-};
+}
 
 const calculateOccurrenceDates = (
   startDate: moment.Moment,
@@ -27,29 +27,29 @@ const calculateOccurrenceDates = (
   occurrences?: number,
   endDate?: string,
 ): moment.Moment[] => {
-  const dates: moment.Moment[] = [];
-  let currentDate = startDate.clone();
-  let count = 0;
-  const maxCount = Math.min(occurrences || MAX_OCCURRENCES, MAX_OCCURRENCES);
-  const maxEndDate = endDate ? moment(endDate) : startDate.clone().add(1, 'year');
+  const dates: moment.Moment[] = []
+  let currentDate = startDate.clone()
+  let count = 0
+  const maxCount = Math.min(occurrences || MAX_OCCURRENCES, MAX_OCCURRENCES)
+  const maxEndDate = endDate ? moment(endDate) : startDate.clone().add(1, 'year')
 
   while (count < maxCount - 1) {
-    currentDate = getNextDate(currentDate, pattern);
+    currentDate = getNextDate(currentDate, pattern)
 
     if (endType === 'endDate' && currentDate.isAfter(maxEndDate)) {
-      break;
+      break
     }
 
-    dates.push(currentDate.clone());
-    count++;
+    dates.push(currentDate.clone())
+    count++
 
     if (endType === 'occurrences' && count >= maxCount - 1) {
-      break;
+      break
     }
   }
 
-  return dates;
-};
+  return dates
+}
 
 export const generateRecurringAppointments: CollectionAfterChangeHook = async ({
   doc,
@@ -57,36 +57,36 @@ export const generateRecurringAppointments: CollectionAfterChangeHook = async ({
   req,
 }) => {
   if (operation !== 'create') {
-    return doc;
+    return doc
   }
 
   if (doc.appointmentType !== 'appointment') {
-    return doc;
+    return doc
   }
 
   const recurrence = doc.recurrence as
     | {
-        isRecurring?: boolean;
-        pattern?: RecurrencePattern;
-        endType?: 'occurrences' | 'endDate';
-        occurrences?: number;
-        endDate?: string;
-        seriesId?: string;
+        isRecurring?: boolean
+        pattern?: RecurrencePattern
+        endType?: 'occurrences' | 'endDate'
+        occurrences?: number
+        endDate?: string
+        seriesId?: string
       }
-    | undefined;
+    | undefined
 
   if (!recurrence?.isRecurring || !recurrence.pattern) {
-    return doc;
+    return doc
   }
 
   if (recurrence.seriesId) {
-    return doc;
+    return doc
   }
 
-  const seriesId = crypto.randomUUID();
-  const startDate = moment(doc.start);
-  const endTime = moment(doc.end);
-  const duration = moment.duration(endTime.diff(startDate));
+  const seriesId = crypto.randomUUID()
+  const startDate = moment(doc.start)
+  const endTime = moment(doc.end)
+  const duration = moment.duration(endTime.diff(startDate))
 
   const occurrenceDates = calculateOccurrenceDates(
     startDate,
@@ -94,7 +94,7 @@ export const generateRecurringAppointments: CollectionAfterChangeHook = async ({
     recurrence.endType || 'occurrences',
     recurrence.occurrences,
     recurrence.endDate,
-  );
+  )
 
   await req.payload.update({
     collection: 'appointments',
@@ -105,13 +105,13 @@ export const generateRecurringAppointments: CollectionAfterChangeHook = async ({
         seriesId,
       },
     },
-  });
+  })
 
-  const createdAppointments: string[] = [doc.id];
+  const createdAppointments: string[] = [doc.id]
 
   for (const date of occurrenceDates) {
-    const newStart = date.clone();
-    const newEnd = date.clone().add(duration);
+    const newStart = date.clone()
+    const newEnd = date.clone().add(duration)
 
     try {
       const newAppointment = await req.payload.create({
@@ -138,17 +138,17 @@ export const generateRecurringAppointments: CollectionAfterChangeHook = async ({
             seriesId,
           },
         },
-      });
+      })
 
-      createdAppointments.push(String(newAppointment.id));
+      createdAppointments.push(String(newAppointment.id))
     } catch (error) {
-      req.payload.logger.error(`Failed to create recurring appointment: ${error}`);
+      req.payload.logger.error(`Failed to create recurring appointment: ${error}`)
     }
   }
 
   req.payload.logger.info(
     `Created ${createdAppointments.length} appointments for series ${seriesId}`,
-  );
+  )
 
-  return doc;
-};
+  return doc
+}

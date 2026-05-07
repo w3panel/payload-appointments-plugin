@@ -1,18 +1,18 @@
-'use client';
+'use client'
 
-import type { Host, AppointmentStatus } from '../../types';
+import type { Host, AppointmentStatus } from '../../types'
 
-import React from 'react';
+import React from 'react'
 
 interface ToolbarProps {
-  currentDate: Date;
-  hosts: Host[];
-  onDateChange: (date: Date) => void;
-  onNewAppointment: () => void;
-  onStatusFilterChange: (status: AppointmentStatus | 'all') => void;
-  onTeamFilterChange: (hostId: string | 'all') => void;
-  statusFilter: AppointmentStatus | 'all';
-  teamFilter: string | 'all';
+  currentDate: Date
+  hosts: Host[]
+  onDateChange: (date: Date) => void
+  onNewAppointment: () => void
+  onStatusFilterChange: (status: AppointmentStatus | 'all') => void
+  onTeamFilterChange: (hostId: string | 'all') => void
+  statusFilter: AppointmentStatus | 'all'
+  teamFilter: string | 'all'
 }
 
 const statusOptions: { label: string; value: AppointmentStatus | 'all' }[] = [
@@ -22,7 +22,7 @@ const statusOptions: { label: string; value: AppointmentStatus | 'all' }[] = [
   { label: 'Completed', value: 'completed' },
   { label: 'Cancelled', value: 'cancelled' },
   { label: 'No Show', value: 'no-show' },
-];
+]
 
 const Toolbar: React.FC<ToolbarProps> = ({
   currentDate,
@@ -35,15 +35,15 @@ const Toolbar: React.FC<ToolbarProps> = ({
   teamFilter,
 }) => {
   const handleDateInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const date = new Date(e.target.value);
+    const date = new Date(e.target.value)
     if (!isNaN(date.getTime())) {
-      onDateChange(date);
+      onDateChange(date)
     }
-  };
+  }
 
   const formatDateForInput = (date: Date) => {
-    return date.toISOString().split('T')[0];
-  };
+    return date.toISOString().split('T')[0]
+  }
 
   return (
     <div className="appointments-toolbar">
@@ -100,13 +100,15 @@ const Toolbar: React.FC<ToolbarProps> = ({
           <option value="all">All Hosts</option>
           {hosts.map((host) => (
             <option key={host.id} value={host.id}>
-              {host.preferredNameAppointments || `${host.firstName ?? ''} ${host.lastName ?? ''}`.trim() || `Host ${host.id}`}
+              {host.preferredNameAppointments ||
+                `${host.firstName ?? ''} ${host.lastName ?? ''}`.trim() ||
+                `Host ${host.id}`}
             </option>
           ))}
         </select>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default Toolbar;
+export default Toolbar

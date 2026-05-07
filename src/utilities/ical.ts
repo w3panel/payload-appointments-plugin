@@ -1,58 +1,54 @@
-import type { Appointment } from '../types';
+import type { Appointment } from '../types'
 
 const escapeICalText = (text: string): string => {
-  return text
-    .replace(/\\/g, '\\\\')
-    .replace(/;/g, '\\;')
-    .replace(/,/g, '\\,')
-    .replace(/\n/g, '\\n');
-};
+  return text.replace(/\\/g, '\\\\').replace(/;/g, '\\;').replace(/,/g, '\\,').replace(/\n/g, '\\n')
+}
 
 const formatICalDate = (date: Date): string => {
   return date
     .toISOString()
     .replace(/[-:]/g, '')
-    .replace(/\.\d{3}/, '');
-};
+    .replace(/\.\d{3}/, '')
+}
 
 const foldLine = (line: string): string => {
-  const maxLength = 75;
+  const maxLength = 75
   if (line.length <= maxLength) {
-    return line;
+    return line
   }
 
-  const result: string[] = [];
-  let remaining = line;
+  const result: string[] = []
+  let remaining = line
 
   while (remaining.length > maxLength) {
-    result.push(remaining.substring(0, maxLength));
-    remaining = ' ' + remaining.substring(maxLength);
+    result.push(remaining.substring(0, maxLength))
+    remaining = ' ' + remaining.substring(maxLength)
   }
 
   if (remaining.length > 0) {
-    result.push(remaining);
+    result.push(remaining)
   }
 
-  return result.join('\r\n');
-};
+  return result.join('\r\n')
+}
 
 export type ICalEvent = {
-  uid: string;
-  summary: string;
-  description?: string;
-  location?: string;
-  start: Date;
-  end: Date;
-  status?: 'TENTATIVE' | 'CONFIRMED' | 'CANCELLED';
+  uid: string
+  summary: string
+  description?: string
+  location?: string
+  start: Date
+  end: Date
+  status?: 'TENTATIVE' | 'CONFIRMED' | 'CANCELLED'
   organizer?: {
-    name: string;
-    email?: string;
-  };
+    name: string
+    email?: string
+  }
   attendee?: {
-    name: string;
-    email?: string;
-  };
-};
+    name: string
+    email?: string
+  }
+}
 
 const generateVEvent = (event: ICalEvent): string => {
   const lines: string[] = [
@@ -62,72 +58,72 @@ const generateVEvent = (event: ICalEvent): string => {
     `DTSTART:${formatICalDate(event.start)}`,
     `DTEND:${formatICalDate(event.end)}`,
     `SUMMARY:${escapeICalText(event.summary)}`,
-  ];
+  ]
 
   if (event.description) {
-    lines.push(`DESCRIPTION:${escapeICalText(event.description)}`);
+    lines.push(`DESCRIPTION:${escapeICalText(event.description)}`)
   }
 
   if (event.location) {
-    lines.push(`LOCATION:${escapeICalText(event.location)}`);
+    lines.push(`LOCATION:${escapeICalText(event.location)}`)
   }
 
   if (event.status) {
-    lines.push(`STATUS:${event.status}`);
+    lines.push(`STATUS:${event.status}`)
   }
 
   if (event.organizer) {
     const organizerLine = event.organizer.email
       ? `ORGANIZER;CN=${escapeICalText(event.organizer.name)}:mailto:${event.organizer.email}`
-      : `ORGANIZER;CN=${escapeICalText(event.organizer.name)}`;
-    lines.push(organizerLine);
+      : `ORGANIZER;CN=${escapeICalText(event.organizer.name)}`
+    lines.push(organizerLine)
   }
 
   if (event.attendee) {
     const attendeeLine = event.attendee.email
       ? `ATTENDEE;CN=${escapeICalText(event.attendee.name)}:mailto:${event.attendee.email}`
-      : `ATTENDEE;CN=${escapeICalText(event.attendee.name)}`;
-    lines.push(attendeeLine);
+      : `ATTENDEE;CN=${escapeICalText(event.attendee.name)}`
+    lines.push(attendeeLine)
   }
 
-  lines.push('END:VEVENT');
+  lines.push('END:VEVENT')
 
-  return lines.map(foldLine).join('\r\n');
-};
+  return lines.map(foldLine).join('\r\n')
+}
 
 export const appointmentToICalEvent = (appointment: Appointment, baseUrl: string): ICalEvent => {
-  const host = appointment.host;
-  const customer = appointment.customer || appointment.guestCustomer;
+  const host = appointment.host
+  const customer = appointment.customer || appointment.guestCustomer
 
-  let summary = 'Appointment';
+  let summary = 'Appointment'
   if (appointment.services && appointment.services.length > 0) {
-    summary = appointment.services.map((s) => s.title).join(', ');
+    summary = appointment.services.map((s) => s.title).join(', ')
   } else if (appointment.title) {
-    summary = appointment.title;
+    summary = appointment.title
   }
 
-  let description = '';
+  let description = ''
   if (customer) {
     const customerName =
       'firstName' in customer
         ? `${customer.firstName || ''} ${customer.lastName || ''}`.trim()
-        : 'Guest';
-    description += `Customer: ${customerName}\n`;
+        : 'Guest'
+    description += `Customer: ${customerName}\n`
   }
   if (appointment.customerNotes) {
-    description += `Notes: ${appointment.customerNotes}\n`;
+    description += `Notes: ${appointment.customerNotes}\n`
   }
 
   const hostName =
     host.preferredNameAppointments ||
     `${host.firstName || ''} ${host.lastName || ''}`.trim() ||
-    'Host';
+    'Host'
 
-  let status: ICalEvent['status'] = 'CONFIRMED';
+  let status: ICalEvent['status'] = 'CONFIRMED'
   if (appointment.status === 'cancelled') {
-    status = 'CANCELLED';
+    status = 'CANCELLED'
   } else if (appointment.status === 'pending') {
-    status = 'TENTATIVE';
+    status = 'TENTATIVE'
   }
 
   return {
@@ -150,8 +146,8 @@ export const appointmentToICalEvent = (appointment: Appointment, baseUrl: string
           email: 'email' in customer ? customer.email : undefined,
         }
       : undefined,
-  };
-};
+  }
+}
 
 export const generateICalFeed = (
   appointments: Appointment[],
@@ -160,7 +156,7 @@ export const generateICalFeed = (
 ): string => {
   const events = appointments
     .filter((a) => a.appointmentType === 'appointment')
-    .map((a) => appointmentToICalEvent(a, baseUrl));
+    .map((a) => appointmentToICalEvent(a, baseUrl))
 
   const vcalendar: string[] = [
     'BEGIN:VCALENDAR',
@@ -169,13 +165,13 @@ export const generateICalFeed = (
     `X-WR-CALNAME:${escapeICalText(calendarName)}`,
     'CALSCALE:GREGORIAN',
     'METHOD:PUBLISH',
-  ];
+  ]
 
   for (const event of events) {
-    vcalendar.push(generateVEvent(event));
+    vcalendar.push(generateVEvent(event))
   }
 
-  vcalendar.push('END:VCALENDAR');
+  vcalendar.push('END:VCALENDAR')
 
-  return vcalendar.join('\r\n');
-};
+  return vcalendar.join('\r\n')
+}

@@ -1,6 +1,6 @@
-import type { CollectionConfig } from 'payload';
+import type { CollectionConfig } from 'payload'
 
-import { authenticated } from '../access/authenticated';
+import { authenticated } from '../access/authenticated'
 
 const Services: CollectionConfig = {
   slug: 'services',
@@ -143,6 +143,6 @@ const Services: CollectionConfig = {
     singular: 'Service',
   },
   timestamps: true,
-};
+}
 
-export default Services;
+export default Services

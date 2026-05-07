@@ -10,26 +10,26 @@ import {
   Section,
   Tailwind,
   Text,
-} from '@react-email/components';
-import { render } from '@react-email/render';
-import type { ReactElement } from 'react';
-import { Appointment } from '../types';
+} from '@react-email/components'
+import { render } from '@react-email/render'
+import type { ReactElement } from 'react'
+import { Appointment } from '../types'
 import {
   formatDateInTimezone,
   formatTimeRangeInTimezone,
   getTimezoneAbbreviation,
-} from '../utilities/formatDate';
+} from '../utilities/formatDate'
 
 interface Props {
-  cancelUrl?: string;
-  doc?: Appointment;
-  timezone?: string;
+  cancelUrl?: string
+  doc?: Appointment
+  timezone?: string
 }
 
 export const Email = ({ cancelUrl, doc, timezone = 'UTC' }: Props): ReactElement => {
-  const customerFirstName = doc?.customer?.firstName || doc?.guestCustomer?.firstName;
-  const customerLastName = doc?.customer?.lastName || doc?.guestCustomer?.lastName;
-  const tzAbbr = doc?.start ? getTimezoneAbbreviation(doc.start, timezone) : '';
+  const customerFirstName = doc?.customer?.firstName || doc?.guestCustomer?.firstName
+  const customerLastName = doc?.customer?.lastName || doc?.guestCustomer?.lastName
+  const tzAbbr = doc?.start ? getTimezoneAbbreviation(doc.start, timezone) : ''
 
   return (
     <Html>
@@ -108,9 +108,9 @@ export const Email = ({ cancelUrl, doc, timezone = 'UTC' }: Props): ReactElement
         </Body>
       </Tailwind>
     </Html>
-  );
-};
+  )
+}
 
 export const RenderedEmail = (data: Props) => {
-  return render(<Email {...data} />);
-};
+  return render(<Email {...data} />)
+}

@@ -1,19 +1,19 @@
-import React from 'react';
+import React from 'react'
 
-import type { Service } from '../../payload-types';
+import type { Service } from '../../payload-types'
 
-import { cn } from '../../lib/utils';
-import { formatPrice } from '../../lib/formatPrice';
+import { cn } from '../../lib/utils'
+import { formatPrice } from '../../lib/formatPrice'
 
 const ServicesList: React.FC<{
-  chosenServices: Service[];
-  services: Service[];
-  setChosenServices: React.Dispatch<React.SetStateAction<Service[]>>;
+  chosenServices: Service[]
+  services: Service[]
+  setChosenServices: React.Dispatch<React.SetStateAction<Service[]>>
 }> = ({ chosenServices, services, setChosenServices }) => {
   return (
     <div className="space-y-3">
       {services.map((service, index) => {
-        const isSelected = chosenServices.some((s) => s.id === service.id);
+        const isSelected = chosenServices.some((s) => s.id === service.id)
         return (
           <label
             className={cn(
@@ -91,23 +91,23 @@ const ServicesList: React.FC<{
               onChange={(e) => {
                 if (chosenServices) {
                   if (e.target.checked) {
-                    setChosenServices((prevState) => [...prevState, service]);
+                    setChosenServices((prevState) => [...prevState, service])
                   } else {
                     setChosenServices((prevState) => [
                       ...prevState.filter((prevStateService) => prevStateService.id !== service.id),
-                    ]);
+                    ])
                   }
                 } else {
-                  setChosenServices([service]);
+                  setChosenServices([service])
                 }
               }}
               type="checkbox"
             />
           </label>
-        );
+        )
       })}
     </div>
-  );
-};
+  )
+}
 
-export default ServicesList;
+export default ServicesList

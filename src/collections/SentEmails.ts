@@ -1,4 +1,4 @@
-import type { CollectionConfig } from 'payload';
+import type { CollectionConfig } from 'payload'
 
 const SentEmails: CollectionConfig = {
   slug: 'sentEmails',
@@ -94,6 +94,6 @@ const SentEmails: CollectionConfig = {
     plural: 'Sent Emails',
     singular: 'Sent Email',
   },
-};
+}
 
-export default SentEmails;
+export default SentEmails

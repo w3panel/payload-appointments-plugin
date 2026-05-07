@@ -1,6 +1,7 @@
 {
   "compilerOptions": {
     "baseUrl": ".",
+    "ignoreDeprecations": "6.0",
     "lib": ["DOM", "DOM.Iterable", "ES2022"],
     "rootDir": "./",
     "allowJs": true,
@@ -14,6 +15,7 @@
     "jsx": "preserve",
     "incremental": true,
     "emitDeclarationOnly": true,
+    "noImplicitAny": false,
     "target": "ES2022",
     "composite": true,
     "plugins": [

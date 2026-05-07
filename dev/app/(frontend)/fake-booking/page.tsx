@@ -1,15 +1,15 @@
-import configPromise from '@payload-config';
-import { cookies } from 'next/headers';
-import Link from 'next/link';
-import { getPayload } from 'payload';
+import configPromise from '@payload-config'
+import { cookies } from 'next/headers'
+import Link from 'next/link'
+import { getPayload } from 'payload'
 
-import { Button } from '../../../components/ui/button';
-import { getDashboardData } from '../../../lib/dashboardData';
-import { FakeBookingClient } from './page.client';
+import { Button } from '../../../components/ui/button'
+import { getDashboardData } from '../../../lib/dashboardData'
+import { FakeBookingClient } from './page.client'
 
 export default async function FakeBookingPage() {
-  const cookieStore = await cookies();
-  const session = cookieStore.get('payload-token');
+  const cookieStore = await cookies()
+  const session = cookieStore.get('payload-token')
 
   if (!session) {
     return (
@@ -22,10 +22,10 @@ export default async function FakeBookingPage() {
           </Button>
         </div>
       </div>
-    );
+    )
   }
 
-  const customer = await getDashboardData();
+  const customer = await getDashboardData()
 
   if (!customer) {
     return (
@@ -35,10 +35,10 @@ export default async function FakeBookingPage() {
           <p className="text-gray-500 mb-6">Failed to load user data.</p>
         </div>
       </div>
-    );
+    )
   }
 
-  const payload = await getPayload({ config: configPromise });
+  const payload = await getPayload({ config: configPromise })
 
   const [teamMembers, services] = await Promise.all([
     payload.find({
@@ -52,7 +52,7 @@ export default async function FakeBookingPage() {
       collection: 'services',
       limit: 100,
     }),
-  ]);
+  ])
 
   return (
     <div className="w-full flex justify-center py-10 px-4 animate-fade-in-up">
@@ -84,5 +84,5 @@ export default async function FakeBookingPage() {
         <FakeBookingClient hosts={teamMembers.docs} services={services.docs} />
       </div>
     </div>
-  );
+  )
 }

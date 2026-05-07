@@ -1,19 +1,19 @@
-import type { CollectionConfig } from 'payload';
+import type { CollectionConfig } from 'payload'
 
-import { anyone } from '../access/anyone';
-import { buildAddAdminTitle } from '../hooks/addAdminTitle';
-import { autoCompleteAppointments } from '../hooks/autoCompleteAppointments';
-import { calculatePaymentAmount } from '../hooks/calculatePaymentAmount';
-import { buildDispatchPaymentRequired } from '../hooks/dispatchPaymentRequired';
-import { generateCancellationToken } from '../hooks/generateCancellationToken';
-import { generateRecurringAppointments } from '../hooks/generateRecurringAppointments';
-import { notifyWaitlist } from '../hooks/notifyWaitlist';
-import { sendCustomerEmail } from '../hooks/sendCustomerEmail';
-import { setEndDateTime } from '../hooks/setEndDateTime';
-import { validateCustomerOrGuest } from '../hooks/validateCustomerOrGuest';
-import { validateNoOverlap } from '../hooks/validateNoOverlap';
-import type { PaymentHooks } from '../types';
-import type { AppointmentsBuildConfig } from '../types/config';
+import { anyone } from '../access/anyone'
+import { buildAddAdminTitle } from '../hooks/addAdminTitle'
+import { autoCompleteAppointments } from '../hooks/autoCompleteAppointments'
+import { calculatePaymentAmount } from '../hooks/calculatePaymentAmount'
+import { buildDispatchPaymentRequired } from '../hooks/dispatchPaymentRequired'
+import { generateCancellationToken } from '../hooks/generateCancellationToken'
+import { generateRecurringAppointments } from '../hooks/generateRecurringAppointments'
+import { notifyWaitlist } from '../hooks/notifyWaitlist'
+import { sendCustomerEmail } from '../hooks/sendCustomerEmail'
+import { setEndDateTime } from '../hooks/setEndDateTime'
+import { validateCustomerOrGuest } from '../hooks/validateCustomerOrGuest'
+import { validateNoOverlap } from '../hooks/validateNoOverlap'
+import type { PaymentHooks } from '../types'
+import type { AppointmentsBuildConfig } from '../types/config'
 
 export const buildAppointments = (
   config: AppointmentsBuildConfig,
@@ -81,12 +81,12 @@ export const buildAppointments = (
       admin: {
         condition: (siblingData) => {
           if (siblingData.appointmentType === 'appointment') {
-            return true;
+            return true
           }
           if (siblingData.appointmentType === 'blockout') {
-            return true;
+            return true
           }
-          return false;
+          return false
         },
       },
       filterOptions: () => {
@@ -94,7 +94,7 @@ export const buildAppointments = (
           takingAppointments: {
             equals: true,
           },
-        };
+        }
       },
       label: 'Host',
       // `relationTo` is intentionally loose so consumers can supply their own host collection.
@@ -107,9 +107,9 @@ export const buildAppointments = (
       admin: {
         condition: (siblingData) => {
           if (siblingData.appointmentType === 'appointment' && !siblingData.guestCustomer) {
-            return true;
+            return true
           }
-          return false;
+          return false
         },
       },
       label: 'Customer',
@@ -121,9 +121,9 @@ export const buildAppointments = (
       admin: {
         condition: (siblingData) => {
           if (siblingData.appointmentType === 'appointment' && !siblingData.customer) {
-            return true;
+            return true
           }
-          return false;
+          return false
         },
       },
       label: 'Guest Customer',
@@ -153,9 +153,9 @@ export const buildAppointments = (
       admin: {
         condition: (data, siblingData) => {
           if (siblingData.appointmentType === 'appointment') {
-            return true;
+            return true
           }
-          return false;
+          return false
         },
       },
       hasMany: true,
@@ -169,9 +169,9 @@ export const buildAppointments = (
       admin: {
         condition: (data, siblingData) => {
           if (siblingData.appointmentType === 'blockout') {
-            return true;
+            return true
           }
-          return false;
+          return false
         },
       },
       required: true,
@@ -185,12 +185,12 @@ export const buildAppointments = (
           admin: {
             condition: (data, siblingData) => {
               if (siblingData.appointmentType === 'appointment') {
-                return true;
+                return true
               }
               if (siblingData.appointmentType === 'blockout') {
-                return true;
+                return true
               }
-              return false;
+              return false
             },
             date: {
               pickerAppearance: 'dayAndTime',
@@ -206,12 +206,12 @@ export const buildAppointments = (
           admin: {
             condition: (data, siblingData) => {
               if (siblingData.appointmentType === 'appointment') {
-                return true;
+                return true
               }
               if (siblingData.appointmentType === 'blockout') {
-                return true;
+                return true
               }
-              return false;
+              return false
             },
             date: {
               pickerAppearance: 'dayAndTime',
@@ -433,13 +433,13 @@ export const buildAppointments = (
     plural: 'Appointments',
     singular: 'Appointment',
   },
-});
+})
 
 /**
  * Backwards-compatible default export. Uses the default slug configuration.
  * Prefer importing `buildAppointments` and passing your resolved config.
  */
-import { DEFAULT_BUILD_CONFIG } from '../types/config';
-const Appointments = buildAppointments(DEFAULT_BUILD_CONFIG);
+import { DEFAULT_BUILD_CONFIG } from '../types/config'
+const Appointments = buildAppointments(DEFAULT_BUILD_CONFIG)
 
-export default Appointments;
+export default Appointments

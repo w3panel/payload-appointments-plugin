@@ -1,18 +1,18 @@
-'use client';
+'use client'
 
-import * as TabsPrimitive from '@radix-ui/react-tabs';
-import * as React from 'react';
+import * as TabsPrimitive from '@radix-ui/react-tabs'
+import * as React from 'react'
 
-import { cn } from '../../lib/utils';
+import { cn } from '../../lib/utils'
 
-const Tabs = TabsPrimitive.Root;
+const Tabs = TabsPrimitive.Root
 
 const TabsList = ({
   className,
   ref,
   ...props
 }: {
-  ref?: React.RefObject<null | React.ElementRef<typeof TabsPrimitive.List>>;
+  ref?: React.RefObject<null | React.ElementRef<typeof TabsPrimitive.List>>
 } & React.ComponentPropsWithoutRef<typeof TabsPrimitive.List>) => (
   <TabsPrimitive.List
     className={cn(
@@ -22,15 +22,15 @@ const TabsList = ({
     ref={ref}
     {...props}
   />
-);
-TabsList.displayName = TabsPrimitive.List.displayName;
+)
+TabsList.displayName = TabsPrimitive.List.displayName
 
 const TabsTrigger = ({
   className,
   ref,
   ...props
 }: {
-  ref?: React.RefObject<null | React.ElementRef<typeof TabsPrimitive.Trigger>>;
+  ref?: React.RefObject<null | React.ElementRef<typeof TabsPrimitive.Trigger>>
 } & React.ComponentPropsWithoutRef<typeof TabsPrimitive.Trigger>) => (
   <TabsPrimitive.Trigger
     className={cn(
@@ -40,15 +40,15 @@ const TabsTrigger = ({
     ref={ref}
     {...props}
   />
-);
-TabsTrigger.displayName = TabsPrimitive.Trigger.displayName;
+)
+TabsTrigger.displayName = TabsPrimitive.Trigger.displayName
 
 const TabsContent = ({
   className,
   ref,
   ...props
 }: {
-  ref?: React.RefObject<null | React.ElementRef<typeof TabsPrimitive.Content>>;
+  ref?: React.RefObject<null | React.ElementRef<typeof TabsPrimitive.Content>>
 } & React.ComponentPropsWithoutRef<typeof TabsPrimitive.Content>) => (
   <TabsPrimitive.Content
     className={cn(
@@ -58,7 +58,7 @@ const TabsContent = ({
     ref={ref}
     {...props}
   />
-);
-TabsContent.displayName = TabsPrimitive.Content.displayName;
+)
+TabsContent.displayName = TabsPrimitive.Content.displayName
 
-export { Tabs, TabsContent, TabsList, TabsTrigger };
+export { Tabs, TabsContent, TabsList, TabsTrigger }

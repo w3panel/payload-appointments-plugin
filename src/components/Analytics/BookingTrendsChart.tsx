@@ -1,19 +1,19 @@
-'use client';
+'use client'
 
-import * as React from 'react';
-import { Bar, BarChart, XAxis, YAxis, CartesianGrid } from 'recharts';
+import * as React from 'react'
+import { Bar, BarChart, XAxis, YAxis, CartesianGrid } from 'recharts'
 
-import { ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent } from '../ui/chart';
+import { ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent } from '../ui/chart'
 
 interface BookingTrend {
-  date: string;
-  count: number;
-  revenue: number;
+  date: string
+  count: number
+  revenue: number
 }
 
 interface BookingTrendsChartProps {
-  data: BookingTrend[];
-  granularity: 'day' | 'week' | 'month';
+  data: BookingTrend[]
+  granularity: 'day' | 'week' | 'month'
 }
 
 const chartConfig = {
@@ -25,25 +25,25 @@ const chartConfig = {
     label: 'Revenue',
     color: 'hsl(var(--chart-2))',
   },
-} satisfies ChartConfig;
+} satisfies ChartConfig
 
 export function BookingTrendsChart({ data, granularity }: BookingTrendsChartProps) {
   const formatDate = (date: string) => {
-    const d = new Date(date);
+    const d = new Date(date)
     switch (granularity) {
       case 'month':
-        return d.toLocaleDateString('en-US', { month: 'short', year: '2-digit' });
+        return d.toLocaleDateString('en-US', { month: 'short', year: '2-digit' })
       case 'week':
-        return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+        return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
       default:
-        return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+        return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
     }
-  };
+  }
 
   const formattedData = data.map((item) => ({
     ...item,
     formattedDate: formatDate(item.date),
-  }));
+  }))
 
   return (
     <div className="analytics-card">
@@ -63,5 +63,5 @@ export function BookingTrendsChart({ data, granularity }: BookingTrendsChartProp
         </ChartContainer>
       </div>
     </div>
-  );
+  )
 }

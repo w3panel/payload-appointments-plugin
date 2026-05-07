@@ -1,16 +1,16 @@
-import configPromise from '@payload-config';
-import moment from 'moment';
-import Link from 'next/link';
-import { notFound } from 'next/navigation';
-import { getPayload } from 'payload';
+import configPromise from '@payload-config'
+import moment from 'moment'
+import Link from 'next/link'
+import { notFound } from 'next/navigation'
+import { getPayload } from 'payload'
 
-import type { Service, TeamMember } from '../../../../payload-types';
+import type { Service, TeamMember } from '../../../../payload-types'
 
-import { Button } from '../../../../components/ui/button';
-import { formatPrice } from '../../../../lib/formatPrice';
-import { CancelButton } from './page.client';
+import { Button } from '../../../../components/ui/button'
+import { formatPrice } from '../../../../lib/formatPrice'
+import { CancelButton } from './page.client'
 
-type AppointmentStatus = 'pending' | 'confirmed' | 'cancelled' | 'completed' | 'no-show';
+type AppointmentStatus = 'pending' | 'confirmed' | 'cancelled' | 'completed' | 'no-show'
 
 const statusConfig: Record<
   AppointmentStatus,
@@ -41,38 +41,38 @@ const statusConfig: Record<
     bgColor: 'bg-red-500',
     textColor: 'text-white',
   },
-};
+}
 
 export default async function BookingPage({ params }: { params: Promise<{ bookingId: string }> }) {
-  const { bookingId } = await params;
-  const payload = await getPayload({ config: configPromise });
+  const { bookingId } = await params
+  const payload = await getPayload({ config: configPromise })
 
   const appointment = await payload.findByID({
     collection: 'appointments',
     id: Number(bookingId),
     depth: 2,
-  });
+  })
 
   if (!appointment || appointment.appointmentType !== 'appointment') {
-    notFound();
+    notFound()
   }
 
-  const host = appointment.host as TeamMember | null;
-  const services = (appointment.services || []) as Service[];
-  const totalPrice = services.reduce((acc, service) => acc + (service.price || 0), 0);
-  const totalDuration = services.reduce((acc, service) => acc + service.duration, 0);
+  const host = appointment.host as TeamMember | null
+  const services = (appointment.services || []) as Service[]
+  const totalPrice = services.reduce((acc, service) => acc + (service.price || 0), 0)
+  const totalDuration = services.reduce((acc, service) => acc + service.duration, 0)
 
-  const startDate = moment(appointment.start);
-  const endDate = moment(appointment.end);
-  const status = (appointment.status as AppointmentStatus) || 'confirmed';
-  const isCancelled = status === 'cancelled';
-  const isCompleted = status === 'completed';
-  const isNoShow = status === 'no-show';
-  const isPast = startDate.isBefore(moment());
-  const isToday = startDate.isSame(moment(), 'day');
-  const canCancel = !isCancelled && !isCompleted && !isNoShow && !isPast;
+  const startDate = moment(appointment.start)
+  const endDate = moment(appointment.end)
+  const status = (appointment.status as AppointmentStatus) || 'confirmed'
+  const isCancelled = status === 'cancelled'
+  const isCompleted = status === 'completed'
+  const isNoShow = status === 'no-show'
+  const isPast = startDate.isBefore(moment())
+  const isToday = startDate.isSame(moment(), 'day')
+  const canCancel = !isCancelled && !isCompleted && !isNoShow && !isPast
 
-  const statusInfo = statusConfig[status];
+  const statusInfo = statusConfig[status]
 
   return (
     <div className="relative min-h-[calc(100vh-4rem)] py-12 px-6 overflow-hidden">
@@ -164,10 +164,10 @@ export default async function BookingPage({ params }: { params: Promise<{ bookin
                 {services.map((service, index) => {
                   const previousServicesDuration = services
                     .slice(0, index)
-                    .reduce((total, s) => total + s.duration, 0);
+                    .reduce((total, s) => total + s.duration, 0)
                   const serviceStartTime = startDate
                     .clone()
-                    .add(previousServicesDuration, 'minutes');
+                    .add(previousServicesDuration, 'minutes')
 
                   return (
                     <div
@@ -190,7 +190,7 @@ export default async function BookingPage({ params }: { params: Promise<{ bookin
                         <p className="font-semibold text-gray-900">{formatPrice(service.price)}</p>
                       )}
                     </div>
-                  );
+                  )
                 })}
               </div>
             </div>
@@ -270,5 +270,5 @@ export default async function BookingPage({ params }: { params: Promise<{ bookin
         </div>
       </div>
     </div>
-  );
+  )
 }

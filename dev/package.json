@@ -1,9 +1,9 @@
 {
   "name": "payload-appointments-plugin-dev",
-  "description": "A blank template to get started with Payload",
   "version": "1.0.0",
-  "type": "module",
+  "description": "A blank template to get started with Payload",
   "license": "MIT",
+  "type": "module",
   "scripts": {
     "dev": "cross-env NODE_OPTIONS=--no-deprecation next dev --turbo",
     "devturbo": "pnpm dev --turbo",
@@ -11,6 +11,10 @@
     "build": "cross-env NODE_OPTIONS=--no-deprecation next build",
     "start": "cross-env NODE_OPTIONS=--no-deprecation next start",
     "payload": "payload",
+    "lint": "bunx oxlint app collections components lib --tsconfig ../../../tsconfig.oxlint.json",
+    "lint:fix": "bunx oxlint app collections components lib --tsconfig ../../../tsconfig.oxlint.json --fix",
+    "format": "bunx oxfmt app collections components lib package.json tsconfig.json next.config.mjs payload.config.ts --write",
+    "format:check": "bunx oxfmt app collections components lib package.json tsconfig.json next.config.mjs payload.config.ts --check",
     "generate:types": "payload generate:types",
     "generate:importmap": "payload generate:importmap"
   },

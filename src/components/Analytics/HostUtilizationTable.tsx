@@ -1,18 +1,18 @@
-'use client';
+'use client'
 
-import * as React from 'react';
+import * as React from 'react'
 
 interface HostUtilization {
-  hostId: string;
-  hostName: string;
-  appointmentsCount: number;
-  hoursBooked: number;
-  completedCount: number;
-  cancelledCount: number;
+  hostId: string
+  hostName: string
+  appointmentsCount: number
+  hoursBooked: number
+  completedCount: number
+  cancelledCount: number
 }
 
 interface HostUtilizationTableProps {
-  data: HostUtilization[];
+  data: HostUtilization[]
 }
 
 export function HostUtilizationTable({ data }: HostUtilizationTableProps) {
@@ -27,7 +27,7 @@ export function HostUtilizationTable({ data }: HostUtilizationTableProps) {
           <p>No data available</p>
         </div>
       </div>
-    );
+    )
   }
 
   return (
@@ -61,5 +61,5 @@ export function HostUtilizationTable({ data }: HostUtilizationTableProps) {
         </table>
       </div>
     </div>
-  );
+  )
 }

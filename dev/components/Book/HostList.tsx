@@ -1,21 +1,21 @@
-'use client';
+'use client'
 
-import React from 'react';
+import React from 'react'
 
-import type { TeamMember } from '../../payload-types';
+import type { TeamMember } from '../../payload-types'
 
-import { cn } from '../../lib/utils';
+import { cn } from '../../lib/utils'
 
 const HostList: React.FC<{
-  chosenStaff: null | TeamMember;
-  setChosenStaff: (staff: TeamMember | null) => void;
-  teamMembers: TeamMember[];
+  chosenStaff: null | TeamMember
+  setChosenStaff: (staff: TeamMember | null) => void
+  teamMembers: TeamMember[]
 }> = ({ chosenStaff, setChosenStaff, teamMembers }) => {
   return (
     <div className="space-y-3">
       {teamMembers.map((staff, index) => {
-        const isSelected = chosenStaff?.id.toString() === staff.id.toString();
-        const isDisabled = !staff.takingAppointments;
+        const isSelected = chosenStaff?.id.toString() === staff.id.toString()
+        const isDisabled = !staff.takingAppointments
         return (
           <label
             className={cn(
@@ -72,16 +72,16 @@ const HostList: React.FC<{
               id={staff.preferredNameAppointments}
               name="selected-barber"
               onChange={() => {
-                setChosenStaff(staff);
+                setChosenStaff(staff)
               }}
               type="radio"
               value={staff.toString()}
             />
           </label>
-        );
+        )
       })}
     </div>
-  );
-};
+  )
+}
 
-export default HostList;
+export default HostList

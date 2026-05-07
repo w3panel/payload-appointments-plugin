@@ -1,130 +1,127 @@
-'use client';
+'use client'
 
-import moment from 'moment';
-import { parseAsArrayOf, parseAsBoolean, parseAsInteger, parseAsString, useQueryState } from 'nuqs';
-import React, { useMemo, useState } from 'react';
+import moment from 'moment'
+import { parseAsArrayOf, parseAsBoolean, parseAsInteger, parseAsString, useQueryState } from 'nuqs'
+import React, { useMemo, useState } from 'react'
 
-import type { Service, TeamMember } from '../../payload-types';
+import type { Service, TeamMember } from '../../payload-types'
 
-import {
-  createAppointment,
-  createGuestAppointment,
-} from '../../app/(frontend)/actions/appointment';
-import { cn } from '../../lib/utils';
-import { Button } from '../ui/button';
-import CustomerDetails from './CustomerDetails';
-import HostList from './HostList';
-import SelectDateTime from './SelectDateTime';
-import Selections from './Selections';
-import ServicesList from './ServicesList';
+import { createAppointment, createGuestAppointment } from '../../app/(frontend)/actions/appointment'
+import { cn } from '../../lib/utils'
+import { Button } from '../ui/button'
+import CustomerDetails from './CustomerDetails'
+import HostList from './HostList'
+import SelectDateTime from './SelectDateTime'
+import Selections from './Selections'
+import ServicesList from './ServicesList'
 
 const BookNow: React.FC<{
-  isAuthenticated: boolean;
-  services: Service[];
-  teamMembers: TeamMember[];
+  isAuthenticated: boolean
+  services: Service[]
+  teamMembers: TeamMember[]
 }> = ({ isAuthenticated, services, teamMembers }) => {
-  const [stepIndex, setStepIndex] = useQueryState('step', parseAsInteger.withDefault(0));
+  const [stepIndex, setStepIndex] = useQueryState('step', parseAsInteger.withDefault(0))
   const [serviceIds, setServiceIds] = useQueryState(
     'services',
     parseAsArrayOf(parseAsString).withDefault([]),
-  );
-  const [hostId, setHostId] = useQueryState('host', parseAsString.withDefault(''));
-  const [isGuest, setIsGuest] = useQueryState('guest', parseAsBoolean.withDefault(true));
+  )
+  const [hostId, setHostId] = useQueryState('host', parseAsString.withDefault(''))
+  const [isGuest, setIsGuest] = useQueryState('guest', parseAsBoolean.withDefault(true))
   const [selectedDate, setSelectedDate] = useQueryState(
     'date',
     parseAsString.withDefault(moment().format('YYYY-MM-DD')),
-  );
-  const [selectedTime, setSelectedTime] = useQueryState('time', parseAsString);
+  )
+  const [selectedTime, setSelectedTime] = useQueryState('time', parseAsString)
 
   const chosenServices = useMemo(() => {
-    return services.filter((service) => serviceIds.includes(service.id.toString()));
-  }, [services, serviceIds]);
+    return services.filter((service) => serviceIds.includes(service.id.toString()))
+  }, [services, serviceIds])
 
   const chosenStaff = useMemo(() => {
-    return teamMembers.find((member) => member.id.toString() === hostId) || null;
-  }, [teamMembers, hostId]);
+    return teamMembers.find((member) => member.id.toString() === hostId) || null
+  }, [teamMembers, hostId])
 
   const chosenDateTime = useMemo(() => {
     if (selectedTime) {
-      return moment(selectedTime).toDate();
+      return moment(selectedTime).toDate()
     }
-  }, [selectedDate, selectedTime]);
+  }, [selectedDate, selectedTime])
 
   const setChosenServices = (newServices: Service[] | ((prev: Service[]) => Service[])) => {
     if (typeof newServices === 'function') {
-      const updated = newServices(chosenServices);
-      setServiceIds(updated.map((s) => s.id.toString()));
+      const updated = newServices(chosenServices)
+      setServiceIds(updated.map((s) => s.id.toString()))
     } else {
-      setServiceIds(newServices.map((s) => s.id.toString()));
+      setServiceIds(newServices.map((s) => s.id.toString()))
     }
-  };
+  }
 
   const setChosenStaff = (staff: TeamMember | null) => {
-    setHostId(staff?.id.toString() || '');
-  };
+    setHostId(staff?.id.toString() || '')
+  }
 
-  const [bookingLoading, setBookingLoading] = useState<boolean>(false);
-  const [bookingSuccess, setBookingSuccess] = useState<boolean>(false);
-  const [bookingError, setBookingError] = useState<string | null>(null);
+  const [bookingLoading, setBookingLoading] = useState<boolean>(false)
+  const [bookingSuccess, setBookingSuccess] = useState<boolean>(false)
+  const [bookingError, setBookingError] = useState<string | null>(null)
   const [customerDetails, setCustomerDetails] = useState<{
-    email: string;
-    firstName: string;
-    lastName: string;
-    notes: string;
-    phone: string;
+    email: string
+    firstName: string
+    lastName: string
+    notes: string
+    phone: string
   }>({
     email: '',
     firstName: '',
     lastName: '',
     notes: '',
     phone: '',
-  });
+  })
 
   const nextStep = () => {
-    setStepIndex(stepIndex + 1);
+    setStepIndex(stepIndex + 1)
     if (window !== undefined) {
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      window.scrollTo({ top: 0, behavior: 'smooth' })
     }
-  };
+  }
 
   const prevStep = () => {
-    setStepIndex(stepIndex - 1);
+    setStepIndex(stepIndex - 1)
     if (window !== undefined) {
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      window.scrollTo({ top: 0, behavior: 'smooth' })
     }
-  };
+  }
 
   const isContinueDisabled = () => {
     if (stepIndex === 0) {
-      return !chosenServices?.length;
+      return !chosenServices?.length
     } else if (stepIndex === 1) {
-      return !chosenStaff;
+      return !chosenStaff
     } else if (stepIndex === 2) {
-      return !selectedTime;
+      return !selectedTime
     }
-  };
+  }
 
   const isBookDisabled = () => {
     if (isAuthenticated) {
-      return false;
+      return false
     }
     if (!isGuest) {
-      return true;
+      return true
     }
     return (
       !customerDetails.firstName ||
       !customerDetails.lastName ||
       !customerDetails.email ||
       !customerDetails.phone
-    );
-  };
+    )
+  }
 
   const handleBooking = async () => {
-    setBookingLoading(true);
-    setBookingError(null);
+    setBookingLoading(true)
+    setBookingError(null)
 
     try {
-      let result;
+      let result
 
       if (isAuthenticated) {
         result = await createAppointment(
@@ -132,7 +129,7 @@ const BookNow: React.FC<{
           chosenServices,
           chosenDateTime as Date,
           customerDetails.notes || undefined,
-        );
+        )
       } else if (isGuest) {
         result = await createGuestAppointment(
           chosenStaff as TeamMember,
@@ -145,41 +142,41 @@ const BookNow: React.FC<{
             phone: customerDetails.phone,
           },
           customerDetails.notes || undefined,
-        );
+        )
       } else {
-        setBookingError('Please sign in or continue as a guest');
-        setBookingLoading(false);
-        return;
+        setBookingError('Please sign in or continue as a guest')
+        setBookingLoading(false)
+        return
       }
 
       if (result.success) {
-        setBookingSuccess(true);
+        setBookingSuccess(true)
       } else {
-        setBookingError(result.message);
+        setBookingError(result.message)
       }
     } catch (error) {
-      console.error(error);
-      setBookingError('An error occurred while booking your appointment');
+      console.error(error)
+      setBookingError('An error occurred while booking your appointment')
     } finally {
-      setBookingLoading(false);
+      setBookingLoading(false)
     }
-  };
+  }
 
   const resetBooking = () => {
-    setBookingSuccess(false);
-    setStepIndex(0);
-    setServiceIds([]);
-    setHostId('');
-    setSelectedDate(moment().format('YYYY-MM-DD'));
-    setSelectedTime(null);
+    setBookingSuccess(false)
+    setStepIndex(0)
+    setServiceIds([])
+    setHostId('')
+    setSelectedDate(moment().format('YYYY-MM-DD'))
+    setSelectedTime(null)
     setCustomerDetails({
       email: '',
       firstName: '',
       lastName: '',
       notes: '',
       phone: '',
-    });
-  };
+    })
+  }
 
   if (bookingSuccess) {
     return (
@@ -219,7 +216,7 @@ const BookNow: React.FC<{
           </Button>
         </div>
       </div>
-    );
+    )
   }
 
   const steps = [
@@ -236,7 +233,7 @@ const BookNow: React.FC<{
       title: 'Details',
       icon: 'M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 002.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 00-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75 2.25 2.25 0 00-.1-.664m-5.8 0A2.251 2.251 0 0113.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25zM6.75 12h.008v.008H6.75V12zm0 3h.008v.008H6.75V15zm0 3h.008v.008H6.75V18z',
     },
-  ];
+  ]
 
   return (
     <div className="max-w-4xl mx-auto">
@@ -245,7 +242,7 @@ const BookNow: React.FC<{
           <React.Fragment key={step.title}>
             <button
               onClick={() => {
-                if (index < stepIndex) setStepIndex(index);
+                if (index < stepIndex) setStepIndex(index)
               }}
               className={cn(
                 'flex items-center gap-2 px-4 py-2 pl-2 rounded-full transition-all duration-300',
@@ -507,7 +504,7 @@ const BookNow: React.FC<{
         </div>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default BookNow;
+export default BookNow

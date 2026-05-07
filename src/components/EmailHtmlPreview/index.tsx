@@ -1,25 +1,25 @@
-'use client';
+'use client'
 
-import { useDocumentInfo } from '@payloadcms/ui';
-import React, { useState } from 'react';
+import { useDocumentInfo } from '@payloadcms/ui'
+import React, { useState } from 'react'
 
-import './styles.scss';
+import './styles.scss'
 
 type SentEmailDoc = {
-  html?: string;
-};
+  html?: string
+}
 
 export default function EmailHtmlPreview() {
-  const { initialData } = useDocumentInfo();
-  const [isExpanded, setIsExpanded] = useState(true);
-  const doc = initialData as SentEmailDoc | undefined;
+  const { initialData } = useDocumentInfo()
+  const [isExpanded, setIsExpanded] = useState(true)
+  const doc = initialData as SentEmailDoc | undefined
 
   if (!doc?.html) {
     return (
       <div className="email-html-preview">
         <div className="email-html-preview__empty">No HTML content available</div>
       </div>
-    );
+    )
   }
 
   return (
@@ -45,5 +45,5 @@ export default function EmailHtmlPreview() {
         </div>
       )}
     </div>
-  );
+  )
 }

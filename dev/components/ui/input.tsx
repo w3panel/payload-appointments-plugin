@@ -1,8 +1,8 @@
-import * as React from 'react';
+import * as React from 'react'
 
-import { cn } from '../../lib/utils';
+import { cn } from '../../lib/utils'
 
-export type InputProps = React.InputHTMLAttributes<HTMLInputElement>;
+export type InputProps = React.InputHTMLAttributes<HTMLInputElement>
 
 const Input = ({
   type,
@@ -20,8 +20,8 @@ const Input = ({
       type={type}
       {...props}
     />
-  );
-};
-Input.displayName = 'Input';
+  )
+}
+Input.displayName = 'Input'
 
-export { Input };
+export { Input }

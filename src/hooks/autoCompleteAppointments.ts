@@ -1,6 +1,6 @@
-import type { CollectionAfterChangeHook } from 'payload';
+import type { CollectionAfterChangeHook } from 'payload'
 
-import moment from 'moment';
+import moment from 'moment'
 
 export const autoCompleteAppointments: CollectionAfterChangeHook = async ({
   doc,
@@ -8,19 +8,19 @@ export const autoCompleteAppointments: CollectionAfterChangeHook = async ({
   req,
 }) => {
   if (operation !== 'create' && operation !== 'update') {
-    return doc;
+    return doc
   }
 
   if (doc.appointmentType !== 'appointment') {
-    return doc;
+    return doc
   }
 
   if (doc.status === 'cancelled' || doc.status === 'completed' || doc.status === 'no-show') {
-    return doc;
+    return doc
   }
 
-  const endTime = moment(doc.end);
-  const now = moment();
+  const endTime = moment(doc.end)
+  const now = moment()
 
   if (endTime.isBefore(now) && doc.status !== 'completed') {
     try {
@@ -31,11 +31,11 @@ export const autoCompleteAppointments: CollectionAfterChangeHook = async ({
           status: 'completed',
         },
         depth: 0,
-      });
+      })
     } catch (error) {
-      req.payload.logger.error(`Error auto-completing appointment ${doc.id}: ${error}`);
+      req.payload.logger.error(`Error auto-completing appointment ${doc.id}: ${error}`)
     }
   }
 
-  return doc;
-};
+  return doc
+}

@@ -1,17 +1,17 @@
-import configPromise from '@payload-config';
-import { cookies } from 'next/headers';
-import Link from 'next/link';
-import { getPayload } from 'payload';
+import configPromise from '@payload-config'
+import { cookies } from 'next/headers'
+import Link from 'next/link'
+import { getPayload } from 'payload'
 
-import AppointmentsList from '../../components/Appointments';
-import { Button } from '../../components/ui/button';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../components/ui/tabs';
-import { getDashboardData } from '../../lib/dashboardData';
-import { logout } from './actions/auth';
+import AppointmentsList from '../../components/Appointments'
+import { Button } from '../../components/ui/button'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../components/ui/tabs'
+import { getDashboardData } from '../../lib/dashboardData'
+import { logout } from './actions/auth'
 
 export default async function Dashboard() {
-  const cookieStore = await cookies();
-  const session = cookieStore.get('payload-token');
+  const cookieStore = await cookies()
+  const session = cookieStore.get('payload-token')
 
   if (!session) {
     return (
@@ -158,12 +158,12 @@ export default async function Dashboard() {
           </div>
         </div>
       </div>
-    );
+    )
   }
 
-  let dashboardData;
+  let dashboardData
   try {
-    dashboardData = await getDashboardData();
+    dashboardData = await getDashboardData()
   } catch {
     return (
       <div className="flex items-center justify-center min-h-[50vh] p-8">
@@ -194,10 +194,10 @@ export default async function Dashboard() {
           </form>
         </div>
       </div>
-    );
+    )
   }
 
-  const payload = await getPayload({ config: configPromise });
+  const payload = await getPayload({ config: configPromise })
 
   const appointments = (
     await payload.find({
@@ -212,16 +212,16 @@ export default async function Dashboard() {
         },
       },
     })
-  ).docs;
+  ).docs
 
-  const currentDate = new Date();
+  const currentDate = new Date()
 
   const upcomingAppointments = appointments.filter(
     (appointment) => new Date(appointment.start as string) >= currentDate,
-  );
+  )
   const pastAppointments = appointments.filter(
     (appointment) => new Date(appointment.start as string) < currentDate,
-  );
+  )
 
   return (
     <div className="w-full flex justify-center py-10 px-4 animate-fade-in-up">
@@ -303,5 +303,5 @@ export default async function Dashboard() {
         </Tabs>
       </div>
     </div>
-  );
+  )
 }

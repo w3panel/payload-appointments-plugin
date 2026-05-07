@@ -1,12 +1,12 @@
-'use client';
+'use client'
 
-import React from 'react';
-import moment from 'moment';
-import { useDocumentDrawer } from '@payloadcms/ui';
+import React from 'react'
+import moment from 'moment'
+import { useDocumentDrawer } from '@payloadcms/ui'
 
-import type { BigCalendarAppointment } from '../../types';
+import type { BigCalendarAppointment } from '../../types'
 
-import './eventStyles.scss';
+import './eventStyles.scss'
 
 const statusClasses: Record<string, string> = {
   pending: 'appointment--pending',
@@ -14,7 +14,7 @@ const statusClasses: Record<string, string> = {
   cancelled: 'appointment--cancelled',
   completed: 'appointment--completed',
   'no-show': 'appointment--no-show',
-};
+}
 
 const statusLabels: Record<string, string> = {
   pending: 'Pending',
@@ -22,28 +22,28 @@ const statusLabels: Record<string, string> = {
   cancelled: 'Cancelled',
   completed: 'Completed',
   'no-show': 'No Show',
-};
+}
 
 const Appointment = ({ event }: { event: BigCalendarAppointment }) => {
   const [DocumentDrawer, DocumentDrawerToggler] = useDocumentDrawer({
     id: Number(event.id),
     collectionSlug: 'appointments',
-  });
+  })
 
-  const statusClass = event.status ? statusClasses[event.status] : 'appointment--confirmed';
+  const statusClass = event.status ? statusClasses[event.status] : 'appointment--confirmed'
 
   const customerName =
     event.bookedBy === 'customer'
       ? `${event.customer?.firstName || ''} ${event.customer?.lastName || ''}`.trim()
-      : `${event.guestCustomer?.firstName || ''} ${event.guestCustomer?.lastName || ''}`.trim();
+      : `${event.guestCustomer?.firstName || ''} ${event.guestCustomer?.lastName || ''}`.trim()
 
   const customerEmail =
-    event.bookedBy === 'customer' ? event.customer?.email : event.guestCustomer?.email;
+    event.bookedBy === 'customer' ? event.customer?.email : event.guestCustomer?.email
 
-  const customerPhone = event.guestCustomer?.phone;
+  const customerPhone = event.guestCustomer?.phone
 
-  const servicesText = event.services.map((service) => service.title).join(', ');
-  const duration = moment(event.end).diff(moment(event.start), 'minutes');
+  const servicesText = event.services.map((service) => service.title).join(', ')
+  const duration = moment(event.end).diff(moment(event.start), 'minutes')
 
   const tooltipContent = [
     customerName,
@@ -54,7 +54,7 @@ const Appointment = ({ event }: { event: BigCalendarAppointment }) => {
     event.customerNotes ? `Notes: ${event.customerNotes}` : null,
   ]
     .filter(Boolean)
-    .join('\n');
+    .join('\n')
 
   return (
     <>
@@ -72,7 +72,7 @@ const Appointment = ({ event }: { event: BigCalendarAppointment }) => {
       </DocumentDrawerToggler>
       <DocumentDrawer />
     </>
-  );
-};
+  )
+}
 
-export default Appointment;
+export default Appointment

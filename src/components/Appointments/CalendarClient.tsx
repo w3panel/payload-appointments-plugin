@@ -1,48 +1,48 @@
-'use client';
+'use client'
 
-import type { Components, SlotInfo, View } from 'react-big-calendar';
+import type { Components, SlotInfo, View } from 'react-big-calendar'
 
-import { useDocumentDrawer } from '@payloadcms/ui';
-import moment from 'moment';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { momentLocalizer, Calendar as ReactBigCalendar } from 'react-big-calendar';
-import withDragAndDrop from 'react-big-calendar/lib/addons/dragAndDrop';
+import { useDocumentDrawer } from '@payloadcms/ui'
+import moment from 'moment'
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
+import { momentLocalizer, Calendar as ReactBigCalendar } from 'react-big-calendar'
+import withDragAndDrop from 'react-big-calendar/lib/addons/dragAndDrop'
 
 import type {
   Appointment as AppointmentType,
   AppointmentStatus,
   BigCalendarAppointment,
   Host,
-} from '../../types';
+} from '../../types'
 
-import Appointment from './Appointment';
-import Blockout from './Blockout';
-import StatsCard from './StatsCard';
-import Toolbar from './Toolbar';
+import Appointment from './Appointment'
+import Blockout from './Blockout'
+import StatsCard from './StatsCard'
+import Toolbar from './Toolbar'
 
-const localizer = momentLocalizer(moment);
-const DnDCalendar = withDragAndDrop<BigCalendarAppointment, Host>(ReactBigCalendar);
+const localizer = momentLocalizer(moment)
+const DnDCalendar = withDragAndDrop<BigCalendarAppointment, Host>(ReactBigCalendar)
 
 interface CalendarClientProps {
-  apiRoute: string;
-  collectionSlug: string;
-  hostSlug: string;
-  initialAppointments: AppointmentType[];
-  initialHosts: Host[];
+  apiRoute: string
+  collectionSlug: string
+  hostSlug: string
+  initialAppointments: AppointmentType[]
+  initialHosts: Host[]
 }
 
 function getDateRangeForView(date: Date, view: View): { start: Date; end: Date } {
-  const m = moment(date);
+  const m = moment(date)
   if (view === 'week') {
     return {
       start: m.clone().startOf('week').toDate(),
       end: m.clone().endOf('week').toDate(),
-    };
+    }
   }
   return {
     start: m.clone().startOf('day').toDate(),
     end: m.clone().endOf('day').toDate(),
-  };
+  }
 }
 
 export default function CalendarClient({
@@ -51,74 +51,74 @@ export default function CalendarClient({
   initialAppointments,
   initialHosts,
 }: CalendarClientProps) {
-  const [view, setView] = useState<View>('day');
-  const [currentDate, setCurrentDate] = useState<Date>(new Date());
-  const [appointments, setAppointments] = useState<AppointmentType[]>(initialAppointments);
-  const [statusFilter, setStatusFilter] = useState<AppointmentStatus | 'all'>('all');
-  const [teamFilter, setTeamFilter] = useState<string | 'all'>('all');
-  const [isLoading, setIsLoading] = useState(false);
+  const [view, setView] = useState<View>('day')
+  const [currentDate, setCurrentDate] = useState<Date>(new Date())
+  const [appointments, setAppointments] = useState<AppointmentType[]>(initialAppointments)
+  const [statusFilter, setStatusFilter] = useState<AppointmentStatus | 'all'>('all')
+  const [teamFilter, setTeamFilter] = useState<string | 'all'>('all')
+  const [isLoading, setIsLoading] = useState(false)
 
   const takingAppointments = useMemo(
     () => initialHosts.filter((host: Host) => host.takingAppointments),
     [initialHosts],
-  );
+  )
 
   const filteredHosts = useMemo(() => {
-    if (teamFilter === 'all') return takingAppointments;
-    return takingAppointments.filter((host) => String(host.id) === teamFilter);
-  }, [takingAppointments, teamFilter]);
+    if (teamFilter === 'all') return takingAppointments
+    return takingAppointments.filter((host) => String(host.id) === teamFilter)
+  }, [takingAppointments, teamFilter])
 
   const [DocumentDrawer, , { isDrawerOpen, toggleDrawer }] = useDocumentDrawer({
     collectionSlug,
-  });
+  })
 
   const fetchAppointments = useCallback(async () => {
-    const { start, end } = getDateRangeForView(currentDate, view);
+    const { start, end } = getDateRangeForView(currentDate, view)
 
-    const params = new URLSearchParams();
-    params.set('where[start][greater_than_equal]', start.toISOString());
-    params.set('where[end][less_than_equal]', end.toISOString());
-    params.set('limit', '500');
-    params.set('depth', '1');
+    const params = new URLSearchParams()
+    params.set('where[start][greater_than_equal]', start.toISOString())
+    params.set('where[end][less_than_equal]', end.toISOString())
+    params.set('limit', '500')
+    params.set('depth', '1')
 
-    setIsLoading(true);
+    setIsLoading(true)
     try {
-      const res = await fetch(`${apiRoute}/${collectionSlug}?${params.toString()}`);
-      const appointmentsRes = (await res.json()) as { docs: AppointmentType[] };
-      setAppointments(appointmentsRes.docs);
+      const res = await fetch(`${apiRoute}/${collectionSlug}?${params.toString()}`)
+      const appointmentsRes = (await res.json()) as { docs: AppointmentType[] }
+      setAppointments(appointmentsRes.docs)
     } finally {
-      setIsLoading(false);
+      setIsLoading(false)
     }
-  }, [apiRoute, collectionSlug, currentDate, view]);
+  }, [apiRoute, collectionSlug, currentDate, view])
 
   useEffect(() => {
     if (!isDrawerOpen) {
-      fetchAppointments();
+      fetchAppointments()
     }
-  }, [isDrawerOpen, fetchAppointments]);
+  }, [isDrawerOpen, fetchAppointments])
 
   const remappedAppointments = useMemo(() => {
     return appointments
       .filter((doc: AppointmentType) => {
         if (statusFilter !== 'all' && doc.status !== statusFilter) {
-          return false;
+          return false
         }
-        return true;
+        return true
       })
       .map((doc: AppointmentType) => ({
         ...doc,
         end: moment(doc.end).toDate(),
         hostId: String(doc.host?.id ?? ''),
         start: moment(doc.start).toDate(),
-      }));
-  }, [appointments, statusFilter]);
+      }))
+  }, [appointments, statusFilter])
 
   const handleSlotSelect = useCallback(
     (_slotInfo: SlotInfo) => {
-      toggleDrawer();
+      toggleDrawer()
     },
     [toggleDrawer],
-  );
+  )
 
   const handleEventDrop = useCallback(
     async ({ end, event, resourceId, start }: any) => {
@@ -126,7 +126,7 @@ export default function CalendarClient({
         end: moment(end).toISOString(),
         host: resourceId,
         start: moment(start).toISOString(),
-      };
+      }
 
       await fetch(`${apiRoute}/${collectionSlug}/${event.id}`, {
         body: JSON.stringify(data),
@@ -135,34 +135,34 @@ export default function CalendarClient({
           'Content-Type': 'application/json',
         },
         method: 'PATCH',
-      });
-      await fetchAppointments();
+      })
+      await fetchAppointments()
     },
     [apiRoute, collectionSlug, fetchAppointments],
-  );
+  )
 
   const handleDateChange = useCallback((date: Date) => {
-    setCurrentDate(date);
-  }, []);
+    setCurrentDate(date)
+  }, [])
 
   const handleNewAppointment = useCallback(() => {
-    toggleDrawer();
-  }, [toggleDrawer]);
+    toggleDrawer()
+  }, [toggleDrawer])
 
   const components: Components<BigCalendarAppointment, Host> = useMemo(
     () => ({
       event: ({ event }) => {
         if (event.appointmentType === 'appointment') {
-          return <Appointment event={event} />;
+          return <Appointment event={event} />
         }
         if (event.appointmentType === 'blockout') {
-          return <Blockout event={event} />;
+          return <Blockout event={event} />
         }
-        return null;
+        return null
       },
     }),
     [],
-  );
+  )
 
   return (
     <React.Fragment>
@@ -206,5 +206,5 @@ export default function CalendarClient({
 
       <DocumentDrawer />
     </React.Fragment>
-  );
+  )
 }

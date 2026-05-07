@@ -1,21 +1,21 @@
-'use client';
+'use client'
 
-import Link from 'next/link';
-import React, { useState } from 'react';
+import Link from 'next/link'
+import React, { useState } from 'react'
 
-import type { Service, TeamMember } from '../../payload-types';
+import type { Service, TeamMember } from '../../payload-types'
 
-import { joinWaitlist, joinWaitlistAsGuest } from '../../app/(frontend)/actions/appointment';
-import { Button } from '../ui/button';
-import { Input } from '../ui/input';
-import { Label } from '../ui/label';
+import { joinWaitlist, joinWaitlistAsGuest } from '../../app/(frontend)/actions/appointment'
+import { Button } from '../ui/button'
+import { Input } from '../ui/input'
+import { Label } from '../ui/label'
 
 interface WaitlistJoinProps {
-  isAuthenticated: boolean;
-  services: Service[];
-  host: TeamMember | null;
-  selectedDate: string;
-  onSuccess?: (waitlistId: string | number) => void;
+  isAuthenticated: boolean
+  services: Service[]
+  host: TeamMember | null
+  selectedDate: string
+  onSuccess?: (waitlistId: string | number) => void
 }
 
 const WaitlistJoin: React.FC<WaitlistJoinProps> = ({
@@ -25,29 +25,29 @@ const WaitlistJoin: React.FC<WaitlistJoinProps> = ({
   selectedDate,
   onSuccess,
 }) => {
-  const [loading, setLoading] = useState(false);
-  const [success, setSuccess] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [waitlistId, setWaitlistId] = useState<string | number | null>(null);
-  const [showForm, setShowForm] = useState(false);
-  const [notes, setNotes] = useState('');
+  const [loading, setLoading] = useState(false)
+  const [success, setSuccess] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [waitlistId, setWaitlistId] = useState<string | number | null>(null)
+  const [showForm, setShowForm] = useState(false)
+  const [notes, setNotes] = useState('')
   const [guestDetails, setGuestDetails] = useState({
     firstName: '',
     lastName: '',
     email: '',
     phone: '',
-  });
+  })
 
-  const primaryService = services[0];
+  const primaryService = services[0]
 
   const handleJoinWaitlist = async () => {
-    if (!primaryService) return;
+    if (!primaryService) return
 
-    setLoading(true);
-    setError(null);
+    setLoading(true)
+    setError(null)
 
     try {
-      let result;
+      let result
 
       if (isAuthenticated) {
         result = await joinWaitlist(
@@ -56,7 +56,7 @@ const WaitlistJoin: React.FC<WaitlistJoinProps> = ({
           [selectedDate],
           undefined,
           notes || undefined,
-        );
+        )
       } else {
         if (
           !guestDetails.firstName ||
@@ -64,9 +64,9 @@ const WaitlistJoin: React.FC<WaitlistJoinProps> = ({
           !guestDetails.email ||
           !guestDetails.phone
         ) {
-          setError('Please fill in all required fields');
-          setLoading(false);
-          return;
+          setError('Please fill in all required fields')
+          setLoading(false)
+          return
         }
 
         result = await joinWaitlistAsGuest(
@@ -76,22 +76,22 @@ const WaitlistJoin: React.FC<WaitlistJoinProps> = ({
           [selectedDate],
           undefined,
           notes || undefined,
-        );
+        )
       }
 
       if (result.success) {
-        setSuccess(true);
-        setWaitlistId(result.id || null);
-        onSuccess?.(result.id!);
+        setSuccess(true)
+        setWaitlistId(result.id || null)
+        onSuccess?.(result.id!)
       } else {
-        setError(result.message);
+        setError(result.message)
       }
     } catch {
-      setError('An error occurred while joining the waitlist');
+      setError('An error occurred while joining the waitlist')
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
 
   if (success) {
     return (
@@ -122,7 +122,7 @@ const WaitlistJoin: React.FC<WaitlistJoinProps> = ({
           <Button className="bg-gray-900 hover:bg-gray-800 text-white">View Waitlist Status</Button>
         </Link>
       </div>
-    );
+    )
   }
 
   if (!showForm) {
@@ -168,7 +168,7 @@ const WaitlistJoin: React.FC<WaitlistJoinProps> = ({
           </div>
         </div>
       </div>
-    );
+    )
   }
 
   return (
@@ -306,8 +306,7 @@ const WaitlistJoin: React.FC<WaitlistJoinProps> = ({
         </Button>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default WaitlistJoin;
-
+export default WaitlistJoin

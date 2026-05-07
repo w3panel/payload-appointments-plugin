@@ -1,32 +1,32 @@
-import type { PayloadHandler, PayloadRequest } from 'payload';
+import type { PayloadHandler, PayloadRequest } from 'payload'
 
-import moment from 'moment';
+import moment from 'moment'
 
-import type { AppointmentsBuildConfig } from '../types/config';
-import { DEFAULT_BUILD_CONFIG } from '../types/config';
+import type { AppointmentsBuildConfig } from '../types/config'
+import { DEFAULT_BUILD_CONFIG } from '../types/config'
 
-type DayOfWeek = 'monday' | 'tuesday' | 'wednesday' | 'thursday' | 'friday' | 'saturday' | 'sunday';
+type DayOfWeek = 'monday' | 'tuesday' | 'wednesday' | 'thursday' | 'friday' | 'saturday' | 'sunday'
 
 type HostCustomHours = {
   [key in DayOfWeek]?: {
-    end?: string | null;
-    isWorking?: boolean;
-    start?: string | null;
-  };
-};
+    end?: string | null
+    isWorking?: boolean
+    start?: string | null
+  }
+}
 
 type HostDoc = {
-  customHours?: HostCustomHours;
-  maxAppointmentsPerDay?: number;
-  useCustomHours?: boolean;
-};
+  customHours?: HostCustomHours
+  maxAppointmentsPerDay?: number
+  useCustomHours?: boolean
+}
 
 type BookingWindowConfig = {
-  minLeadTime: number;
-  maxAdvanceBooking: number;
-  earliestBookableTime: string | null;
-  latestBookableDate: string | null;
-};
+  minLeadTime: number
+  maxAdvanceBooking: number
+  earliestBookableTime: string | null
+  latestBookableDate: string | null
+}
 
 const curateSlots = (
   slotInterval: number,
@@ -34,23 +34,23 @@ const curateSlots = (
   endTime: string,
   bookingWindow: BookingWindowConfig,
 ): string[] => {
-  const slots: string[] = [];
-  const current = moment(startTime);
-  const end = moment(endTime);
-  const now = moment();
+  const slots: string[] = []
+  const current = moment(startTime)
+  const end = moment(endTime)
+  const now = moment()
   const earliestBookable = bookingWindow.earliestBookableTime
     ? moment(bookingWindow.earliestBookableTime)
-    : now;
+    : now
 
   while (current.isBefore(end)) {
     if (current.isAfter(earliestBookable)) {
-      slots.push(current.format('YYYY-MM-DDTHH:mm:ss.SSSZ'));
+      slots.push(current.format('YYYY-MM-DDTHH:mm:ss.SSSZ'))
     }
-    current.add(slotInterval, 'minutes');
+    current.add(slotInterval, 'minutes')
   }
 
-  return slots;
-};
+  return slots
+}
 
 const filterSlotsForHost = async (
   config: AppointmentsBuildConfig,
@@ -61,8 +61,8 @@ const filterSlotsForHost = async (
   hostId?: string,
   maxAppointmentsPerDay?: number,
 ): Promise<string[]> => {
-  const startOfDay = moment(day).startOf('day');
-  const endOfDay = moment(day).endOf('day');
+  const startOfDay = moment(day).startOf('day')
+  const endOfDay = moment(day).endOf('day')
 
   const whereClause: any = {
     and: [
@@ -78,14 +78,14 @@ const filterSlotsForHost = async (
         },
       },
     ],
-  };
+  }
 
   if (hostId) {
     whereClause.and.push({
       host: {
         equals: hostId,
       },
-    });
+    })
   }
 
   const existingAppointments = await req.payload.find({
@@ -93,48 +93,48 @@ const filterSlotsForHost = async (
     depth: 0,
     limit: 100,
     where: whereClause,
-  });
+  })
 
   if (maxAppointmentsPerDay && maxAppointmentsPerDay > 0) {
     const appointmentCount = existingAppointments.docs.filter(
       (a: any) => a.appointmentType === 'appointment',
-    ).length;
+    ).length
     if (appointmentCount >= maxAppointmentsPerDay) {
-      return [];
+      return []
     }
   }
 
   return availableSlots.filter((slot) => {
-    const slotStart = moment(slot);
-    const slotEnd = slotStart.clone().add(slotDuration, 'minutes');
+    const slotStart = moment(slot)
+    const slotEnd = slotStart.clone().add(slotDuration, 'minutes')
 
     const hasOverlap = existingAppointments.docs.some((appointment: any) => {
-      const appointmentStart = moment(appointment.start);
-      const appointmentEnd = moment(appointment.end);
+      const appointmentStart = moment(appointment.start)
+      const appointmentEnd = moment(appointment.end)
 
-      return slotStart.isBefore(appointmentEnd) && slotEnd.isAfter(appointmentStart);
-    });
+      return slotStart.isBefore(appointmentEnd) && slotEnd.isAfter(appointmentStart)
+    })
 
-    return !hasOverlap;
-  });
-};
+    return !hasOverlap
+  })
+}
 
 export const buildGetAppointmentsForDayAndHost =
   (config: AppointmentsBuildConfig): PayloadHandler =>
   async (req: PayloadRequest) => {
     try {
-      const { day, host, services } = req.query;
+      const { day, host, services } = req.query
 
       if (!services || !day || typeof services !== 'string' || typeof day !== 'string') {
         return Response.json(
           { error: 'Missing or invalid services or day parameter' },
           { status: 400 },
-        );
+        )
       }
 
-      const hostId = typeof host === 'string' ? host : undefined;
+      const hostId = typeof host === 'string' ? host : undefined
 
-      const servicesArray = services.split(',');
+      const servicesArray = services.split(',')
       const servicesData = await req.payload.find({
         collection: config.servicesSlug as 'services',
         depth: 0,
@@ -143,143 +143,142 @@ export const buildGetAppointmentsForDayAndHost =
             in: servicesArray,
           },
         },
-      });
+      })
 
       const totalDuration = servicesData.docs.reduce(
         (total: number, service: any) => total + (service.duration || 0),
         0,
-      );
+      )
 
       const maxBufferTime = servicesData.docs.reduce(
         (max: number, service: any) => Math.max(max, service.bufferTime || 0),
         0,
-      );
+      )
 
-      const slotDuration = totalDuration + maxBufferTime;
+      const slotDuration = totalDuration + maxBufferTime
 
       const maxMinLeadTime = servicesData.docs.reduce(
         (max: number, service: any) => Math.max(max, service.minLeadTime || 0),
         0,
-      );
+      )
 
       const nonZeroMaxAdvance = servicesData.docs
         .map((s: any) => s.maxAdvanceBooking || 0)
-        .filter((v: number) => v > 0);
-      const effectiveMaxAdvance =
-        nonZeroMaxAdvance.length > 0 ? Math.min(...nonZeroMaxAdvance) : 0;
+        .filter((v: number) => v > 0)
+      const effectiveMaxAdvance = nonZeroMaxAdvance.length > 0 ? Math.min(...nonZeroMaxAdvance) : 0
 
-      const now = moment();
+      const now = moment()
       const earliestBookableTime =
-        maxMinLeadTime > 0 ? now.clone().add(maxMinLeadTime, 'hours').toISOString() : null;
+        maxMinLeadTime > 0 ? now.clone().add(maxMinLeadTime, 'hours').toISOString() : null
       const latestBookableDate =
         effectiveMaxAdvance > 0
           ? now.clone().add(effectiveMaxAdvance, 'days').endOf('day').toISOString()
-          : null;
+          : null
 
       const bookingWindow: BookingWindowConfig = {
         minLeadTime: maxMinLeadTime,
         maxAdvanceBooking: effectiveMaxAdvance,
         earliestBookableTime,
         latestBookableDate,
-      };
+      }
 
-      const requestedDay = moment(day).startOf('day');
+      const requestedDay = moment(day).startOf('day')
       if (latestBookableDate && requestedDay.isAfter(moment(latestBookableDate))) {
         return Response.json({
           availableSlots: [],
           bookingWindow,
           filteredSlots: [],
           message: `Cannot book more than ${effectiveMaxAdvance} days in advance`,
-        });
+        })
       }
 
-      const dayOfWeek = moment(day).format('dddd').toLowerCase() as DayOfWeek;
+      const dayOfWeek = moment(day).format('dddd').toLowerCase() as DayOfWeek
 
-      let opening: string | null = null;
-      let closing: string | null = null;
-      let isOpen = false;
-      let maxAppointmentsPerDay: number | undefined;
+      let opening: string | null = null
+      let closing: string | null = null
+      let isOpen = false
+      let maxAppointmentsPerDay: number | undefined
 
       if (hostId) {
         const hostDoc = (await req.payload.findByID({
           id: hostId,
           collection: config.hostSlug as any,
           depth: 0,
-        })) as unknown as HostDoc;
+        })) as unknown as HostDoc
 
         if (hostDoc?.useCustomHours && hostDoc?.customHours) {
-          const memberDayConfig = hostDoc.customHours[dayOfWeek];
+          const memberDayConfig = hostDoc.customHours[dayOfWeek]
           if (memberDayConfig?.isWorking && memberDayConfig?.start && memberDayConfig?.end) {
-            opening = memberDayConfig.start;
-            closing = memberDayConfig.end;
-            isOpen = true;
+            opening = memberDayConfig.start
+            closing = memberDayConfig.end
+            isOpen = true
           }
         }
 
-        maxAppointmentsPerDay = hostDoc?.maxAppointmentsPerDay;
+        maxAppointmentsPerDay = hostDoc?.maxAppointmentsPerDay
       }
 
       if (!opening || !closing) {
         const openingTimes = await req.payload.findGlobal({
           slug: config.openingTimesSlug as 'openingTimes',
           depth: 0,
-        });
+        })
 
-        const openingTimesRecord = openingTimes as unknown as Record<string, unknown>;
+        const openingTimesRecord = openingTimes as unknown as Record<string, unknown>
         if (!openingTimesRecord || !openingTimesRecord[dayOfWeek]) {
           return Response.json(
             { error: 'Opening times not configured for this day' },
             { status: 400 },
-          );
+          )
         }
 
         const dayConfig = openingTimesRecord[dayOfWeek] as {
-          closing: string | null;
-          isOpen: boolean;
-          opening: string | null;
-        };
+          closing: string | null
+          isOpen: boolean
+          opening: string | null
+        }
 
         if (!dayConfig.isOpen || !dayConfig.opening || !dayConfig.closing) {
           return Response.json({
             availableSlots: [],
             filteredSlots: [],
-          });
+          })
         }
 
-        opening = dayConfig.opening;
-        closing = dayConfig.closing;
-        isOpen = dayConfig.isOpen;
+        opening = dayConfig.opening
+        closing = dayConfig.closing
+        isOpen = dayConfig.isOpen
       }
 
       if (!isOpen || !opening || !closing) {
         return Response.json({
           availableSlots: [],
           filteredSlots: [],
-        });
+        })
       }
 
-      const openingMoment = moment(opening);
-      const closingMoment = moment(closing);
+      const openingMoment = moment(opening)
+      const closingMoment = moment(closing)
 
       const startTime = moment(day).set({
         hour: openingMoment.hour(),
         millisecond: 0,
         minute: openingMoment.minute(),
         second: 0,
-      });
+      })
       const endTime = moment(day).set({
         hour: closingMoment.hour(),
         millisecond: 0,
         minute: closingMoment.minute(),
         second: 0,
-      });
+      })
 
       const availableSlots = curateSlots(
         totalDuration,
         startTime.toISOString(),
         endTime.toISOString(),
         bookingWindow,
-      );
+      )
       const filteredSlots = await filterSlotsForHost(
         config,
         req,
@@ -288,7 +287,7 @@ export const buildGetAppointmentsForDayAndHost =
         slotDuration,
         hostId,
         maxAppointmentsPerDay,
-      );
+      )
 
       return Response.json({
         availableSlots,
@@ -296,13 +295,13 @@ export const buildGetAppointmentsForDayAndHost =
         bufferTime: maxBufferTime,
         filteredSlots,
         slotDuration,
-      });
+      })
     } catch (error) {
-      req.payload.logger.error(`Error getting appointments: ${error}`);
-      return Response.json({ error: 'Internal server error' }, { status: 500 });
+      req.payload.logger.error(`Error getting appointments: ${error}`)
+      return Response.json({ error: 'Internal server error' }, { status: 500 })
     }
-  };
+  }
 
 /** Backwards-compatible default export bound to the default slug configuration. */
 export const getAppointmentsForDayAndHost: PayloadHandler =
-  buildGetAppointmentsForDayAndHost(DEFAULT_BUILD_CONFIG);
+  buildGetAppointmentsForDayAndHost(DEFAULT_BUILD_CONFIG)

@@ -1,0 +1,5 @@
+$ bunx oxfmt app collections components lib package.json tsconfig.json next.config.mjs payload.config.ts --check
+Checking formatting...
+
+All matched files use the correct format.
+Finished in 1106ms on 54 files using 10 threads.

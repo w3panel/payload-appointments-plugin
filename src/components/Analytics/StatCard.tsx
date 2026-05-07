@@ -1,19 +1,19 @@
-'use client';
+'use client'
 
-import * as React from 'react';
+import * as React from 'react'
 
-import { cn } from '../../lib/utils';
+import { cn } from '../../lib/utils'
 
 interface StatCardProps {
-  title: string;
-  value: string | number;
-  description?: string;
-  icon?: React.ReactNode;
+  title: string
+  value: string | number
+  description?: string
+  icon?: React.ReactNode
   trend?: {
-    value: number;
-    isPositive: boolean;
-  };
-  className?: string;
+    value: number
+    isPositive: boolean
+  }
+  className?: string
 }
 
 export function StatCard({ title, value, description, icon, trend, className }: StatCardProps) {
@@ -36,5 +36,5 @@ export function StatCard({ title, value, description, icon, trend, className }: 
         </p>
       )}
     </div>
-  );
+  )
 }

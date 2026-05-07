@@ -1,44 +1,44 @@
-'use client';
+'use client'
 
-import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useRouter } from 'next/navigation'
+import { useState } from 'react'
 
-import { Button } from '../../../../components/ui/button';
-import { cancelAppointment } from '../../actions/appointment';
+import { Button } from '../../../../components/ui/button'
+import { cancelAppointment } from '../../actions/appointment'
 
 interface CancelButtonProps {
-  appointmentId: number | string;
-  disabled?: boolean;
+  appointmentId: number | string
+  disabled?: boolean
 }
 
 export function CancelButton({ appointmentId, disabled }: CancelButtonProps) {
-  const router = useRouter();
-  const [isLoading, setIsLoading] = useState(false);
-  const [showConfirm, setShowConfirm] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const router = useRouter()
+  const [isLoading, setIsLoading] = useState(false)
+  const [showConfirm, setShowConfirm] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
   const handleCancel = async () => {
-    setIsLoading(true);
-    setError(null);
+    setIsLoading(true)
+    setError(null)
 
     try {
-      const result = await cancelAppointment(appointmentId);
+      const result = await cancelAppointment(appointmentId)
 
       if (result.success) {
-        router.refresh();
+        router.refresh()
       } else {
-        setError(result.message);
+        setError(result.message)
       }
     } catch {
-      setError('An error occurred while cancelling');
+      setError('An error occurred while cancelling')
     } finally {
-      setIsLoading(false);
-      setShowConfirm(false);
+      setIsLoading(false)
+      setShowConfirm(false)
     }
-  };
+  }
 
   if (disabled) {
-    return null;
+    return null
   }
 
   if (showConfirm) {
@@ -105,7 +105,7 @@ export function CancelButton({ appointmentId, disabled }: CancelButtonProps) {
           </Button>
         </div>
       </div>
-    );
+    )
   }
 
   return (
@@ -125,6 +125,5 @@ export function CancelButton({ appointmentId, disabled }: CancelButtonProps) {
       </svg>
       Cancel Appointment
     </Button>
-  );
+  )
 }
-

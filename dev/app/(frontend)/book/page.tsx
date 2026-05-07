@@ -1,16 +1,16 @@
-import configPromise from '@payload-config';
-import { cookies } from 'next/headers';
-import { getPayload } from 'payload';
-import React from 'react';
+import configPromise from '@payload-config'
+import { cookies } from 'next/headers'
+import { getPayload } from 'payload'
+import React from 'react'
 
-import BookNow from '../../../components/Book';
+import BookNow from '../../../components/Book'
 
 const Page = async () => {
-  const cookieStore = await cookies();
-  const session = cookieStore.get('payload-token');
-  const isAuthenticated = !!session?.value;
+  const cookieStore = await cookies()
+  const session = cookieStore.get('payload-token')
+  const isAuthenticated = !!session?.value
 
-  const payload = await getPayload({ config: configPromise });
+  const payload = await getPayload({ config: configPromise })
   const teamMembers = (
     await payload.find({
       collection: 'teamMembers',
@@ -21,14 +21,14 @@ const Page = async () => {
         },
       },
     })
-  ).docs;
+  ).docs
 
   const services = (
     await payload.find({
       collection: 'services',
       overrideAccess: false,
     })
-  ).docs;
+  ).docs
 
   return (
     <div className="relative min-h-[calc(100vh-4rem)] py-12 px-6 overflow-hidden">
@@ -60,7 +60,7 @@ const Page = async () => {
         <BookNow isAuthenticated={isAuthenticated} services={services} teamMembers={teamMembers} />
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default Page;
+export default Page

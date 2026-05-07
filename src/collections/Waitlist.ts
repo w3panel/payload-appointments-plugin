@@ -1,8 +1,8 @@
-import type { CollectionConfig } from 'payload';
+import type { CollectionConfig } from 'payload'
 
-import { anyone } from '../access/anyone';
-import type { AppointmentsBuildConfig } from '../types/config';
-import { DEFAULT_BUILD_CONFIG } from '../types/config';
+import { anyone } from '../access/anyone'
+import type { AppointmentsBuildConfig } from '../types/config'
+import { DEFAULT_BUILD_CONFIG } from '../types/config'
 
 export const buildWaitlist = (config: AppointmentsBuildConfig): CollectionConfig => ({
   slug: config.waitlistSlug,
@@ -144,8 +144,8 @@ export const buildWaitlist = (config: AppointmentsBuildConfig): CollectionConfig
     singular: 'Waitlist Entry',
   },
   timestamps: true,
-});
+})
 
-const Waitlist = buildWaitlist(DEFAULT_BUILD_CONFIG);
+const Waitlist = buildWaitlist(DEFAULT_BUILD_CONFIG)
 
-export default Waitlist;
+export default Waitlist

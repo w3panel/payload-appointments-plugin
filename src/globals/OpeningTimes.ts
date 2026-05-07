@@ -1,7 +1,7 @@
-import type { GlobalConfig } from 'payload';
+import type { GlobalConfig } from 'payload'
 
-const timesOfDay = ['opening', 'closing'];
-const daysOfWeek = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+const timesOfDay = ['opening', 'closing']
+const daysOfWeek = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday']
 
 const commonTimezones = [
   { label: 'UTC', value: 'UTC' },
@@ -22,7 +22,7 @@ const commonTimezones = [
   { label: 'Los Angeles (PST/PDT)', value: 'America/Los_Angeles' },
   { label: 'Toronto (EST/EDT)', value: 'America/Toronto' },
   { label: 'São Paulo (BRT)', value: 'America/Sao_Paulo' },
-];
+]
 
 const OpeningTimes: GlobalConfig = {
   slug: 'openingTimes',
@@ -72,6 +72,6 @@ const OpeningTimes: GlobalConfig = {
     })),
   ],
   label: 'Opening Times',
-};
+}
 
-export default OpeningTimes;
+export default OpeningTimes

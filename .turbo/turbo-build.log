@@ -1,15 +1,6 @@
 
-[0m[2m[35m$[0m [2m[1mpnpm copyfiles && pnpm build:types && pnpm build:swc[0m
-
-> payload-appointments-plugin@3.0.0 copyfiles /Users/w3/projects/doctors-app/packages/payload-appointments-plugin
-> copyfiles -u 1 "src/**/*.{html,css,scss,ttf,woff,woff2,eot,svg,jpg,png,json}" dist/
-
-
-> payload-appointments-plugin@3.0.0 build:types /Users/w3/projects/doctors-app/packages/payload-appointments-plugin
-> tsc --outDir dist --rootDir ./src
-
-
-> payload-appointments-plugin@3.0.0 build:swc /Users/w3/projects/doctors-app/packages/payload-appointments-plugin
-> swc ./src -d ./dist --config-file .swcrc --strip-leading-paths
-
-Successfully compiled: 70 files with swc (51.41ms)
+[0m[2m[35m$[0m [2m[1mbun run copyfiles && bun run build:types && bun run build:swc[0m
+[0m[2m[35m$[0m [2m[1mcopyfiles -u 1 "src/**/*.{html,css,scss,ttf,woff,woff2,eot,svg,jpg,png,json}" dist/[0m
+[0m[2m[35m$[0m [2m[1mtsc --outDir dist --rootDir ./src[0m
+[0m[2m[35m$[0m [2m[1mswc ./src -d ./dist --config-file .swcrc --strip-leading-paths[0m
+Successfully compiled: 70 files with swc (47.52ms)

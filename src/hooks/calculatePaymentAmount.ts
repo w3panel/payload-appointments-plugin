@@ -1,4 +1,4 @@
-import type { CollectionBeforeChangeHook } from 'payload';
+import type { CollectionBeforeChangeHook } from 'payload'
 
 export const calculatePaymentAmount: CollectionBeforeChangeHook = async ({
   data,
@@ -6,16 +6,16 @@ export const calculatePaymentAmount: CollectionBeforeChangeHook = async ({
   req,
 }) => {
   if (operation !== 'create' || data.appointmentType !== 'appointment') {
-    return data;
+    return data
   }
 
   if (!data.services || !Array.isArray(data.services) || data.services.length === 0) {
-    return data;
+    return data
   }
 
   const serviceIds = data.services.map((s: string | { id: string }) =>
     typeof s === 'string' ? s : s.id,
-  );
+  )
 
   const services = await req.payload.find({
     collection: 'services',
@@ -26,40 +26,40 @@ export const calculatePaymentAmount: CollectionBeforeChangeHook = async ({
         in: serviceIds,
       },
     },
-  });
+  })
 
-  let totalPrice = 0;
-  let requiresPayment = false;
+  let totalPrice = 0
+  let requiresPayment = false
 
   for (const service of services.docs) {
     if (service.paidService && service.price) {
-      totalPrice += service.price;
+      totalPrice += service.price
 
       if (service.paymentRequired) {
-        requiresPayment = true;
+        requiresPayment = true
       }
     }
   }
 
   if (totalPrice > 0) {
-    let amountDue = totalPrice;
+    let amountDue = totalPrice
 
     if (requiresPayment) {
-      const firstPaidService = services.docs.find((s) => s.paidService && s.paymentRequired);
+      const firstPaidService = services.docs.find((s) => s.paidService && s.paymentRequired)
 
       if (firstPaidService) {
-        const depositType = firstPaidService.depositType || 'full';
-        const depositAmount = firstPaidService.depositAmount || 0;
+        const depositType = firstPaidService.depositType || 'full'
+        const depositAmount = firstPaidService.depositAmount || 0
 
         switch (depositType) {
           case 'fixed':
-            amountDue = Math.min(depositAmount, totalPrice);
-            break;
+            amountDue = Math.min(depositAmount, totalPrice)
+            break
           case 'percentage':
-            amountDue = (totalPrice * depositAmount) / 100;
-            break;
+            amountDue = (totalPrice * depositAmount) / 100
+            break
           default:
-            amountDue = totalPrice;
+            amountDue = totalPrice
         }
       }
     }
@@ -70,8 +70,8 @@ export const calculatePaymentAmount: CollectionBeforeChangeHook = async ({
       amountPaid: 0,
       externalPaymentId: null,
       paidAt: null,
-    };
+    }
   }
 
-  return data;
-};
+  return data
+}

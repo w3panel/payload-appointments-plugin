@@ -1,33 +1,33 @@
-'use client';
+'use client'
 
-import moment from 'moment';
-import React, { useEffect, useMemo, useState } from 'react';
-import 'react-calendar/dist/Calendar.css';
-import Calendar from 'react-calendar';
-import MoonLoader from 'react-spinners/MoonLoader';
+import moment from 'moment'
+import React, { useEffect, useMemo, useState } from 'react'
+import 'react-calendar/dist/Calendar.css'
+import Calendar from 'react-calendar'
+import MoonLoader from 'react-spinners/MoonLoader'
 
-import type { Service, TeamMember } from '../../payload-types';
+import type { Service, TeamMember } from '../../payload-types'
 
-import { fetchPublic } from '../../lib/api';
-import { filterByDateAndPeriod } from '../../lib/filterByDateAndPeriod';
-import TimeSelectButton from './TimeSelectButton';
-import WaitlistJoin from './WaitlistJoin';
+import { fetchPublic } from '../../lib/api'
+import { filterByDateAndPeriod } from '../../lib/filterByDateAndPeriod'
+import TimeSelectButton from './TimeSelectButton'
+import WaitlistJoin from './WaitlistJoin'
 
 type BookingWindow = {
-  minLeadTime: number;
-  maxAdvanceBooking: number;
-  earliestBookableTime: string | null;
-  latestBookableDate: string | null;
-};
+  minLeadTime: number
+  maxAdvanceBooking: number
+  earliestBookableTime: string | null
+  latestBookableDate: string | null
+}
 
 const SelectDateTime: React.FC<{
-  chosenServices: Service[];
-  chosenStaff: null | TeamMember;
-  isAuthenticated?: boolean;
-  selectedDate: string;
-  selectedTime: string | null;
-  setSelectedDate: (date: string) => void;
-  setSelectedTime: (time: string | null) => void;
+  chosenServices: Service[]
+  chosenStaff: null | TeamMember
+  isAuthenticated?: boolean
+  selectedDate: string
+  selectedTime: string | null
+  setSelectedDate: (date: string) => void
+  setSelectedTime: (time: string | null) => void
 }> = ({
   chosenServices,
   chosenStaff,
@@ -37,50 +37,50 @@ const SelectDateTime: React.FC<{
   setSelectedDate,
   setSelectedTime,
 }) => {
-  const [slots, setSlots] = useState<null | string[]>(null);
-  const [loading, setLoading] = useState<boolean>(false);
-  const [bookingWindow, setBookingWindow] = useState<BookingWindow | null>(null);
+  const [slots, setSlots] = useState<null | string[]>(null)
+  const [loading, setLoading] = useState<boolean>(false)
+  const [bookingWindow, setBookingWindow] = useState<BookingWindow | null>(null)
 
-  const calendarDate = moment(selectedDate).toDate();
+  const calendarDate = moment(selectedDate).toDate()
 
   useEffect(() => {
-    const services = chosenServices.map((service) => service.id).join(',');
-    const day = moment(selectedDate).toISOString();
+    const services = chosenServices.map((service) => service.id).join(',')
+    const day = moment(selectedDate).toISOString()
     const getAvailabilities = async () => {
-      setLoading(true);
+      setLoading(true)
       const data = await fetchPublic(
         `/api/get-available-appointment-slots?services=${services}&host=${chosenStaff?.id}&day=${day}`,
         {
           method: 'get',
         },
-      );
+      )
 
-      const result = await data.json();
-      setSlots(result.filteredSlots);
+      const result = await data.json()
+      setSlots(result.filteredSlots)
       if (result.bookingWindow) {
-        setBookingWindow(result.bookingWindow);
+        setBookingWindow(result.bookingWindow)
       }
-      setLoading(false);
-    };
+      setLoading(false)
+    }
 
-    void getAvailabilities();
-  }, [selectedDate, chosenServices, chosenStaff?.id]);
+    void getAvailabilities()
+  }, [selectedDate, chosenServices, chosenStaff?.id])
 
   const maxCalendarDate = useMemo(() => {
     if (bookingWindow?.latestBookableDate) {
-      return moment(bookingWindow.latestBookableDate).toDate();
+      return moment(bookingWindow.latestBookableDate).toDate()
     }
-    return new Date(new Date().setMonth(new Date().getMonth() + 3));
-  }, [bookingWindow]);
+    return new Date(new Date().setMonth(new Date().getMonth() + 3))
+  }, [bookingWindow])
 
-  const morningSlots = slots ? filterByDateAndPeriod('morning', calendarDate, slots) : [];
-  const afternoonSlots = slots ? filterByDateAndPeriod('afternoon', calendarDate, slots) : [];
-  const eveningSlots = slots ? filterByDateAndPeriod('evening', calendarDate, slots) : [];
+  const morningSlots = slots ? filterByDateAndPeriod('morning', calendarDate, slots) : []
+  const afternoonSlots = slots ? filterByDateAndPeriod('afternoon', calendarDate, slots) : []
+  const eveningSlots = slots ? filterByDateAndPeriod('evening', calendarDate, slots) : []
 
   const handleDateChange = (value: Date) => {
-    setSelectedDate(moment(value).format('YYYY-MM-DD'));
-    setSelectedTime(null);
-  };
+    setSelectedDate(moment(value).format('YYYY-MM-DD'))
+    setSelectedTime(null)
+  }
 
   return (
     <div>
@@ -241,7 +241,7 @@ const SelectDateTime: React.FC<{
         </div>
       )}
     </div>
-  );
-};
+  )
+}
 
-export default SelectDateTime;
+export default SelectDateTime

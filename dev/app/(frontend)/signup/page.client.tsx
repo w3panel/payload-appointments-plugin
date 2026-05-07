@@ -1,9 +1,9 @@
-'use client';
+'use client'
 
-import Link from 'next/link';
-import { useState } from 'react';
+import Link from 'next/link'
+import { useState } from 'react'
 
-import { Button } from '../../../components/ui/button';
+import { Button } from '../../../components/ui/button'
 import {
   Card,
   CardContent,
@@ -11,37 +11,37 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from '../../../components/ui/card';
-import { Input } from '../../../components/ui/input';
-import { Label } from '../../../components/ui/label';
-import { signup } from '../actions/auth';
+} from '../../../components/ui/card'
+import { Input } from '../../../components/ui/input'
+import { Label } from '../../../components/ui/label'
+import { signup } from '../actions/auth'
 
 export default function SignupPageClient() {
-  const [error, setError] = useState<null | string>(null);
-  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<null | string>(null)
+  const [loading, setLoading] = useState(false)
 
   async function handleSubmit(formData: FormData) {
-    setLoading(true);
-    setError(null);
+    setLoading(true)
+    setError(null)
 
-    const password = formData.get('password') as string;
-    const confirmPassword = formData.get('confirmPassword') as string;
+    const password = formData.get('password') as string
+    const confirmPassword = formData.get('confirmPassword') as string
 
     if (password !== confirmPassword) {
-      setError('Passwords do not match');
-      setLoading(false);
-      return;
+      setError('Passwords do not match')
+      setLoading(false)
+      return
     }
 
     try {
-      const result = await signup(formData);
+      const result = await signup(formData)
       if (result?.error) {
-        setError(result.error);
+        setError(result.error)
       }
     } catch {
-      setError('An error occurred while signing up');
+      setError('An error occurred while signing up')
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
   }
 
@@ -215,5 +215,5 @@ export default function SignupPageClient() {
         </form>
       </Card>
     </div>
-  );
+  )
 }

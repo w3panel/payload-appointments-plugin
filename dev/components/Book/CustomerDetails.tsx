@@ -1,41 +1,41 @@
-'use client';
+'use client'
 
-import Link from 'next/link';
-import React from 'react';
+import Link from 'next/link'
+import React from 'react'
 
-import type { Service, TeamMember } from '../../payload-types';
+import type { Service, TeamMember } from '../../payload-types'
 
-import { cn } from '../../lib/utils';
-import { Button } from '../ui/button';
+import { cn } from '../../lib/utils'
+import { Button } from '../ui/button'
 
 const CustomerDetails: React.FC<{
-  chosenDateTime: Date | null;
-  chosenServices: Service[];
-  chosenStaff: null | TeamMember;
+  chosenDateTime: Date | null
+  chosenServices: Service[]
+  chosenStaff: null | TeamMember
   customerDetails: {
-    email: string;
-    firstName: string;
-    lastName: string;
-    notes: string;
-    phone: string;
-  };
-  isAuthenticated: boolean;
-  isGuest: boolean;
+    email: string
+    firstName: string
+    lastName: string
+    notes: string
+    phone: string
+  }
+  isAuthenticated: boolean
+  isGuest: boolean
   setCustomerDetails: React.Dispatch<
     React.SetStateAction<{
-      email: string;
-      firstName: string;
-      lastName: string;
-      notes: string;
-      phone: string;
+      email: string
+      firstName: string
+      lastName: string
+      notes: string
+      phone: string
     }>
-  >;
-  setIsGuest: (value: boolean) => void;
+  >
+  setIsGuest: (value: boolean) => void
 }> = ({ customerDetails, isAuthenticated, isGuest, setCustomerDetails, setIsGuest }) => {
   const inputClasses =
-    'block w-full h-12 rounded-xl border-2 border-gray-100 px-4 text-gray-900 placeholder:text-gray-400 bg-white focus:border-gray-400 focus:ring-4 focus:ring-gray-500/10 focus:outline-none text-sm transition-all duration-200';
+    'block w-full h-12 rounded-xl border-2 border-gray-100 px-4 text-gray-900 placeholder:text-gray-400 bg-white focus:border-gray-400 focus:ring-4 focus:ring-gray-500/10 focus:outline-none text-sm transition-all duration-200'
   const textareaClasses =
-    'block w-full rounded-xl border-2 border-gray-100 px-4 py-3 text-gray-900 placeholder:text-gray-400 bg-white focus:border-gray-400 focus:ring-4 focus:ring-gray-500/10 focus:outline-none text-sm transition-all duration-200 resize-none';
+    'block w-full rounded-xl border-2 border-gray-100 px-4 py-3 text-gray-900 placeholder:text-gray-400 bg-white focus:border-gray-400 focus:ring-4 focus:ring-gray-500/10 focus:outline-none text-sm transition-all duration-200 resize-none'
 
   if (isAuthenticated) {
     return (
@@ -74,7 +74,7 @@ const CustomerDetails: React.FC<{
                 setCustomerDetails({
                   ...customerDetails,
                   notes: e.currentTarget.value,
-                });
+                })
               }}
               placeholder="Any special requests or additional information..."
               rows={4}
@@ -83,7 +83,7 @@ const CustomerDetails: React.FC<{
           </label>
         </div>
       </div>
-    );
+    )
   }
 
   return (
@@ -220,7 +220,7 @@ const CustomerDetails: React.FC<{
                   setCustomerDetails({
                     ...customerDetails,
                     firstName: e.currentTarget.value,
-                  });
+                  })
                 }}
                 placeholder="John"
                 required
@@ -238,7 +238,7 @@ const CustomerDetails: React.FC<{
                   setCustomerDetails({
                     ...customerDetails,
                     lastName: e.currentTarget.value,
-                  });
+                  })
                 }}
                 placeholder="Doe"
                 required
@@ -258,7 +258,7 @@ const CustomerDetails: React.FC<{
                   setCustomerDetails({
                     ...customerDetails,
                     email: e.currentTarget.value,
-                  });
+                  })
                 }}
                 placeholder="john@example.com"
                 required
@@ -276,7 +276,7 @@ const CustomerDetails: React.FC<{
                   setCustomerDetails({
                     ...customerDetails,
                     phone: e.currentTarget.value,
-                  });
+                  })
                 }}
                 placeholder="+1 234 567 8900"
                 required
@@ -295,7 +295,7 @@ const CustomerDetails: React.FC<{
                 setCustomerDetails({
                   ...customerDetails,
                   notes: e.currentTarget.value,
-                });
+                })
               }}
               placeholder="Any special requests or additional information..."
               rows={4}
@@ -305,7 +305,7 @@ const CustomerDetails: React.FC<{
         </div>
       )}
     </div>
-  );
-};
+  )
+}
 
-export default CustomerDetails;
+export default CustomerDetails

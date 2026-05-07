@@ -1,30 +1,89 @@
 
 [0m[2m[35m$[0m [2m[1mcross-env NODE_OPTIONS=--no-deprecation next build[0m
-   [1m[38;2;173;127;168m▲ Next.js 15.5.16[39m[22m
+[1m[38;2;173;127;168m▲ Next.js 16.2.5[39m[22m (Turbopack)
+- Experiments (use with caution):
+  [1m⨯[22m turbopackServerFastRefresh
 
- [37m[1m [22m[39m Creating an optimized production build ...
- [32m[1m✓[22m[39m Compiled successfully in 19.3s
-[?25l [37m[1m [22m[39m Linting and checking validity of types  [36m.[39m[2K[1G [37m[1m [22m[39m Linting and checking validity of types  [36m..[39m[2K[1G [37m[1m [22m[39m Linting and checking validity of types  [36m...[39m ⚠ TypeScript project references are not fully supported. Attempting to build in incremental mode.
-[2K[1G [37m[1m [22m[39m Linting and checking validity of types  [36m.[39m ⨯ ESLint: Cannot find package '@next/eslint-plugin-next' imported from /Users/w3/projects/doctors-app/packages/payload-appointments-plugin/eslint.config.js
-[2K[1G [37m[1m [22m[39m Linting and checking validity of types  [36m..[39m[2K[1G [37m[1m [22m[39m Linting and checking validity of types  [36m...[39m[2K[1G [37m[1m [22m[39m Linting and checking validity of types  [36m.[39m[2K[1G [37m[1m [22m[39m Linting and checking validity of types  [36m..[39m[2K[1G [37m[1m [22m[39m Linting and checking validity of types  [36m...[39m[2K[1G [37m[1m [22m[39m Linting and checking validity of types  [36m.[39m[2K[1G [37m[1m [22m[39m Linting and checking validity of types  [36m..[39m[2K[1G [37m[1m [22m[39m Linting and checking validity of types  [36m...[39m[2K[1G [37m[1m [22m[39m Linting and checking validity of types  [36m.[39m[2K[1G [37m[1m [22m[39m Linting and checking validity of types  [36m..[39m[2K[1G [37m[1m [22m[39m Linting and checking validity of types  [36m...[39m[2K[1G [37m[1m [22m[39m Linting and checking validity of types  [36m.[39m[2K[1G [37m[1m [22m[39m Linting and checking validity of types  [36m..[39m[2K[1G [37m[1m [22m[39m Linting and checking validity of types  [36m...[39m[2K[1G [37m[1m [22m[39m Linting and checking validity of types  [36m.[39m[2K[1G [37m[1m [22m[39m Linting and checking validity of types  [36m..[39m[2K[1G [37m[1m [22m[39m Linting and checking validity of types  [36m...[39m[2K[1G [37m[1m [22m[39m Linting and checking validity of types  [36m.[39m[2K[1G [37m[1m [22m[39m Linting and checking validity of types  [36m..[39m[2K[1G [37m[1m [22m[39m Linting and checking validity of types  [36m...[39mFailed to compile.
+[37m[1m [22m[39m Creating an optimized production build ...
+[32m[1m✓[22m[39m Compiled successfully in 15.0s
+[?25l[37m[1m [22m[39m Running TypeScript  [36m.[39m[2K[1G[37m[1m [22m[39m Running TypeScript  [36m..[39m[2K[1G[37m[1m [22m[39m Running TypeScript  [36m...[39m[2K[1G[37m[1m [22m[39m Running TypeScript  [36m.[39m[2K[1G[37m[1m [22m[39m Running TypeScript  [36m..[39m[2K[1G[37m[1m [22m[39m Running TypeScript  [36m...[39m[33m[1m⚠[22m[39m TypeScript project references are not fully supported. Attempting to build in incremental mode.
+[2K[1G[37m[1m [22m[39m Running TypeScript  [36m.[39m[2K[1G[37m[1m [22m[39m Running TypeScript  [36m..[39m[2K[1G[37m[1m [22m[39m Running TypeScript  [36m...[39m[2K[1G[37m[1m [22m[39m Running TypeScript  [36m.[39m[2K[1G[37m[1m [22m[39m Running TypeScript  [36m..[39m[2K[1G[37m[1m [22m[39m Running TypeScript  [36m...[39m[2K[1G[37m[1m [22m[39m Running TypeScript  [36m.[39m[2K[1G[37m[1m [22m[39m Running TypeScript  [36m..[39m[2K[1G[37m[1m [22m[39m Running TypeScript  [36m...[39m[2K[1G[37m[1m [22m[39m Running TypeScript  [36m.[39m[2K[1G[37m[1m [22m[39m Running TypeScript  [36m..[39m[2K[1G[37m[1m [22m[39m Running TypeScript  [36m...[39m[2K[1G[37m[1m [22m[39m Running TypeScript  [36m.[39m[2K[1G[37m[1m [22m[39m Running TypeScript  [36m..[39m[2K[1G[37m[1m [22m[39m Running TypeScript  [36m...[39m[2K[1G[37m[1m [22m[39m Running TypeScript  [36m.[39m[2K[1G[37m[1m [22m[39m Running TypeScript  [36m..[39m[2K[1G[37m[1m [22m[39m Running TypeScript  [36m...[39m[2K[1G[37m[1m [22m[39m Running TypeScript  [36m.[39m[2K[1G[37m[1m [22m[39m Running TypeScript  [36m..[39m[2K[1G[37m[1m [22m[39m Running TypeScript  [36m...[39m[2K[1G[37m[1m [22m[39m Running TypeScript  [36m.[39m[2K[1G[37m[1m [22m[39m Running TypeScript  [36m..[39m[2K[1G[37m[1m [22m[39m Running TypeScript  [36m...[39m[2K[1G[37m[1m [22m[39m Running TypeScript  [36m.[39m[2K[1G[37m[1m [22m[39m Running TypeScript  [36m..[39m[2K[1G[37m[1m [22m[39m Running TypeScript  [36m...[39m[2K[1G[37m[1m [22m[39m Running TypeScript  [36m.[39m[2K[1G[37m[1m [22m[39m Running TypeScript  [36m..[39m[2K[1G[?25h[?25l[37m[1m [22m[39m Finished TypeScript in 6.9s  [36m.[39m[2K[1G[?25h[37m[1m [22m[39m Finished TypeScript in 6.9s    [32m[1m✓[22m[39m Finished TypeScript in 6.9s 
+[?25l[37m[1m [22m[39m Collecting page data using 9 workers  [36m.[39m[2K[1G[37m[1m [22m[39m Collecting page data using 9 workers  [36m..[39m[2K[1G[37m[1m [22m[39m Collecting page data using 9 workers  [36m...[39m[2K[1G[37m[1m [22m[39m Collecting page data using 9 workers  [36m.[39m[2K[1G[37m[1m [22m[39m Collecting page data using 9 workers  [36m..[39m[2K[1G[37m[1m [22m[39m Collecting page data using 9 workers  [36m...[39m[2K[1G[37m[1m [22m[39m Collecting page data using 9 workers  [36m.[39m[2K[1G[37m[1m [22m[39m Collecting page data using 9 workers  [36m..[39m[2K[1G[?25h[37m[1m [22m[39m Collecting page data using 9 workers in 1601ms    [32m[1m✓[22m[39m Collecting page data using 9 workers in 1601ms 
+[?25l[37m[1m [22m[39m Generating static pages using 9 workers (0/10)  [36m[    ][39m[2K[1G[?25hError: Dynamic server usage: Route /book couldn't be rendered statically because it used `headers`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error
+    at y (.next/server/chunks/ssr/0kjx_next_dist_0s20eap._.js:1:12754)
+    at m (.next/server/chunks/ssr/0kjx_next_0sjge-7._.js:1:15909)
+    at g (.next/server/chunks/ssr/[root-of-the-server]__0r_sur1._.js:2:2579)
+    at j (.next/server/chunks/ssr/[root-of-the-server]__0r_sur1._.js:2:4200)
+    at stringify (<anonymous>) {
+  description: [32m"Route /book couldn't be rendered statically because it used `headers`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error"[39m,
+  digest: [32m'DYNAMIC_SERVER_USAGE'[39m
+}
+Error: Dynamic server usage: Route /fake-booking couldn't be rendered statically because it used `headers`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error
+    at y (.next/server/chunks/ssr/0kjx_next_dist_0s20eap._.js:1:12754)
+    at m (.next/server/chunks/ssr/0kjx_next_0sjge-7._.js:1:15909)
+    at g (.next/server/chunks/ssr/[root-of-the-server]__0r_sur1._.js:2:2579)
+    at j (.next/server/chunks/ssr/[root-of-the-server]__0r_sur1._.js:2:4200)
+    at stringify (<anonymous>) {
+  description: [32m"Route /fake-booking couldn't be rendered statically because it used `headers`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error"[39m,
+  digest: [32m'DYNAMIC_SERVER_USAGE'[39m
+}
+Error: Dynamic server usage: Route /login couldn't be rendered statically because it used `headers`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error
+    at y (.next/server/chunks/ssr/0kjx_next_dist_0s20eap._.js:1:12754)
+    at m (.next/server/chunks/ssr/0kjx_next_0sjge-7._.js:1:15909)
+    at g (.next/server/chunks/ssr/[root-of-the-server]__0r_sur1._.js:2:2579)
+    at j (.next/server/chunks/ssr/[root-of-the-server]__0r_sur1._.js:2:4200)
+    at stringify (<anonymous>) {
+  description: [32m"Route /login couldn't be rendered statically because it used `headers`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error"[39m,
+  digest: [32m'DYNAMIC_SERVER_USAGE'[39m
+}
+Error: Dynamic server usage: Route / couldn't be rendered statically because it used `headers`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error
+    at y (.next/server/chunks/ssr/0kjx_next_dist_0s20eap._.js:1:12754)
+    at m (.next/server/chunks/ssr/0kjx_next_0sjge-7._.js:1:15909)
+    at g (.next/server/chunks/ssr/[root-of-the-server]__0r_sur1._.js:2:2579)
+    at j (.next/server/chunks/ssr/[root-of-the-server]__0r_sur1._.js:2:4200)
+    at stringify (<anonymous>) {
+  description: [32m"Route / couldn't be rendered statically because it used `headers`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error"[39m,
+  digest: [32m'DYNAMIC_SERVER_USAGE'[39m
+}
+Error: Dynamic server usage: Route /signup couldn't be rendered statically because it used `headers`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error
+    at y (.next/server/chunks/ssr/0kjx_next_dist_0s20eap._.js:1:12754)
+    at m (.next/server/chunks/ssr/0kjx_next_0sjge-7._.js:1:15909)
+    at g (.next/server/chunks/ssr/[root-of-the-server]__0r_sur1._.js:2:2579)
+    at j (.next/server/chunks/ssr/[root-of-the-server]__0r_sur1._.js:2:4200)
+    at stringify (<anonymous>) {
+  description: [32m"Route /signup couldn't be rendered statically because it used `headers`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error"[39m,
+  digest: [32m'DYNAMIC_SERVER_USAGE'[39m
+}
+Error: Dynamic server usage: Route /test couldn't be rendered statically because it used `headers`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error
+    at y (.next/server/chunks/ssr/0kjx_next_dist_0s20eap._.js:1:12754)
+    at m (.next/server/chunks/ssr/0kjx_next_0sjge-7._.js:1:15909)
+    at g (.next/server/chunks/ssr/[root-of-the-server]__0r_sur1._.js:2:2579)
+    at j (.next/server/chunks/ssr/[root-of-the-server]__0r_sur1._.js:2:4200)
+    at stringify (<anonymous>) {
+  description: [32m"Route /test couldn't be rendered statically because it used `headers`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error"[39m,
+  digest: [32m'DYNAMIC_SERVER_USAGE'[39m
+}
+[?25h[32m[1m✓[22m[39m Generating static pages using 9 workers (10/10) in 481ms
+[?25l[37m[1m [22m[39m Finalizing page optimization  [36m.[39m[2K[1G[?25h[37m[1m [22m[39m Finalizing page optimization in 26ms    [32m[1m✓[22m[39m Finalizing page optimization in 26ms 
 
-./components/ui/button.tsx:50:11
-Type error: Type '{ disabled?: boolean | undefined; form?: string | undefined; formAction?: string | ((formData: FormData) => void | Promise<void>) | undefined; formEncType?: string | undefined; ... 284 more ...; ref: RefObject<...> | undefined; }' is not assignable to type 'SlotProps'.
-  Types of property 'onChange' are incompatible.
-    Type 'FormEventHandler<HTMLButtonElement> | undefined' is not assignable to type 'ChangeEventHandler<HTMLElement, Element> | undefined'.
-      Type 'FormEventHandler<HTMLButtonElement>' is not assignable to type 'ChangeEventHandler<HTMLElement, Element>'.
-        Types of parameters 'event' and 'event' are incompatible.
-          Type 'ChangeEvent<HTMLElement, Element>' is not assignable to type 'FormEvent<HTMLButtonElement>'.
-            Types of property 'currentTarget' are incompatible.
-              Type 'EventTarget & HTMLElement' is not assignable to type 'EventTarget & HTMLButtonElement'.
-                Type 'EventTarget & HTMLElement' is missing the following properties from type 'HTMLButtonElement': disabled, form, formAction, formEnctype, and 15 more.
+[4mRoute (app)[24m
+┌ ƒ /
+├ ○ /_not-found
+├ ƒ /admin/[[...segments]]
+├ ƒ /api/[...slug]
+├ ƒ /api/graphql
+├ ƒ /api/graphql-playground
+├ ƒ /book
+├ ƒ /booking/[bookingId]
+├ ƒ /cancel/[token]
+├ ƒ /fake-booking
+├ ƒ /login
+├ ƒ /signup
+├ ƒ /test
+└ ƒ /waitlist/[id]
 
-[0m [90m 48 |[39m }[33m:[39m { ref[33m?[39m[33m:[39m [33mReact[39m[33m.[39m[33mRefObject[39m[33m<[39m[33mHTMLButtonElement[39m [33m|[39m [36mnull[39m[33m>[39m } [33m&[39m [33mButtonProps[39m) [33m=>[39m {
- [90m 49 |[39m   [36mconst[39m [33mComp[39m [33m=[39m asChild [33m?[39m [33mSlot[39m [33m:[39m [32m'button'[39m[33m;[39m
-[31m[1m>[22m[39m[90m 50 |[39m   [36mreturn[39m [33m<[39m[33mComp[39m className[33m=[39m{cn(buttonVariants({ className[33m,[39m size[33m,[39m variant }))} ref[33m=[39m{ref} {[33m...[39mprops} [33m/[39m[33m>[39m[33m;[39m
- [90m    |[39m           [31m[1m^[22m[39m
- [90m 51 |[39m }[33m;[39m
- [90m 52 |[39m [33mButton[39m[33m.[39mdisplayName [33m=[39m [32m'Button'[39m[33m;[39m
- [90m 53 |[39m[0m
-[2K[1G[?25hNext.js build worker exited with code: 1 and signal: null
-[?25l [36m.[39m [?25h[0m[31merror[0m[2m:[0m script [1m"build"[0m exited with code 1[0m
+
+○  (Static)   prerendered as static content
+ƒ  (Dynamic)  server-rendered on demand
+
+[?25h

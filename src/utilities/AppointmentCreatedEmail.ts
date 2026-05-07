@@ -1,21 +1,21 @@
-import { getPublicServerUrl } from '../lib/utils';
-import type { Appointment } from '../types';
+import { getPublicServerUrl } from '../lib/utils'
+import type { Appointment } from '../types'
 
-import { formatAppointmentDate } from './formatDate';
+import { formatAppointmentDate } from './formatDate'
 
 export const appointmentCreatedEmail = (appointment: Appointment) => {
-  const customerEmail = appointment.customer?.email || appointment.guestCustomer?.email;
+  const customerEmail = appointment.customer?.email || appointment.guestCustomer?.email
 
   if (!customerEmail) {
-    throw new Error('Customer email is required for sending appointment confirmation');
+    throw new Error('Customer email is required for sending appointment confirmation')
   }
 
-  const formattedDate = formatAppointmentDate(appointment.start);
-  const serviceNames = appointment.services.map((service) => service.title).join(', ');
-  const baseUrl = getPublicServerUrl();
+  const formattedDate = formatAppointmentDate(appointment.start)
+  const serviceNames = appointment.services.map((service) => service.title).join(', ')
+  const baseUrl = getPublicServerUrl()
   const cancelUrl = appointment.cancellationToken
     ? `${baseUrl}/cancel/${appointment.cancellationToken}`
-    : '';
+    : ''
 
   return {
     cancelUrl,
@@ -23,5 +23,5 @@ export const appointmentCreatedEmail = (appointment: Appointment) => {
     subject: `Appointment Confirmation - ${formattedDate}`,
     text: `Your appointment for ${serviceNames} has been confirmed for ${formattedDate}.${cancelUrl ? ` To cancel, visit: ${cancelUrl}` : ''}`,
     to: customerEmail,
-  };
-};
+  }
+}

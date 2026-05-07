@@ -1,33 +1,33 @@
-import moment from 'moment';
-import Link from 'next/link';
-import { notFound } from 'next/navigation';
+import moment from 'moment'
+import Link from 'next/link'
+import { notFound } from 'next/navigation'
 
-import type { Service, TeamMember } from '../../../../payload-types';
+import type { Service, TeamMember } from '../../../../payload-types'
 
-import { Button } from '../../../../components/ui/button';
-import { formatPrice } from '../../../../lib/formatPrice';
-import { getAppointmentByToken } from '../../actions/appointment';
-import { CancelByTokenButton } from './page.client';
+import { Button } from '../../../../components/ui/button'
+import { formatPrice } from '../../../../lib/formatPrice'
+import { getAppointmentByToken } from '../../actions/appointment'
+import { CancelByTokenButton } from './page.client'
 
 export default async function CancelPage({ params }: { params: Promise<{ token: string }> }) {
-  const { token } = await params;
-  const appointment = await getAppointmentByToken(token);
+  const { token } = await params
+  const appointment = await getAppointmentByToken(token)
 
   if (!appointment || appointment.appointmentType !== 'appointment') {
-    notFound();
+    notFound()
   }
 
-  const host = appointment.host as TeamMember | null;
-  const services = (appointment.services || []) as Service[];
-  const totalPrice = services.reduce((acc, service) => acc + (service.price || 0), 0);
-  const totalDuration = services.reduce((acc, service) => acc + service.duration, 0);
+  const host = appointment.host as TeamMember | null
+  const services = (appointment.services || []) as Service[]
+  const totalPrice = services.reduce((acc, service) => acc + (service.price || 0), 0)
+  const totalDuration = services.reduce((acc, service) => acc + service.duration, 0)
 
-  const startDate = moment(appointment.start);
-  const endDate = moment(appointment.end);
-  const isCancelled = appointment.status === 'cancelled';
-  const isCompleted = appointment.status === 'completed';
-  const isPast = startDate.isBefore(moment());
-  const canCancel = !isCancelled && !isCompleted && !isPast;
+  const startDate = moment(appointment.start)
+  const endDate = moment(appointment.end)
+  const isCancelled = appointment.status === 'cancelled'
+  const isCompleted = appointment.status === 'completed'
+  const isPast = startDate.isBefore(moment())
+  const canCancel = !isCancelled && !isCompleted && !isPast
 
   return (
     <div className="relative min-h-[calc(100vh-4rem)] py-12 px-6 overflow-hidden">
@@ -153,10 +153,10 @@ export default async function CancelPage({ params }: { params: Promise<{ token: 
                 {services.map((service, index) => {
                   const previousServicesDuration = services
                     .slice(0, index)
-                    .reduce((total, s) => total + s.duration, 0);
+                    .reduce((total, s) => total + s.duration, 0)
                   const serviceStartTime = startDate
                     .clone()
-                    .add(previousServicesDuration, 'minutes');
+                    .add(previousServicesDuration, 'minutes')
 
                   return (
                     <div
@@ -180,7 +180,7 @@ export default async function CancelPage({ params }: { params: Promise<{ token: 
                         <p className="font-semibold text-gray-900">{formatPrice(service.price)}</p>
                       )}
                     </div>
-                  );
+                  )
                 })}
               </div>
             </div>
@@ -287,5 +287,5 @@ export default async function CancelPage({ params }: { params: Promise<{ token: 
         </div>
       </div>
     </div>
-  );
+  )
 }

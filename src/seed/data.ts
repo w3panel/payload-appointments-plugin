@@ -35,7 +35,7 @@ export const openingTimesSeed = {
     opening: null as string | null,
     closing: null as string | null,
   },
-};
+}
 
 export const servicesSeed = [
   {
@@ -85,7 +85,7 @@ export const servicesSeed = [
     price: 30,
     paymentRequired: false,
   },
-];
+]
 
 export const teamMembersSeed = [
   {
@@ -137,4 +137,4 @@ export const teamMembersSeed = [
     useCustomHours: false,
     maxAppointmentsPerDay: 0,
   },
-];
+]

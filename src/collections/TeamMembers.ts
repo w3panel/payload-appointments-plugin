@@ -1,8 +1,8 @@
-import type { CollectionConfig } from 'payload';
+import type { CollectionConfig } from 'payload'
 
-import { authenticated } from '../access/authenticated';
+import { authenticated } from '../access/authenticated'
 
-const daysOfWeek = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+const daysOfWeek = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday']
 
 const TeamMembers: CollectionConfig = {
   slug: 'teamMembers',
@@ -52,9 +52,9 @@ const TeamMembers: CollectionConfig = {
         beforeValidate: [
           ({ data, value }) => {
             if (!value && data?.firstName && data?.lastName) {
-              return `${data.firstName} ${data.lastName}`;
+              return `${data.firstName} ${data.lastName}`
             }
-            return value;
+            return value
           },
         ],
       },
@@ -159,10 +159,10 @@ const TeamMembers: CollectionConfig = {
         beforeValidate: [
           async ({ value, operation }) => {
             if (operation === 'create' || !value) {
-              const crypto = await import('crypto');
-              return crypto.randomBytes(32).toString('hex');
+              const crypto = await import('crypto')
+              return crypto.randomBytes(32).toString('hex')
             }
-            return value;
+            return value
           },
         ],
       },
@@ -172,6 +172,6 @@ const TeamMembers: CollectionConfig = {
     },
   ],
   timestamps: true,
-};
+}
 
-export default TeamMembers;
+export default TeamMembers

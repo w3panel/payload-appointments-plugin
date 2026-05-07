@@ -1,74 +1,74 @@
-'use client';
+'use client'
 
-import { useState } from 'react';
+import { useState } from 'react'
 
-import type { Service, TeamMember } from '../../../payload-types';
+import type { Service, TeamMember } from '../../../payload-types'
 
-import { Button } from '../../../components/ui/button';
-import { createAppointment } from '../actions/appointment';
+import { Button } from '../../../components/ui/button'
+import { createAppointment } from '../actions/appointment'
 
 interface Props {
-  hosts: TeamMember[];
-  services: Service[];
+  hosts: TeamMember[]
+  services: Service[]
 }
 
 function getRandomFutureDate(): Date {
-  const now = new Date();
-  const daysAhead = Math.floor(Math.random() * 14) + 1;
-  const hour = Math.floor(Math.random() * 8) + 9;
-  const minute = Math.random() > 0.5 ? 0 : 30;
+  const now = new Date()
+  const daysAhead = Math.floor(Math.random() * 14) + 1
+  const hour = Math.floor(Math.random() * 8) + 9
+  const minute = Math.random() > 0.5 ? 0 : 30
 
-  const date = new Date(now);
-  date.setDate(date.getDate() + daysAhead);
-  date.setHours(hour, minute, 0, 0);
+  const date = new Date(now)
+  date.setDate(date.getDate() + daysAhead)
+  date.setHours(hour, minute, 0, 0)
 
-  return date;
+  return date
 }
 
 function getRandomItems<T>(arr: T[], count: number): T[] {
-  const shuffled = [...arr].sort(() => 0.5 - Math.random());
-  return shuffled.slice(0, Math.min(count, arr.length));
+  const shuffled = [...arr].sort(() => 0.5 - Math.random())
+  return shuffled.slice(0, Math.min(count, arr.length))
 }
 
 export function FakeBookingClient({ hosts, services }: Props) {
-  const [loading, setLoading] = useState(false);
-  const [result, setResult] = useState<{ success: boolean; message: string } | null>(null);
+  const [loading, setLoading] = useState(false)
+  const [result, setResult] = useState<{ success: boolean; message: string } | null>(null)
   const [lastBooking, setLastBooking] = useState<{
-    host: string;
-    services: string[];
-    date: string;
-  } | null>(null);
+    host: string
+    services: string[]
+    date: string
+  } | null>(null)
 
   const handleFakeBooking = async () => {
     if (hosts.length === 0 || services.length === 0) {
-      setResult({ success: false, message: 'No hosts or services available' });
-      return;
+      setResult({ success: false, message: 'No hosts or services available' })
+      return
     }
 
-    setLoading(true);
-    setResult(null);
+    setLoading(true)
+    setResult(null)
 
-    const randomHost = hosts[Math.floor(Math.random() * hosts.length)];
-    const serviceCount = Math.floor(Math.random() * 3) + 1;
-    const randomServices = getRandomItems(services, serviceCount);
-    const randomDate = getRandomFutureDate();
+    const randomHost = hosts[Math.floor(Math.random() * hosts.length)]
+    const serviceCount = Math.floor(Math.random() * 3) + 1
+    const randomServices = getRandomItems(services, serviceCount)
+    const randomDate = getRandomFutureDate()
 
     setLastBooking({
       host: randomHost.firstName || 'Unknown',
       services: randomServices.map((s) => s.title),
       date: randomDate.toLocaleString(),
-    });
+    })
 
     const response = await createAppointment(
       randomHost,
       randomServices,
       randomDate,
       'Test booking from fake booking page',
-    );
+    )
 
-    setResult(response);
-    setLoading(false);
-  };
+    setResult(response)
+    setLoading(false)
+  }
 
   return (
     <div className="space-y-6">
@@ -197,5 +197,5 @@ export function FakeBookingClient({ hosts, services }: Props) {
         </a>
       </div>
     </div>
-  );
+  )
 }

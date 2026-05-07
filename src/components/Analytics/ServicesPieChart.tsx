@@ -1,7 +1,7 @@
-'use client';
+'use client'
 
-import * as React from 'react';
-import { Pie, PieChart, Cell } from 'recharts';
+import * as React from 'react'
+import { Pie, PieChart, Cell } from 'recharts'
 
 import {
   ChartConfig,
@@ -10,17 +10,17 @@ import {
   ChartTooltipContent,
   ChartLegend,
   ChartLegendContent,
-} from '../ui/chart';
+} from '../ui/chart'
 
 interface PopularService {
-  serviceId: string;
-  serviceName: string;
-  count: number;
-  revenue: number;
+  serviceId: string
+  serviceName: string
+  count: number
+  revenue: number
 }
 
 interface ServicesPieChartProps {
-  data: PopularService[];
+  data: PopularService[]
 }
 
 const COLORS = [
@@ -29,22 +29,22 @@ const COLORS = [
   'hsl(var(--chart-3))',
   'hsl(var(--chart-4))',
   'hsl(var(--chart-5))',
-];
+]
 
 export function ServicesPieChart({ data }: ServicesPieChartProps) {
   const chartConfig: ChartConfig = data.reduce((acc, service, index) => {
     acc[service.serviceName] = {
       label: service.serviceName,
       color: COLORS[index % COLORS.length],
-    };
-    return acc;
-  }, {} as ChartConfig);
+    }
+    return acc
+  }, {} as ChartConfig)
 
   const chartData = data.map((service, index) => ({
     name: service.serviceName,
     value: service.count,
     fill: COLORS[index % COLORS.length],
-  }));
+  }))
 
   if (data.length === 0) {
     return (
@@ -57,7 +57,7 @@ export function ServicesPieChart({ data }: ServicesPieChartProps) {
           <p>No data available</p>
         </div>
       </div>
-    );
+    )
   }
 
   return (
@@ -77,7 +77,9 @@ export function ServicesPieChart({ data }: ServicesPieChartProps) {
               cx="50%"
               cy="50%"
               outerRadius={100}
-              label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+              label={({ name, percent }) =>
+                `${name}: ${(((percent ?? 0) as number) * 100).toFixed(0)}%`
+              }
               labelLine={false}
             >
               {chartData.map((entry) => (
@@ -89,5 +91,5 @@ export function ServicesPieChart({ data }: ServicesPieChartProps) {
         </ChartContainer>
       </div>
     </div>
-  );
+  )
 }

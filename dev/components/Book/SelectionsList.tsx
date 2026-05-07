@@ -1,15 +1,15 @@
-import moment from 'moment';
-import React from 'react';
+import moment from 'moment'
+import React from 'react'
 
-import type { Service, TeamMember } from '../../payload-types';
+import type { Service, TeamMember } from '../../payload-types'
 
-import { formatPrice } from '../../lib/formatPrice';
+import { formatPrice } from '../../lib/formatPrice'
 
 const SelectionsList: React.FC<{
-  chosenDateTime?: Date | null;
-  chosenServices?: null | Service[];
-  chosenStaff: null | TeamMember;
-  setStepIndex: (value: number) => void;
+  chosenDateTime?: Date | null
+  chosenServices?: null | Service[]
+  chosenStaff: null | TeamMember
+  setStepIndex: (value: number) => void
 }> = ({ chosenDateTime, chosenServices, chosenStaff, setStepIndex }) => {
   return (
     <div className="space-y-4">
@@ -171,7 +171,7 @@ const SelectionsList: React.FC<{
         </div>
       ) : null}
     </div>
-  );
-};
+  )
+}
 
-export default SelectionsList;
+export default SelectionsList

@@ -1,75 +1,75 @@
-'use client';
+'use client'
 
-import * as React from 'react';
+import * as React from 'react'
 
-import { StatCard } from './StatCard';
-import { BookingTrendsChart } from './BookingTrendsChart';
-import { ServicesPieChart } from './ServicesPieChart';
-import { StatusBreakdownChart } from './StatusBreakdownChart';
-import { HostUtilizationTable } from './HostUtilizationTable';
-import type { AnalyticsData } from '../../utilities/analytics';
+import { StatCard } from './StatCard'
+import { BookingTrendsChart } from './BookingTrendsChart'
+import { ServicesPieChart } from './ServicesPieChart'
+import { StatusBreakdownChart } from './StatusBreakdownChart'
+import { HostUtilizationTable } from './HostUtilizationTable'
+import type { AnalyticsData } from '../../utilities/analytics'
 
 interface AnalyticsDashboardProps {
-  className?: string;
+  className?: string
 }
 
-type Granularity = 'day' | 'week' | 'month';
+type Granularity = 'day' | 'week' | 'month'
 
 type AnalyticsAPIResponse = {
-  data: AnalyticsData;
-};
+  data: AnalyticsData
+}
 
 export function AnalyticsDashboard({ className }: AnalyticsDashboardProps) {
-  const [data, setData] = React.useState<AnalyticsData | null>(null);
-  const [loading, setLoading] = React.useState(true);
-  const [error, setError] = React.useState<string | null>(null);
-  const [granularity, setGranularity] = React.useState<Granularity>('day');
+  const [data, setData] = React.useState<AnalyticsData | null>(null)
+  const [loading, setLoading] = React.useState(true)
+  const [error, setError] = React.useState<string | null>(null)
+  const [granularity, setGranularity] = React.useState<Granularity>('day')
   const [dateRange, setDateRange] = React.useState(() => {
-    const end = new Date();
-    const start = new Date();
-    start.setDate(start.getDate() - 30);
+    const end = new Date()
+    const start = new Date()
+    start.setDate(start.getDate() - 30)
     return {
       startDate: start.toISOString().split('T')[0],
       endDate: end.toISOString().split('T')[0],
-    };
-  });
+    }
+  })
 
   const fetchAnalytics = React.useCallback(async () => {
-    setLoading(true);
-    setError(null);
+    setLoading(true)
+    setError(null)
 
     try {
       const params = new URLSearchParams({
         startDate: new Date(dateRange.startDate).toISOString(),
         endDate: new Date(dateRange.endDate + 'T23:59:59').toISOString(),
         granularity,
-      });
+      })
 
-      const response = await fetch(`/api/appointments-analytics?${params}`);
+      const response = await fetch(`/api/appointments-analytics?${params}`)
 
       if (!response.ok) {
-        throw new Error('Failed to fetch analytics');
+        throw new Error('Failed to fetch analytics')
       }
 
-      const result = (await response.json()) as AnalyticsAPIResponse;
-      setData(result.data);
+      const result = (await response.json()) as AnalyticsAPIResponse
+      setData(result.data)
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred');
+      setError(err instanceof Error ? err.message : 'An error occurred')
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  }, [dateRange, granularity]);
+  }, [dateRange, granularity])
 
   React.useEffect(() => {
-    fetchAnalytics();
-  }, [fetchAnalytics]);
+    fetchAnalytics()
+  }, [fetchAnalytics])
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
       currency: 'USD',
-    }).format(amount);
-  };
+    }).format(amount)
+  }
 
   return (
     <div className={className}>
@@ -157,11 +157,11 @@ export function AnalyticsDashboard({ className }: AnalyticsDashboardProps) {
         </div>
       )}
     </div>
-  );
+  )
 }
 
-export { StatCard } from './StatCard';
-export { BookingTrendsChart } from './BookingTrendsChart';
-export { ServicesPieChart } from './ServicesPieChart';
-export { StatusBreakdownChart } from './StatusBreakdownChart';
-export { HostUtilizationTable } from './HostUtilizationTable';
+export { StatCard } from './StatCard'
+export { BookingTrendsChart } from './BookingTrendsChart'
+export { ServicesPieChart } from './ServicesPieChart'
+export { StatusBreakdownChart } from './StatusBreakdownChart'
+export { HostUtilizationTable } from './HostUtilizationTable'

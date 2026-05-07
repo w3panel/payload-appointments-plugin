@@ -47,7 +47,7 @@ export const seedAppointmentsData = async (
       if (existingTeamMembers.totalDocs === 0) {
         for (const teamMember of teamMembersSeed) {
           await payload.create({
-          collection: config.hostSlug as any,
+            collection: config.hostSlug as any,
             data: teamMember,
           })
         }

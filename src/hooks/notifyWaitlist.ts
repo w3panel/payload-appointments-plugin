@@ -1,8 +1,8 @@
-import type { CollectionAfterChangeHook } from 'payload';
+import type { CollectionAfterChangeHook } from 'payload'
 
-import moment from 'moment';
+import moment from 'moment'
 
-const WAITLIST_EXPIRY_HOURS = 2;
+const WAITLIST_EXPIRY_HOURS = 2
 
 export const notifyWaitlist: CollectionAfterChangeHook = async ({
   doc,
@@ -11,24 +11,24 @@ export const notifyWaitlist: CollectionAfterChangeHook = async ({
   req,
 }) => {
   if (operation !== 'update') {
-    return doc;
+    return doc
   }
 
   if (doc.appointmentType !== 'appointment') {
-    return doc;
+    return doc
   }
 
-  const wasCancelled = previousDoc?.status !== 'cancelled' && doc.status === 'cancelled';
+  const wasCancelled = previousDoc?.status !== 'cancelled' && doc.status === 'cancelled'
 
   if (!wasCancelled) {
-    return doc;
+    return doc
   }
 
-  const serviceIds = doc.services?.map((s: any) => (typeof s === 'object' ? s.id : s)) || [];
-  const hostId = typeof doc.host === 'object' ? doc.host?.id : doc.host;
+  const serviceIds = doc.services?.map((s: any) => (typeof s === 'object' ? s.id : s)) || []
+  const hostId = typeof doc.host === 'object' ? doc.host?.id : doc.host
 
   if (serviceIds.length === 0) {
-    return doc;
+    return doc
   }
 
   const waitlistEntries = await req.payload.find({
@@ -45,14 +45,14 @@ export const notifyWaitlist: CollectionAfterChangeHook = async ({
         },
       ],
     },
-  });
+  })
 
   if (waitlistEntries.totalDocs === 0) {
-    return doc;
+    return doc
   }
 
-  const firstEntry = waitlistEntries.docs[0];
-  const expiresAt = moment().add(WAITLIST_EXPIRY_HOURS, 'hours').toISOString();
+  const firstEntry = waitlistEntries.docs[0]
+  const expiresAt = moment().add(WAITLIST_EXPIRY_HOURS, 'hours').toISOString()
 
   await req.payload.update({
     collection: 'waitlist',
@@ -62,11 +62,11 @@ export const notifyWaitlist: CollectionAfterChangeHook = async ({
       notifiedAt: new Date().toISOString(),
       expiresAt,
     },
-  });
+  })
 
   req.payload.logger.info(
     `Notified waitlist entry ${firstEntry.id} about cancelled appointment ${doc.id}`,
-  );
+  )
 
-  return doc;
-};
+  return doc
+}

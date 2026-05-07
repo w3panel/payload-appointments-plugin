@@ -7,10 +7,10 @@ import { CollectionCards as CollectionCards_f9c02e79a4aed9a3924487c0cd4cafb1 } f
 
 /** @type import('payload').ImportMap */
 export const importMap = {
-  "payload-appointments-plugin/EmailHtmlPreview#default": default_49bc9dcde81587ca68164652c18a25f9,
-  "payload-appointments-plugin/BeforeDashboard#default": default_1f7656ee5786d8647c62f5122d060f8e,
-  "payload-appointments-plugin/BeforeNavLinks#default": default_a64700e656dab2896ef33b24134c9b5b,
-  "payload-appointments-plugin/AppointmentsList#default": default_f8bfbb02b7678980040bc8c9b9afbb0b,
-  "payload-appointments-plugin/AnalyticsView#default": default_6e5910f15434d56906beac8ae627216e,
-  "@payloadcms/next/rsc#CollectionCards": CollectionCards_f9c02e79a4aed9a3924487c0cd4cafb1
+  'payload-appointments-plugin/EmailHtmlPreview#default': default_49bc9dcde81587ca68164652c18a25f9,
+  'payload-appointments-plugin/BeforeDashboard#default': default_1f7656ee5786d8647c62f5122d060f8e,
+  'payload-appointments-plugin/BeforeNavLinks#default': default_a64700e656dab2896ef33b24134c9b5b,
+  'payload-appointments-plugin/AppointmentsList#default': default_f8bfbb02b7678980040bc8c9b9afbb0b,
+  'payload-appointments-plugin/AnalyticsView#default': default_6e5910f15434d56906beac8ae627216e,
+  '@payloadcms/next/rsc#CollectionCards': CollectionCards_f9c02e79a4aed9a3924487c0cd4cafb1,
 }

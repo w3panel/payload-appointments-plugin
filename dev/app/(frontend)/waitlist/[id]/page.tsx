@@ -1,17 +1,17 @@
-import configPromise from '@payload-config';
-import { getPayload, Where } from 'payload';
+import configPromise from '@payload-config'
+import { getPayload, Where } from 'payload'
 
-import WaitlistStatusClient from './page.client';
+import WaitlistStatusClient from './page.client'
 
 export default async function WaitlistStatusPage({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = await params;
-  const payload = await getPayload({ config: configPromise });
+  const { id } = await params
+  const payload = await getPayload({ config: configPromise })
 
   const entry = await payload.findByID({
     id,
     collection: 'waitlist',
     depth: 2,
-  });
+  })
 
   if (!entry) {
     return (
@@ -38,30 +38,27 @@ export default async function WaitlistStatusPage({ params }: { params: Promise<{
           </p>
         </div>
       </div>
-    );
+    )
   }
 
-  const serviceId = typeof entry.service === 'object' ? entry.service?.id : entry.service;
-  const hostId = typeof entry.host === 'object' ? entry.host?.id : entry.host;
+  const serviceId = typeof entry.service === 'object' ? entry.service?.id : entry.service
+  const hostId = typeof entry.host === 'object' ? entry.host?.id : entry.host
 
   const whereClause: Where = {
     and: [
       { service: { equals: serviceId } },
       { status: { equals: 'waiting' } },
       { createdAt: { less_than: entry.createdAt } },
-      ...(hostId
-        ? [{ or: [{ host: { equals: hostId } }, { host: { exists: false } }] }]
-        : []),
+      ...(hostId ? [{ or: [{ host: { equals: hostId } }, { host: { exists: false } }] }] : []),
     ],
-  };
+  }
 
   const aheadCount = await payload.count({
     collection: 'waitlist',
     where: whereClause,
-  });
+  })
 
-  const position = aheadCount.totalDocs + 1;
+  const position = aheadCount.totalDocs + 1
 
-  return <WaitlistStatusClient entry={entry} position={position} />;
+  return <WaitlistStatusClient entry={entry} position={position} />
 }
-

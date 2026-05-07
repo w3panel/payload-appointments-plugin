@@ -1,21 +1,21 @@
-'use client';
+'use client'
 
-import { useStepNav } from '@payloadcms/ui';
-import { useEffect } from 'react';
+import { useStepNav } from '@payloadcms/ui'
+import { useEffect } from 'react'
 
-import { AnalyticsDashboard } from '../../components/Analytics';
-import '../../components/Analytics/styles.scss';
+import { AnalyticsDashboard } from '../../components/Analytics'
+import '../../components/Analytics/styles.scss'
 
 const AnalyticsClient: React.FC = () => {
-  const { setStepNav } = useStepNav();
+  const { setStepNav } = useStepNav()
 
   useEffect(() => {
     setStepNav([
       {
         label: 'Analytics',
       },
-    ]);
-  }, [setStepNav]);
+    ])
+  }, [setStepNav])
 
   return (
     <div className="collection-list analytics-view">
@@ -25,7 +25,7 @@ const AnalyticsClient: React.FC = () => {
       <div className="list-controls" />
       <AnalyticsDashboard />
     </div>
-  );
-};
+  )
+}
 
-export default AnalyticsClient;
+export default AnalyticsClient

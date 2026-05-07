@@ -1,12 +1,12 @@
-import { NuqsAdapter } from 'nuqs/adapters/next/app';
+import { NuqsAdapter } from 'nuqs/adapters/next/app'
 
-import Header from '../../components/Header/index';
-import './globals.css';
+import Header from '../../components/Header/index'
+import './globals.css'
 
 export const metadata = {
   description: 'Book appointments effortlessly with our modern scheduling platform',
   title: 'Bookly - Appointment Scheduling',
-};
+}
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -26,5 +26,5 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         </NuqsAdapter>
       </body>
     </html>
-  );
+  )
 }

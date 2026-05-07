@@ -108,9 +108,10 @@ export interface Config {
     openingTimes: OpeningTimesSelect<false> | OpeningTimesSelect<true>;
   };
   locale: null;
-  user: User & {
-    collection: 'users';
+  widgets: {
+    collections: CollectionsWidget;
   };
+  user: User;
   jobs: {
     tasks: unknown;
     workflows: unknown;
@@ -160,6 +161,7 @@ export interface User {
       }[]
     | null;
   password?: string | null;
+  collection: 'users';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -196,6 +198,10 @@ export interface Appointment {
      * Payment ID from external provider (Stripe, etc.)
      */
     externalPaymentId?: string | null;
+    /**
+     * Hosted payment URL returned by the provider
+     */
+    paymentUrl?: string | null;
     paidAt?: string | null;
   };
   recurrence?: {
@@ -383,7 +389,7 @@ export interface Waitlist {
   id: number;
   service: number | Service;
   /**
-   * Preferred team member (optional)
+   * Preferred host (optional)
    */
   host?: (number | null) | TeamMember;
   customer?: (number | null) | User;
@@ -569,6 +575,7 @@ export interface AppointmentsSelect<T extends boolean = true> {
         amountDue?: T;
         amountPaid?: T;
         externalPaymentId?: T;
+        paymentUrl?: T;
         paidAt?: T;
       };
   recurrence?:
@@ -892,6 +899,16 @@ export interface OpeningTimesSelect<T extends boolean = true> {
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "collections_widget".
+ */
+export interface CollectionsWidget {
+  data?: {
+    [k: string]: unknown;
+  };
+  width: 'full';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

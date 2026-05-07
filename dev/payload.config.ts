@@ -18,6 +18,21 @@ if (!process.env.ROOT_DIR) {
 }
 
 const buildConfigWithMemoryDB = async () => {
+  const transport =
+    process.env.SMTP_USER && process.env.SMTP_PASS
+      ? nodemailer.createTransport({
+          service: 'iCloud',
+          auth: {
+            user: process.env.SMTP_USER,
+            pass: process.env.SMTP_PASS,
+          },
+        })
+      : nodemailer.createTransport({
+          // Avoid failing dev startup when SMTP creds aren't provided.
+          // Emails will be rendered + logged rather than sent.
+          jsonTransport: true,
+        });
+
   return buildConfig({
     admin: {
       importMap: {
@@ -35,13 +50,7 @@ const buildConfigWithMemoryDB = async () => {
     email: nodemailerAdapter({
       defaultFromAddress: 'akx9@icloud.com',
       defaultFromName: 'Booking App',
-      transport: nodemailer.createTransport({
-        service: 'iCloud',
-        auth: {
-          user: process.env.SMTP_USER,
-          pass: process.env.SMTP_PASS,
-        },
-      }),
+      transport,
     }),
     secret: process.env.PAYLOAD_SECRET || 'test-secret_key',
     sharp,

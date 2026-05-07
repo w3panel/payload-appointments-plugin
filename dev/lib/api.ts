@@ -4,7 +4,9 @@ export async function fetchWithAuth(url: string, options: RequestInit = {}) {
   const token = await getAuthToken()
 
   const headers = new Headers(options.headers)
-  headers.set('Authorization', `Bearer ${token}`)
+  if (token) {
+    headers.set('Authorization', `Bearer ${token}`)
+  }
 
   const response = await fetch(url, {
     ...options,

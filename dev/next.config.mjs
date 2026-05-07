@@ -6,6 +6,9 @@ const dirname = path.dirname(fileURLToPath(import.meta.url))
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  // Next sometimes picks the wrong workspace root in monorepos
+  // (especially when multiple lockfiles exist), which can break tracing/chunk loading.
+  outputFileTracingRoot: dirname,
   webpack: (webpackConfig) => {
     webpackConfig.resolve.extensionAlias = {
       '.cjs': ['.cts', '.cjs'],

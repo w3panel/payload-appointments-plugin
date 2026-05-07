@@ -1,4 +1,5 @@
 import type { Appointment as AppointmentType, Host } from '../../types'
+import type { ReactElement } from 'react'
 
 import CalendarClient from './CalendarClient'
 import './styles.scss'
@@ -17,7 +18,7 @@ export default function Calendar({
   hostSlug,
   initialAppointments,
   initialHosts,
-}: CalendarProps) {
+}: CalendarProps): ReactElement {
   return (
     <CalendarClient
       apiRoute={apiRoute}

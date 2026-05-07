@@ -1,5 +1,7 @@
 'use client'
 
+import type { ReactElement } from 'react'
+
 import { NavGroup, useConfig, useNav } from '@payloadcms/ui'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
@@ -8,7 +10,7 @@ import { links } from '../../lib/links'
 
 const baseClass = 'nav'
 
-export default function BeforeNavLinks() {
+export default function BeforeNavLinks(): ReactElement {
   const {
     config: {
       routes: { admin: adminRoute },

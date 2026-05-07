@@ -12,6 +12,7 @@ import {
   Text,
 } from '@react-email/components';
 import { render } from '@react-email/render';
+import type { ReactElement } from 'react';
 import { Appointment } from '../types';
 import {
   formatDateInTimezone,
@@ -25,7 +26,7 @@ interface Props {
   timezone?: string;
 }
 
-export const Email = ({ cancelUrl, doc, timezone = 'UTC' }: Props) => {
+export const Email = ({ cancelUrl, doc, timezone = 'UTC' }: Props): ReactElement => {
   const customerFirstName = doc?.customer?.firstName || doc?.guestCustomer?.firstName;
   const customerLastName = doc?.customer?.lastName || doc?.guestCustomer?.lastName;
   const tzAbbr = doc?.start ? getTimezoneAbbreviation(doc.start, timezone) : '';

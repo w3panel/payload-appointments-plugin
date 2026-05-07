@@ -84,7 +84,7 @@ export default function CalendarClient({
     setIsLoading(true);
     try {
       const res = await fetch(`${apiRoute}/${collectionSlug}?${params.toString()}`);
-      const appointmentsRes = await res.json();
+      const appointmentsRes = (await res.json()) as { docs: AppointmentType[] };
       setAppointments(appointmentsRes.docs);
     } finally {
       setIsLoading(false);

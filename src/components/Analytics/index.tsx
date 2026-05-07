@@ -15,6 +15,10 @@ interface AnalyticsDashboardProps {
 
 type Granularity = 'day' | 'week' | 'month';
 
+type AnalyticsAPIResponse = {
+  data: AnalyticsData;
+};
+
 export function AnalyticsDashboard({ className }: AnalyticsDashboardProps) {
   const [data, setData] = React.useState<AnalyticsData | null>(null);
   const [loading, setLoading] = React.useState(true);
@@ -47,7 +51,7 @@ export function AnalyticsDashboard({ className }: AnalyticsDashboardProps) {
         throw new Error('Failed to fetch analytics');
       }
 
-      const result = await response.json();
+      const result = (await response.json()) as AnalyticsAPIResponse;
       setData(result.data);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred');

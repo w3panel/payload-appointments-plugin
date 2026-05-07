@@ -30,7 +30,7 @@ const AppointmentsList: React.FC<AdminViewProps> = async ({
 
   const [appointmentsRes, hostsRes] = await Promise.all([
     payload.find({
-      collection: buildConfig.appointmentsSlug as 'appointments',
+      collection: buildConfig.appointmentsSlug as any,
       depth: 1,
       limit: 500,
       where: {
@@ -49,7 +49,7 @@ const AppointmentsList: React.FC<AdminViewProps> = async ({
       },
     }),
     payload.find({
-      collection: buildConfig.hostSlug as 'teamMembers',
+      collection: buildConfig.hostSlug as any,
       limit: 100,
     }),
   ]);

@@ -145,8 +145,7 @@ export const appointmentsPlugin =
       customerSlug: customerCollectionSlug ?? DEFAULT_BUILD_CONFIG.customerSlug,
       currency: currency ?? DEFAULT_BUILD_CONFIG.currency,
       paymentProvider,
-      hostScheduleFieldPath:
-        hostScheduleFieldPath ?? DEFAULT_BUILD_CONFIG.hostScheduleFieldPath,
+      hostScheduleFieldPath: hostScheduleFieldPath ?? DEFAULT_BUILD_CONFIG.hostScheduleFieldPath,
       requireHostSchedule: requireHostSchedule ?? DEFAULT_BUILD_CONFIG.requireHostSchedule,
       hostServiceConfigsSlug:
         hostServices?.hostServiceConfigSlug ?? DEFAULT_BUILD_CONFIG.hostServiceConfigsSlug,
@@ -200,7 +199,8 @@ export const appointmentsPlugin =
         views: {
           ...config.admin.components.views,
           AppointmentsList: {
-            Component: adminViews?.appointmentsList ?? 'payload-appointments-plugin/AppointmentsList',
+            Component:
+              adminViews?.appointmentsList ?? 'payload-appointments-plugin/AppointmentsList',
             exact: true,
             path: '/appointments/schedule',
           },

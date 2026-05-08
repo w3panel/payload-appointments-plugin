@@ -44,7 +44,10 @@ type BookingWindowConfig = {
 
 const getAtPath = (doc: unknown, path: string): unknown => {
   if (!doc || typeof doc !== 'object') return undefined
-  const segments = path.split('.').map((s) => s.trim()).filter(Boolean)
+  const segments = path
+    .split('.')
+    .map((s) => s.trim())
+    .filter(Boolean)
   let current: any = doc
   for (const seg of segments) {
     if (!current || typeof current !== 'object') return undefined
@@ -53,17 +56,18 @@ const getAtPath = (doc: unknown, path: string): unknown => {
   return current
 }
 
-const buildDayTimeInTimezone = (dayISO: string, timeISO: string, timezone: string): moment.Moment => {
+const buildDayTimeInTimezone = (
+  dayISO: string,
+  timeISO: string,
+  timezone: string,
+): moment.Moment => {
   const time = momentTz.tz(timeISO, timezone)
-  return momentTz
-    .tz(dayISO, timezone)
-    .startOf('day')
-    .set({
-      hour: time.hour(),
-      minute: time.minute(),
-      second: 0,
-      millisecond: 0,
-    })
+  return momentTz.tz(dayISO, timezone).startOf('day').set({
+    hour: time.hour(),
+    minute: time.minute(),
+    second: 0,
+    millisecond: 0,
+  })
 }
 
 const curateSlots = (
@@ -266,7 +270,12 @@ export const buildGetAppointmentsForDayAndHost =
             const shiftEnd = buildDayTimeInTimezone(day, shift.end, tz)
             if (!shiftEnd.isAfter(shiftStart)) continue
             allSlots.push(
-              ...curateSlots(totalDuration, shiftStart.toISOString(), shiftEnd.toISOString(), bookingWindow),
+              ...curateSlots(
+                totalDuration,
+                shiftStart.toISOString(),
+                shiftEnd.toISOString(),
+                bookingWindow,
+              ),
             )
           }
 

@@ -1,6 +1,14 @@
 import type { Field } from 'payload'
 
-const daysOfWeek = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'] as const
+const daysOfWeek = [
+  'monday',
+  'tuesday',
+  'wednesday',
+  'thursday',
+  'friday',
+  'saturday',
+  'sunday',
+] as const
 
 const commonTimezones = [
   { label: 'UTC', value: 'UTC' },
@@ -39,7 +47,8 @@ function validateNoShiftOverlaps(value: unknown): true | string {
       if (!v || typeof v !== 'object') return null
       const start = (v as any).start ? new Date((v as any).start) : null
       const end = (v as any).end ? new Date((v as any).end) : null
-      if (!start || !end || Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) return null
+      if (!start || !end || Number.isNaN(start.getTime()) || Number.isNaN(end.getTime()))
+        return null
       return { start, end }
     })
     .filter(Boolean) as Array<{ start: Date; end: Date }>
@@ -82,7 +91,7 @@ export const buildHostScheduleLeafField = (): Field => ({
       admin: {
         position: 'sidebar',
       },
-    }, 
+    },
     ...daysOfWeek.map(
       (day): Field => ({
         name: day,
@@ -151,13 +160,19 @@ const isGroupField = (field: Field): field is Field & { type: 'group'; fields: F
  * - ensures a group field `appointments` exists and contains the `schedule` group.\n
  */
 export function injectFieldAtPath(hostFields: Field[], path: string, leaf: Field): void {
-  const segments = path.split('.').map((s) => s.trim()).filter(Boolean)
+  const segments = path
+    .split('.')
+    .map((s) => s.trim())
+    .filter(Boolean)
   if (segments.length === 0) return
 
   const leafName = segments[segments.length - 1]
   const containerSegments = segments.slice(0, -1)
 
-  const ensureGroup = (fields: Field[], name: string): Field & { type: 'group'; fields: Field[] } => {
+  const ensureGroup = (
+    fields: Field[],
+    name: string,
+  ): Field & { type: 'group'; fields: Field[] } => {
     const existing = fields.find((f) => (f as any)?.name === name)
     if (existing && isGroupField(existing)) return existing as any
     if (existing) {
@@ -186,4 +201,3 @@ export function injectFieldAtPath(hostFields: Field[], path: string, leaf: Field
 
   currentFields.push({ ...(leaf as any), name: leafName } as any)
 }
-

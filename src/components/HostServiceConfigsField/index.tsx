@@ -73,11 +73,14 @@ export default function HostServiceConfigsField() {
 
   return (
     <div style={{ display: 'grid', gap: 12 }}>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
+      <div
+        style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}
+      >
         <div style={{ display: 'grid', gap: 4 }}>
           <div style={{ fontWeight: 600 }}>Service configuration</div>
           <div style={{ opacity: 0.8, fontSize: 13 }}>
-            {collectionSlug ? `Host: ${collectionSlug}` : 'Host'} · Join collection: {hostServiceConfigsSlug}
+            {collectionSlug ? `Host: ${collectionSlug}` : 'Host'} · Join collection:{' '}
+            {hostServiceConfigsSlug}
           </div>
         </div>
         {openFilteredListHref ? (
@@ -94,11 +97,7 @@ export default function HostServiceConfigsField() {
       </div>
 
       {loading ? <div>Loading…</div> : null}
-      {error ? (
-        <div style={{ color: 'var(--theme-error-500)' }}>
-          {error}
-        </div>
-      ) : null}
+      {error ? <div style={{ color: 'var(--theme-error-500)' }}>{error}</div> : null}
 
       {!loading && !error ? (
         rows.length === 0 ? (
@@ -109,7 +108,7 @@ export default function HostServiceConfigsField() {
               const serviceLabel =
                 typeof row.service === 'string'
                   ? row.service
-                  : row.service?.title ?? row.service?.name ?? row.service?.id ?? 'Service'
+                  : (row.service?.title ?? row.service?.name ?? row.service?.id ?? 'Service')
 
               return (
                 <div
@@ -132,9 +131,7 @@ export default function HostServiceConfigsField() {
                     </div>
                   </div>
 
-                  <Pill
-                    pillStyle={row.enabled === false ? 'warning' : 'success'}
-                  >
+                  <Pill pillStyle={row.enabled === false ? 'warning' : 'success'}>
                     {row.enabled === false ? 'Disabled' : 'Enabled'}
                   </Pill>
                 </div>
@@ -146,4 +143,3 @@ export default function HostServiceConfigsField() {
     </div>
   )
 }
-

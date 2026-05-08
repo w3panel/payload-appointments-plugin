@@ -38,7 +38,10 @@ function ensureGroup(fields: Field[], name: string, label?: string): GroupField 
 }
 
 function ensureScheduleAtPath(hostFields: Field[], hostScheduleFieldPath: string): void {
-  const segments = hostScheduleFieldPath.split('.').map((s) => s.trim()).filter(Boolean)
+  const segments = hostScheduleFieldPath
+    .split('.')
+    .map((s) => s.trim())
+    .filter(Boolean)
   if (segments.length === 0) return
 
   const leafName = segments[segments.length - 1]!
@@ -89,11 +92,14 @@ export function applyHostTabs(
   // Avoid double-wrapping if called more than once.
   const existingTabs = mainFields.find((f) => (f as any)?.type === 'tabs') as TabsField | undefined
   if (existingTabs) {
-    hostCollection.fields = [ ...mainFields]
+    hostCollection.fields = [...mainFields]
     return hostCollection
   }
 
-  const rootSegment = config.hostScheduleFieldPath.split('.').map((s) => s.trim()).filter(Boolean)[0]
+  const rootSegment = config.hostScheduleFieldPath
+    .split('.')
+    .map((s) => s.trim())
+    .filter(Boolean)[0]
   const openingTimesFields: Field[] = []
   const hostFields: Field[] = []
 
@@ -126,9 +132,6 @@ export function applyHostTabs(
     } as any
   })
 
-
-
   hostCollection.fields = [...sidebarOrUntabbed, buildHostScheduleLeafField()]
   return hostCollection
 }
-

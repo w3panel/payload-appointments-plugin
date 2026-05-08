@@ -36,11 +36,15 @@ export const sendCustomerEmail: CollectionAfterChangeHook = async ({
       | undefined
 
     const hostSchedulePath = resolved?.hostScheduleFieldPath ?? 'appointments.schedule'
-    const segments = hostSchedulePath.split('.').map((s) => s.trim()).filter(Boolean)
+    const segments = hostSchedulePath
+      .split('.')
+      .map((s) => s.trim())
+      .filter(Boolean)
     const root = segments[0]
 
     const timezone =
-      (root ? ((appointment as any)?.host?.[root]?.timezone as string | undefined) : undefined) || 'UTC'
+      (root ? ((appointment as any)?.host?.[root]?.timezone as string | undefined) : undefined) ||
+      'UTC'
 
     let emailData: ReturnType<
       | typeof appointmentCreatedEmail

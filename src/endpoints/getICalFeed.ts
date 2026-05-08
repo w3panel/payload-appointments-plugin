@@ -1,12 +1,26 @@
 import type { PayloadHandler, PayloadRequest } from 'payload'
 
-import moment from 'moment'
-
 import type { Appointment } from '../types'
 import type { AppointmentsBuildConfig } from '../types/config'
 import { DEFAULT_BUILD_CONFIG } from '../types/config'
 
 import { generateICalFeed } from '../utilities/ical'
+
+function toISOStringWithDayBoundary(date: Date, boundary: 'start' | 'end') {
+  const d = new Date(date)
+  if (boundary === 'start') {
+    d.setHours(0, 0, 0, 0)
+  } else {
+    d.setHours(23, 59, 59, 999)
+  }
+  return d.toISOString()
+}
+
+function addMonths(date: Date, months: number) {
+  const d = new Date(date)
+  d.setMonth(d.getMonth() + months)
+  return d
+}
 
 export const buildGetICalFeed =
   (config: AppointmentsBuildConfig): PayloadHandler =>
@@ -37,11 +51,21 @@ export const buildGetICalFeed =
         lastName?: string
         preferredNameAppointments?: string
       }
-      const effectiveHostId = host && typeof host === 'string' ? host : String(tokenHost.id)
+      const effectiveHostId = String(tokenHost.id)
 
-      const monthsAhead = months && typeof months === 'string' ? parseInt(months, 10) : 3
-      const startDate = moment().subtract(1, 'month').startOf('day').toISOString()
-      const endDate = moment().add(monthsAhead, 'months').endOf('day').toISOString()
+      // Token must match the requested host to avoid leaking other hosts' calendars.
+      if (host && typeof host === 'string' && host !== effectiveHostId) {
+        return Response.json({ error: 'Invalid token' }, { status: 401 })
+      }
+
+      const monthsAheadRaw = months && typeof months === 'string' ? parseInt(months, 10) : 3
+      const monthsAhead = Number.isFinite(monthsAheadRaw)
+        ? Math.min(Math.max(monthsAheadRaw, 0), 12)
+        : 3
+
+      const now = new Date()
+      const startDate = toISOStringWithDayBoundary(addMonths(now, -1), 'start')
+      const endDate = toISOStringWithDayBoundary(addMonths(now, monthsAhead), 'end')
 
       const whereClause: any = {
         and: [
@@ -58,8 +82,17 @@ export const buildGetICalFeed =
 
       const appointments = await req.payload.find({
         collection: config.appointmentsSlug as 'appointments',
-        depth: 2,
+        depth: 0,
         limit: 500,
+        select: {
+          id: true,
+          title: true,
+          start: true,
+          end: true,
+          status: true,
+          appointmentType: true,
+          host: true,
+        },
         where: whereClause,
       })
 
@@ -83,6 +116,7 @@ export const buildGetICalFeed =
         headers: {
           'Content-Type': 'text/calendar; charset=utf-8',
           'Content-Disposition': 'attachment; filename="appointments.ics"',
+          'Cache-Control': 'private, max-age=60',
         },
       })
     } catch (error) {

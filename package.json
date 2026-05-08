@@ -95,7 +95,7 @@
     "copyfiles": "copyfiles -u 1 \"src/**/*.{html,css,scss,ttf,woff,woff2,eot,svg,jpg,png,json}\" dist/",
     "generate:importmap": "echo \"skip (handled by host app)\"",
     "generate:types": "echo \"skip (handled by host app)\"",
-    "lint": "bunx oxlint src --tsconfig ../../tsconfig.oxlint.json",
+    "lint": "bunx oxlint src --tsconfig ../../tsconfig.oxlint.json --quiet",
     "lint:fix": "bunx oxlint src --tsconfig ../../tsconfig.oxlint.json --fix",
     "format": "bunx oxfmt src package.json tsconfig.json --write",
     "format:check": "bunx oxfmt src package.json tsconfig.json --check",

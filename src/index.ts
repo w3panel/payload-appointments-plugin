@@ -2,6 +2,7 @@ import type { Config } from 'payload'
 
 import { buildAppointments } from './collections/Appointments'
 import GuestCustomers from './collections/GuestCustomers'
+import { buildHostServiceConfigs } from './collections/HostServiceConfigs'
 import SentEmails from './collections/SentEmails'
 import Services from './collections/Services'
 import TeamMembers from './collections/TeamMembers'
@@ -18,6 +19,7 @@ import { updateRecurringAppointment } from './endpoints/updateRecurringAppointme
 import { waitlistJoin } from './endpoints/waitlistJoin'
 import { waitlistLeave } from './endpoints/waitlistLeave'
 import { waitlistPosition } from './endpoints/waitlistPosition'
+import { buildHostScheduleLeafField, injectFieldAtPath } from './fields/hostSchedule'
 import OpeningTimes from './globals/OpeningTimes'
 import { seedAppointmentsData } from './seed'
 import { CUSTOM_CONFIG_KEY, DEFAULT_BUILD_CONFIG } from './types/config'
@@ -31,6 +33,50 @@ export type AppointmentsPluginConfig = {
   seedData?: boolean
   showDashboardCards?: boolean
   showNavItems?: boolean
+  /**
+   * Scheduling configuration. Defaults to legacy global OpeningTimes behavior.
+   */
+  scheduling?: {
+    mode?: 'global' | 'embeddedOnHost'
+    /**
+     * Dot-notation field path where the host schedule is stored on the host
+     * document. Used when `mode === 'embeddedOnHost'`.
+     *
+     * @default 'appointments.schedule'
+     */
+    hostScheduleFieldPath?: string
+    /**
+     * When `true`, no fallback to global OpeningTimes is allowed; hosts must
+     * have a schedule configured.
+     *
+     * @default false
+     */
+    requireHostSchedule?: boolean
+    /**
+     * During migration, you may want to allow falling back to global OpeningTimes
+     * if the host schedule is missing.
+     *
+     * @default true
+     */
+    fallbackToGlobalOpeningTimes?: boolean
+  }
+  /**
+   * Host-specific service configuration.
+   */
+  hostServices?: {
+    /**
+     * Slug for the join collection that stores host-specific service config.
+     *
+     * @default 'hostServiceConfigs'
+     */
+    hostServiceConfigSlug?: string
+    /**
+     * If true, only enabled host services can be booked.
+     *
+     * @default false
+     */
+    requireEnabledServicesOnly?: boolean
+  }
   /**
    * Override admin view component paths. Useful when the host app needs to wrap
    * plugin views with framework-specific templates (e.g. `@payloadcms/next`),
@@ -93,6 +139,8 @@ export const appointmentsPlugin =
     registerGuestCustomerCollection = true,
     currency,
     paymentProvider,
+    scheduling,
+    hostServices,
   }: AppointmentsPluginConfig = {}) =>
   (config: Config): Config => {
     if (!config.collections) {
@@ -121,17 +169,29 @@ export const appointmentsPlugin =
       customerSlug: customerCollectionSlug ?? DEFAULT_BUILD_CONFIG.customerSlug,
       currency: currency ?? DEFAULT_BUILD_CONFIG.currency,
       paymentProvider,
+      schedulingMode: scheduling?.mode ?? DEFAULT_BUILD_CONFIG.schedulingMode,
+      hostScheduleFieldPath:
+        scheduling?.hostScheduleFieldPath ?? DEFAULT_BUILD_CONFIG.hostScheduleFieldPath,
+      requireHostSchedule:
+        scheduling?.requireHostSchedule ?? DEFAULT_BUILD_CONFIG.requireHostSchedule,
+      fallbackToGlobalOpeningTimes:
+        scheduling?.fallbackToGlobalOpeningTimes ?? DEFAULT_BUILD_CONFIG.fallbackToGlobalOpeningTimes,
+      hostServiceConfigsSlug:
+        hostServices?.hostServiceConfigSlug ?? DEFAULT_BUILD_CONFIG.hostServiceConfigsSlug,
+      requireEnabledServicesOnly:
+        hostServices?.requireEnabledServicesOnly ?? DEFAULT_BUILD_CONFIG.requireEnabledServicesOnly,
     }
 
     // Stash the resolved config on `payload.config.custom` so server admin
     // views (and any consumer code) can read the active slugs at runtime.
     ;(config as Config & { custom?: Record<string, unknown> }).custom = {
-      ...((config as Config & { custom?: Record<string, unknown> }).custom || {}),
+      ...(config as Config & { custom?: Record<string, unknown> }).custom,
       [CUSTOM_CONFIG_KEY]: buildConfig,
     }
 
     const Appointments = buildAppointments(buildConfig, paymentHooks)
     const Waitlist = buildWaitlist(buildConfig)
+    const HostServiceConfigs = buildHostServiceConfigs(buildConfig)
 
     config.collections = [
       ...(config.collections || []),
@@ -140,9 +200,23 @@ export const appointmentsPlugin =
       SentEmails,
       ...(registerHostCollection ? [TeamMembers] : []),
       Services,
+      HostServiceConfigs,
       Waitlist,
     ]
     config.globals = [...(config.globals || []), OpeningTimes]
+
+    if (buildConfig.schedulingMode === 'embeddedOnHost') {
+      const hostCollection = config.collections.find((c) => c.slug === buildConfig.hostSlug)
+      if (!hostCollection) {
+        throw new Error(
+          `payload-appointments-plugin: Host collection '${buildConfig.hostSlug}' was not found. ` +
+            `Ensure it is registered before applying appointmentsPlugin, or set registerHostCollection=true.`,
+        )
+      }
+      if (!hostCollection.fields) hostCollection.fields = []
+      const scheduleLeaf = buildHostScheduleLeafField()
+      injectFieldAtPath(hostCollection.fields as any, buildConfig.hostScheduleFieldPath, scheduleLeaf)
+    }
 
     config.admin = {
       ...config.admin,

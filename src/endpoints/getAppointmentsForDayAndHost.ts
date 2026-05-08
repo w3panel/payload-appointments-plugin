@@ -1,6 +1,7 @@
 import type { PayloadHandler, PayloadRequest } from 'payload'
 
 import moment from 'moment'
+import momentTz from 'moment-timezone'
 
 import type { AppointmentsBuildConfig } from '../types/config'
 import { DEFAULT_BUILD_CONFIG } from '../types/config'
@@ -21,11 +22,50 @@ type HostDoc = {
   useCustomHours?: boolean
 }
 
+type HostScheduleShift = {
+  end?: string | null
+  start?: string | null
+}
+
+type HostScheduleDay = {
+  isWorking?: boolean
+  shifts?: HostScheduleShift[]
+}
+
+type HostEmbeddedSchedule = {
+  timezone?: string
+  weekly?: Partial<Record<DayOfWeek, HostScheduleDay>>
+}
+
 type BookingWindowConfig = {
   minLeadTime: number
   maxAdvanceBooking: number
   earliestBookableTime: string | null
   latestBookableDate: string | null
+}
+
+const getAtPath = (doc: unknown, path: string): unknown => {
+  if (!doc || typeof doc !== 'object') return undefined
+  const segments = path.split('.').map((s) => s.trim()).filter(Boolean)
+  let current: any = doc
+  for (const seg of segments) {
+    if (!current || typeof current !== 'object') return undefined
+    current = current[seg]
+  }
+  return current
+}
+
+const buildDayTimeInTimezone = (dayISO: string, timeISO: string, timezone: string): moment.Moment => {
+  const time = momentTz.tz(timeISO, timezone)
+  return momentTz
+    .tz(dayISO, timezone)
+    .startOf('day')
+    .set({
+      hour: time.hour(),
+      minute: time.minute(),
+      second: 0,
+      millisecond: 0,
+    })
 }
 
 const curateSlots = (
@@ -197,6 +237,7 @@ export const buildGetAppointmentsForDayAndHost =
       let opening: string | null = null
       let closing: string | null = null
       let isOpen = false
+      let embeddedSchedule: HostEmbeddedSchedule | null = null
       let maxAppointmentsPerDay: number | undefined
 
       if (hostId) {
@@ -206,7 +247,11 @@ export const buildGetAppointmentsForDayAndHost =
           depth: 0,
         })) as unknown as HostDoc
 
-        if (hostDoc?.useCustomHours && hostDoc?.customHours) {
+        if (config.schedulingMode === 'embeddedOnHost') {
+          embeddedSchedule = (getAtPath(hostDoc as any, config.hostScheduleFieldPath) ??
+            null) as HostEmbeddedSchedule | null
+        } else if (hostDoc?.useCustomHours && hostDoc?.customHours) {
+          // Legacy per-host single-window hours
           const memberDayConfig = hostDoc.customHours[dayOfWeek]
           if (memberDayConfig?.isWorking && memberDayConfig?.start && memberDayConfig?.end) {
             opening = memberDayConfig.start
@@ -216,6 +261,49 @@ export const buildGetAppointmentsForDayAndHost =
         }
 
         maxAppointmentsPerDay = hostDoc?.maxAppointmentsPerDay
+      }
+
+      // Embedded host schedule with multi-shift support
+      if (config.schedulingMode === 'embeddedOnHost' && hostId) {
+        const tz = embeddedSchedule?.timezone || 'UTC'
+        const dayConfig = embeddedSchedule?.weekly?.[dayOfWeek]
+
+        if (!dayConfig?.isWorking) {
+          if (config.requireHostSchedule || !config.fallbackToGlobalOpeningTimes) {
+            return Response.json({ availableSlots: [], filteredSlots: [] })
+          }
+        } else if (Array.isArray(dayConfig.shifts) && dayConfig.shifts.length > 0) {
+          const allSlots: string[] = []
+          for (const shift of dayConfig.shifts) {
+            if (!shift?.start || !shift?.end) continue
+            const shiftStart = buildDayTimeInTimezone(day, shift.start, tz)
+            const shiftEnd = buildDayTimeInTimezone(day, shift.end, tz)
+            if (!shiftEnd.isAfter(shiftStart)) continue
+            allSlots.push(
+              ...curateSlots(totalDuration, shiftStart.toISOString(), shiftEnd.toISOString(), bookingWindow),
+            )
+          }
+
+          const filteredSlots = await filterSlotsForHost(
+            config,
+            req,
+            day,
+            allSlots,
+            slotDuration,
+            hostId,
+            maxAppointmentsPerDay,
+          )
+
+          return Response.json({
+            availableSlots: allSlots,
+            bookingWindow,
+            bufferTime: maxBufferTime,
+            filteredSlots,
+            slotDuration,
+          })
+        } else if (config.requireHostSchedule || !config.fallbackToGlobalOpeningTimes) {
+          return Response.json({ availableSlots: [], filteredSlots: [] })
+        }
       }
 
       if (!opening || !closing) {

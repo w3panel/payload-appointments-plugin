@@ -1,5 +1,7 @@
 import type { CollectionBeforeChangeHook } from 'payload'
 
+import { CUSTOM_CONFIG_KEY, DEFAULT_BUILD_CONFIG } from '../types/config'
+
 export const calculatePaymentAmount: CollectionBeforeChangeHook = async ({
   data,
   operation,
@@ -13,43 +15,100 @@ export const calculatePaymentAmount: CollectionBeforeChangeHook = async ({
     return data
   }
 
+  if (!data.host) {
+    return data
+  }
+
+  const hostId = typeof data.host === 'object' ? (data.host as any).id : data.host
+
   const serviceIds = data.services.map((s: string | { id: string }) =>
     typeof s === 'string' ? s : s.id,
   )
 
-  const services = await req.payload.find({
-    collection: 'services',
+  const resolvedConfig =
+    ((req.payload.config as any)?.custom?.[CUSTOM_CONFIG_KEY] as any) ?? DEFAULT_BUILD_CONFIG
+  const hostServiceConfigsSlug =
+    typeof resolvedConfig?.hostServiceConfigsSlug === 'string'
+      ? resolvedConfig.hostServiceConfigsSlug
+      : 'hostServiceConfigs'
+  const servicesSlug =
+    typeof resolvedConfig?.servicesSlug === 'string' ? resolvedConfig.servicesSlug : 'services'
+
+  // Prefer host-specific service configuration when available.
+  const hostServiceConfigs = await req.payload.find({
+    collection: hostServiceConfigsSlug,
     depth: 0,
     limit: 100,
     where: {
-      id: {
-        in: serviceIds,
-      },
+      and: [
+        { host: { equals: hostId } },
+        { service: { in: serviceIds } },
+        { enabled: { equals: true } },
+      ],
     },
   })
 
-  let totalPrice = 0
+  // Backwards-compatible fallback: if no host configs are present, use legacy service pricing.
+  const shouldFallbackToLegacy = hostServiceConfigs.docs.length === 0
+
+  let serviceSubtotal = 0
+  let platformFeeTotal = 0
   let requiresPayment = false
+  let firstRequiringPayment: any | null = null
 
-  for (const service of services.docs) {
-    if (service.paidService && service.price) {
-      totalPrice += service.price
+  if (!shouldFallbackToLegacy) {
+    for (const cfg of hostServiceConfigs.docs as any[]) {
+      if (cfg.paidService && typeof cfg.price === 'number') {
+        serviceSubtotal += cfg.price
 
-      if (service.paymentRequired) {
+        const pf = cfg.platformFee
+        if (pf?.enabled && typeof pf.feeAmount === 'number') {
+          if (pf.feeType === 'percentage') {
+            platformFeeTotal += (cfg.price * pf.feeAmount) / 100
+          } else {
+            platformFeeTotal += pf.feeAmount
+          }
+        }
+      }
+
+      if (cfg.paidService && cfg.paymentRequired) {
         requiresPayment = true
+        if (!firstRequiringPayment) firstRequiringPayment = cfg
+      }
+    }
+  } else {
+    const services = await req.payload.find({
+      collection: servicesSlug,
+      depth: 0,
+      limit: 100,
+      where: {
+        id: {
+          in: serviceIds,
+        },
+      },
+    })
+
+    for (const service of services.docs as any[]) {
+      if (service.paidService && service.price) {
+        serviceSubtotal += service.price
+
+        if (service.paymentRequired) {
+          requiresPayment = true
+          if (!firstRequiringPayment) firstRequiringPayment = service
+        }
       }
     }
   }
+
+  const totalPrice = serviceSubtotal + platformFeeTotal
 
   if (totalPrice > 0) {
     let amountDue = totalPrice
 
     if (requiresPayment) {
-      const firstPaidService = services.docs.find((s) => s.paidService && s.paymentRequired)
-
-      if (firstPaidService) {
-        const depositType = firstPaidService.depositType || 'full'
-        const depositAmount = firstPaidService.depositAmount || 0
+      if (firstRequiringPayment) {
+        const depositType = firstRequiringPayment.depositType || 'full'
+        const depositAmount = firstRequiringPayment.depositAmount || 0
 
         switch (depositType) {
           case 'fixed':
@@ -66,7 +125,7 @@ export const calculatePaymentAmount: CollectionBeforeChangeHook = async ({
 
     data.payment = {
       status: requiresPayment ? 'pending' : 'not-required',
-      amountDue: totalPrice,
+      amountDue,
       amountPaid: 0,
       externalPaymentId: null,
       paidAt: null,

@@ -11,9 +11,28 @@ export type AppointmentsBuildConfig = {
   guestCustomerSlug: string
   appointmentsSlug: string
   servicesSlug: string
+  /**
+   * Join collection storing host-specific service configuration (enabled,
+   * pricing, payment rules, platform fee).
+   */
+  hostServiceConfigsSlug: string
   waitlistSlug: string
   sentEmailsSlug: string
+  /**
+   * Legacy global opening times (used when `schedulingMode === 'global'` or as
+   * a fallback during migration).
+   */
   openingTimesSlug: string
+  /** Where the host schedule is stored on the host document. */
+  hostScheduleFieldPath: string
+  /** Scheduling source. */
+  schedulingMode: 'global' | 'embeddedOnHost'
+  /** If true, embedded host schedule is required (no global fallback). */
+  requireHostSchedule: boolean
+  /** If true, allow falling back to global OpeningTimes during transition. */
+  fallbackToGlobalOpeningTimes: boolean
+  /** If true, only allow booking enabled host services. */
+  requireEnabledServicesOnly: boolean
   /** ISO 4217 currency code passed to payment providers (e.g. 'USD', 'INR'). */
   currency: string
   /** Free-form provider id used for logging/dispatch (e.g. 'stripe'). */
@@ -26,9 +45,15 @@ export const DEFAULT_BUILD_CONFIG: AppointmentsBuildConfig = {
   guestCustomerSlug: 'guestCustomers',
   appointmentsSlug: 'appointments',
   servicesSlug: 'services',
+  hostServiceConfigsSlug: 'hostServiceConfigs',
   waitlistSlug: 'waitlist',
   sentEmailsSlug: 'sentEmails',
   openingTimesSlug: 'openingTimes',
+  hostScheduleFieldPath: 'appointments.schedule',
+  schedulingMode: 'global',
+  requireHostSchedule: false,
+  fallbackToGlobalOpeningTimes: true,
+  requireEnabledServicesOnly: false,
   currency: 'USD',
 }
 

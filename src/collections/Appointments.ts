@@ -158,6 +158,28 @@ export const buildAppointments = (
           return false
         },
       },
+      filterOptions: async ({ siblingData, req }) => {
+        if (!config.requireEnabledServicesOnly) return true
+        const host = (siblingData as any)?.host
+        const hostId = typeof host === 'object' ? host?.id : host
+        if (!hostId) return true
+
+        const enabledConfigs = await req.payload.find({
+          collection: config.hostServiceConfigsSlug as any,
+          depth: 0,
+          limit: 500,
+          where: {
+            and: [{ host: { equals: hostId } }, { enabled: { equals: true } }],
+          },
+        })
+
+        const enabledServiceIds = enabledConfigs.docs
+          .map((d: any) => (typeof d.service === 'object' ? d.service?.id : d.service))
+          .filter(Boolean)
+
+        if (enabledServiceIds.length === 0) return { id: { in: ['__none__'] } }
+        return { id: { in: enabledServiceIds } }
+      },
       hasMany: true,
       label: 'Services',
       relationTo: config.servicesSlug as any,

@@ -49,6 +49,11 @@
       "import": "./src/components/EmailHtmlPreview/index.tsx",
       "types": "./src/components/EmailHtmlPreview/index.tsx",
       "default": "./src/components/EmailHtmlPreview/index.tsx"
+    },
+    "./HostServiceConfigsField": {
+      "import": "./src/components/HostServiceConfigsField/index.tsx",
+      "types": "./src/components/HostServiceConfigsField/index.tsx",
+      "default": "./src/components/HostServiceConfigsField/index.tsx"
     }
   },
   "publishConfig": {
@@ -72,6 +77,11 @@
         "import": "./dist/exports/rsc.js",
         "types": "./dist/exports/rsc.d.ts",
         "default": "./dist/exports/rsc.js"
+      },
+      "./HostServiceConfigsField": {
+        "import": "./dist/components/HostServiceConfigsField/index.js",
+        "types": "./dist/components/HostServiceConfigsField/index.d.ts",
+        "default": "./dist/components/HostServiceConfigsField/index.js"
       }
     },
     "main": "./dist/index.js",

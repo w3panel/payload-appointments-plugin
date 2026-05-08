@@ -18,7 +18,7 @@ import { updateRecurringAppointment } from './endpoints/updateRecurringAppointme
 import { waitlistJoin } from './endpoints/waitlistJoin'
 import { waitlistLeave } from './endpoints/waitlistLeave'
 import { waitlistPosition } from './endpoints/waitlistPosition'
-import { buildHostScheduleLeafField, injectFieldAtPath } from './fields/hostSchedule'
+import { applyHostTabs } from './fields/hostTabs'
 import OpeningTimes from './globals/OpeningTimes'
 import { seedAppointmentsData } from './seed'
 import { CUSTOM_CONFIG_KEY, DEFAULT_BUILD_CONFIG } from './types/config'
@@ -217,9 +217,7 @@ export const appointmentsPlugin =
             `Ensure it is registered before applying appointmentsPlugin, or set registerHostCollection=true.`,
         )
       }
-      if (!hostCollection.fields) hostCollection.fields = []
-      const scheduleLeaf = buildHostScheduleLeafField()
-      injectFieldAtPath(hostCollection.fields as any, buildConfig.hostScheduleFieldPath, scheduleLeaf)
+      applyHostTabs(hostCollection, buildConfig)
     }
 
     config.admin = {

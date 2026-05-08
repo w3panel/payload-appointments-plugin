@@ -19,7 +19,6 @@ import { waitlistJoin } from './endpoints/waitlistJoin'
 import { waitlistLeave } from './endpoints/waitlistLeave'
 import { waitlistPosition } from './endpoints/waitlistPosition'
 import { applyHostTabs } from './fields/hostTabs'
-import OpeningTimes from './globals/OpeningTimes'
 import { seedAppointmentsData } from './seed'
 import { CUSTOM_CONFIG_KEY, DEFAULT_BUILD_CONFIG } from './types/config'
 import type { AppointmentsBuildConfig } from './types/config'
@@ -32,33 +31,10 @@ export type AppointmentsPluginConfig = {
   seedData?: boolean
   showDashboardCards?: boolean
   showNavItems?: boolean
-  /**
-   * Scheduling configuration. Defaults to legacy global OpeningTimes behavior.
-   */
-  scheduling?: {
-    mode?: 'global' | 'embeddedOnHost'
-    /**
-     * Dot-notation field path where the host schedule is stored on the host
-     * document. Used when `mode === 'embeddedOnHost'`.
-     *
-     * @default 'appointments.schedule'
-     */
-    hostScheduleFieldPath?: string
-    /**
-     * When `true`, no fallback to global OpeningTimes is allowed; hosts must
-     * have a schedule configured.
-     *
-     * @default false
-     */
-    requireHostSchedule?: boolean
-    /**
-     * During migration, you may want to allow falling back to global OpeningTimes
-     * if the host schedule is missing.
-     *
-     * @default true
-     */
-    fallbackToGlobalOpeningTimes?: boolean
-  }
+  /** Dot-notation field path where the host schedule is stored on the host document. */
+  hostScheduleFieldPath?: string
+  /** When `true`, hosts must have a schedule configured. */
+  requireHostSchedule?: boolean
   /**
    * Host-specific service configuration.
    */
@@ -138,8 +114,9 @@ export const appointmentsPlugin =
     registerGuestCustomerCollection = true,
     currency,
     paymentProvider,
-    scheduling,
     hostServices,
+    hostScheduleFieldPath,
+    requireHostSchedule,
   }: AppointmentsPluginConfig = {}) =>
   (config: Config): Config => {
     if (!config.collections) {
@@ -168,13 +145,9 @@ export const appointmentsPlugin =
       customerSlug: customerCollectionSlug ?? DEFAULT_BUILD_CONFIG.customerSlug,
       currency: currency ?? DEFAULT_BUILD_CONFIG.currency,
       paymentProvider,
-      schedulingMode: scheduling?.mode ?? DEFAULT_BUILD_CONFIG.schedulingMode,
       hostScheduleFieldPath:
-        scheduling?.hostScheduleFieldPath ?? DEFAULT_BUILD_CONFIG.hostScheduleFieldPath,
-      requireHostSchedule:
-        scheduling?.requireHostSchedule ?? DEFAULT_BUILD_CONFIG.requireHostSchedule,
-      fallbackToGlobalOpeningTimes:
-        scheduling?.fallbackToGlobalOpeningTimes ?? DEFAULT_BUILD_CONFIG.fallbackToGlobalOpeningTimes,
+        hostScheduleFieldPath ?? DEFAULT_BUILD_CONFIG.hostScheduleFieldPath,
+      requireHostSchedule: requireHostSchedule ?? DEFAULT_BUILD_CONFIG.requireHostSchedule,
       hostServiceConfigsSlug:
         hostServices?.hostServiceConfigSlug ?? DEFAULT_BUILD_CONFIG.hostServiceConfigsSlug,
       requireEnabledServicesOnly:
@@ -201,24 +174,16 @@ export const appointmentsPlugin =
       HostServiceConfigs,
       Waitlist,
     ]
-    // Only register legacy OpeningTimes when needed.
-    const shouldRegisterOpeningTimes =
-      buildConfig.schedulingMode === 'global' || buildConfig.fallbackToGlobalOpeningTimes === true
-    config.globals = [
-      ...(config.globals || []),
-      ...(shouldRegisterOpeningTimes ? [OpeningTimes] : []),
-    ]
+    config.globals = [...(config.globals || [])]
 
-    if (buildConfig.schedulingMode === 'embeddedOnHost') {
-      const hostCollection = config.collections.find((c) => c.slug === buildConfig.hostSlug)
-      if (!hostCollection) {
-        throw new Error(
-          `payload-appointments-plugin: Host collection '${buildConfig.hostSlug}' was not found. ` +
-            `Ensure it is registered before applying appointmentsPlugin, or set registerHostCollection=true.`,
-        )
-      }
-      applyHostTabs(hostCollection, buildConfig)
+    const hostCollection = config.collections.find((c) => c.slug === buildConfig.hostSlug)
+    if (!hostCollection) {
+      throw new Error(
+        `payload-appointments-plugin: Host collection '${buildConfig.hostSlug}' was not found. ` +
+          `Ensure it is registered before applying appointmentsPlugin, or set registerHostCollection=true.`,
+      )
     }
+    applyHostTabs(hostCollection, buildConfig)
 
     config.admin = {
       ...config.admin,

@@ -102,18 +102,18 @@ export function applyHostTabs(
 
   // If the root container wasn't present for some reason, ensure it's there so the tab renders something.
   if (rootSegment && openingTimesFields.length === 0) {
-    openingTimesFields.push(ensureGroup(hostFields, rootSegment))
+    // Attach the container to the source list so data is persisted, but render it in the Opening Times tab.
+    const ensured = ensureGroup(all, rootSegment)
+    // Avoid leaking the container into the Host tab if we had to synthesize it.
+    openingTimesFields.push(ensured)
   }
 
   const servicesUIField: Field = {
-    name: 'hostServiceConfigsTab',
-    type: 'ui',
-    admin: {
-      components: {
-        Field: 'payload-appointments-plugin/HostServiceConfigsField',
-      },
-    },
-  }
+      name: 'doctorServicePaymentConfigs',
+      type: 'join',
+      collection: 'doctorServicePaymentConfigs',
+      on: 'doctor',
+    }
 
   const tabsField: Field = {
     type: 'tabs',

@@ -2,6 +2,7 @@ import type { CollectionAfterChangeHook } from 'payload'
 
 import type { Appointment } from '../types'
 import { CUSTOM_CONFIG_KEY } from '../types/config'
+import type { AppointmentsBuildConfig } from '../types/config'
 
 import { RenderedEmail as AppointmentCancelledRenderedEmail } from '../emails/AppointmentCancelledEmail'
 import { RenderedEmail as AppointmentCreatedRenderedEmail } from '../emails/AppointmentCreatedEmail'
@@ -30,17 +31,16 @@ export const sendCustomerEmail: CollectionAfterChangeHook = async ({
       req,
     })) as unknown as Appointment
 
-    const resolved = (req.payload.config as any)?.custom?.[CUSTOM_CONFIG_KEY] as any
-    const shouldUseOpeningTimes =
-      resolved?.schedulingMode === 'global' || resolved?.fallbackToGlobalOpeningTimes === true
+    const resolved = (req.payload.config as any)?.custom?.[CUSTOM_CONFIG_KEY] as
+      | AppointmentsBuildConfig
+      | undefined
 
-    const timezone = shouldUseOpeningTimes
-      ? (((await (req.payload as any).findGlobal({
-          slug: resolved?.openingTimesSlug ?? 'openingTimes',
-          depth: 0,
-          req,
-        })) as any)?.timezone as string) || 'UTC'
-      : (appointment as any)?.host?.appointments?.timezone || 'UTC'
+    const hostSchedulePath = resolved?.hostScheduleFieldPath ?? 'appointments.schedule'
+    const segments = hostSchedulePath.split('.').map((s) => s.trim()).filter(Boolean)
+    const root = segments[0]
+
+    const timezone =
+      (root ? ((appointment as any)?.host?.[root]?.timezone as string | undefined) : undefined) || 'UTC'
 
     let emailData: ReturnType<
       | typeof appointmentCreatedEmail

@@ -17,9 +17,7 @@ type HostCustomHours = {
 }
 
 type HostDoc = {
-  customHours?: HostCustomHours
   maxAppointmentsPerDay?: number
-  useCustomHours?: boolean
 }
 
 type HostScheduleShift = {
@@ -247,31 +245,19 @@ export const buildGetAppointmentsForDayAndHost =
           depth: 0,
         })) as unknown as HostDoc
 
-        if (config.schedulingMode === 'embeddedOnHost') {
-          embeddedSchedule = (getAtPath(hostDoc as any, config.hostScheduleFieldPath) ??
-            null) as HostEmbeddedSchedule | null
-        } else if (hostDoc?.useCustomHours && hostDoc?.customHours) {
-          // Legacy per-host single-window hours
-          const memberDayConfig = hostDoc.customHours[dayOfWeek]
-          if (memberDayConfig?.isWorking && memberDayConfig?.start && memberDayConfig?.end) {
-            opening = memberDayConfig.start
-            closing = memberDayConfig.end
-            isOpen = true
-          }
-        }
+        embeddedSchedule = (getAtPath(hostDoc as any, config.hostScheduleFieldPath) ??
+          null) as HostEmbeddedSchedule | null
 
         maxAppointmentsPerDay = hostDoc?.maxAppointmentsPerDay
       }
 
       // Embedded host schedule with multi-shift support
-      if (config.schedulingMode === 'embeddedOnHost' && hostId) {
+      if (hostId) {
         const tz = embeddedSchedule?.timezone || 'UTC'
         const dayConfig = embeddedSchedule?.weekly?.[dayOfWeek]
 
         if (!dayConfig?.isWorking) {
-          if (config.requireHostSchedule || !config.fallbackToGlobalOpeningTimes) {
-            return Response.json({ availableSlots: [], filteredSlots: [] })
-          }
+          return Response.json({ availableSlots: [], filteredSlots: [] })
         } else if (Array.isArray(dayConfig.shifts) && dayConfig.shifts.length > 0) {
           const allSlots: string[] = []
           for (const shift of dayConfig.shifts) {
@@ -301,43 +287,13 @@ export const buildGetAppointmentsForDayAndHost =
             filteredSlots,
             slotDuration,
           })
-        } else if (config.requireHostSchedule || !config.fallbackToGlobalOpeningTimes) {
+        } else {
           return Response.json({ availableSlots: [], filteredSlots: [] })
         }
       }
 
-      if (!opening || !closing) {
-        // In some consumers, OpeningTimes is not registered; avoid typed slug constraints.
-        const openingTimes = await (req.payload as any).findGlobal({
-          slug: config.openingTimesSlug,
-          depth: 0,
-        })
-
-        const openingTimesRecord = openingTimes as unknown as Record<string, unknown>
-        if (!openingTimesRecord || !openingTimesRecord[dayOfWeek]) {
-          return Response.json(
-            { error: 'Opening times not configured for this day' },
-            { status: 400 },
-          )
-        }
-
-        const dayConfig = openingTimesRecord[dayOfWeek] as {
-          closing: string | null
-          isOpen: boolean
-          opening: string | null
-        }
-
-        if (!dayConfig.isOpen || !dayConfig.opening || !dayConfig.closing) {
-          return Response.json({
-            availableSlots: [],
-            filteredSlots: [],
-          })
-        }
-
-        opening = dayConfig.opening
-        closing = dayConfig.closing
-        isOpen = dayConfig.isOpen
-      }
+      // With embedded scheduling enabled, we should have returned above.
+      if (!opening || !closing) return Response.json({ availableSlots: [], filteredSlots: [] })
 
       if (!isOpen || !opening || !closing) {
         return Response.json({

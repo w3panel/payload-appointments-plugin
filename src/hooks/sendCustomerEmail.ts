@@ -1,6 +1,7 @@
 import type { CollectionAfterChangeHook } from 'payload'
 
 import type { Appointment } from '../types'
+import { CUSTOM_CONFIG_KEY } from '../types/config'
 
 import { RenderedEmail as AppointmentCancelledRenderedEmail } from '../emails/AppointmentCancelledEmail'
 import { RenderedEmail as AppointmentCreatedRenderedEmail } from '../emails/AppointmentCreatedEmail'
@@ -17,13 +18,11 @@ export const sendCustomerEmail: CollectionAfterChangeHook = async ({
   previousDoc,
   req,
 }) => {
-  req.payload.logger.info('1')
   if (doc.appointmentType !== 'appointment') {
     return
   }
 
   try {
-    req.payload.logger.info('2')
     const appointment = (await req.payload.findByID({
       id: doc.id,
       collection: 'appointments',
@@ -31,14 +30,17 @@ export const sendCustomerEmail: CollectionAfterChangeHook = async ({
       req,
     })) as unknown as Appointment
 
-    req.payload.logger.info('3')
-    const openingTimes = await req.payload.findGlobal({
-      slug: 'openingTimes',
-      depth: 0,
-      req,
-    })
-    req.payload.logger.info('4')
-    const timezone = (openingTimes?.timezone as string) || 'UTC'
+    const resolved = (req.payload.config as any)?.custom?.[CUSTOM_CONFIG_KEY] as any
+    const shouldUseOpeningTimes =
+      resolved?.schedulingMode === 'global' || resolved?.fallbackToGlobalOpeningTimes === true
+
+    const timezone = shouldUseOpeningTimes
+      ? (((await (req.payload as any).findGlobal({
+          slug: resolved?.openingTimesSlug ?? 'openingTimes',
+          depth: 0,
+          req,
+        })) as any)?.timezone as string) || 'UTC'
+      : (appointment as any)?.host?.appointments?.timezone || 'UTC'
 
     let emailData: ReturnType<
       | typeof appointmentCreatedEmail
@@ -48,54 +50,41 @@ export const sendCustomerEmail: CollectionAfterChangeHook = async ({
     let htmlContent: string | null = null
     let emailType: EmailType | null = null
 
-    req.payload.logger.info('5')
     if (operation === 'create') {
       emailData = appointmentCreatedEmail(appointment)
-      req.payload.logger.info('6')
       htmlContent = await AppointmentCreatedRenderedEmail({
         cancelUrl: 'cancelUrl' in emailData ? emailData.cancelUrl : undefined,
         doc: appointment,
         timezone,
       })
-      req.payload.logger.info('7')
       emailType = 'created'
     } else if (operation === 'update') {
-      req.payload.logger.info('8')
       const wasCancelled = previousDoc?.status !== 'cancelled' && doc.status === 'cancelled'
-      req.payload.logger.info('9')
       if (wasCancelled) {
         emailData = appointmentCancelledEmail(appointment)
-        req.payload.logger.info('10')
         htmlContent = await AppointmentCancelledRenderedEmail({ doc: appointment, timezone })
         emailType = 'cancelled'
       } else if (doc.status !== 'cancelled') {
-        req.payload.logger.info('11')
         emailData = appointmentUpdatedEmail(appointment)
-        req.payload.logger.info('12')
         htmlContent = await AppointmentUpdatedRenderedEmail({
           cancelUrl: 'cancelUrl' in emailData ? emailData.cancelUrl : undefined,
           doc: appointment,
           timezone,
         })
-        req.payload.logger.info('13')
         emailType = 'updated'
       }
     }
 
-    req.payload.logger.info('14')
     if (emailData && htmlContent && emailType) {
       let emailSent = false
 
       try {
-        req.payload.logger.info('15')
         await req.payload.sendEmail({
           ...emailData,
           html: htmlContent,
         })
-        req.payload.logger.info('16')
         emailSent = true
       } catch (emailError: unknown) {
-        req.payload.logger.info('17')
         const errorString = String(emailError)
         const errorName = emailError instanceof Error ? emailError.name : ''
         const isNotConfigured =
@@ -115,7 +104,6 @@ export const sendCustomerEmail: CollectionAfterChangeHook = async ({
 
       if (emailSent) {
         try {
-          req.payload.logger.info('18')
           await req.payload.create({
             collection: 'sentEmails',
             data: {
@@ -130,9 +118,7 @@ export const sendCustomerEmail: CollectionAfterChangeHook = async ({
             },
             req,
           })
-          req.payload.logger.info('19')
         } catch (logError) {
-          req.payload.logger.info('20')
           req.payload.logger.error(`Error logging sent email: ${logError}`)
         }
       }

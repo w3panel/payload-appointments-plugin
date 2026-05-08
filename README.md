@@ -7,7 +7,7 @@ This plugin allows you to add appointment scheduling capabilities to your payloa
 
 - Services and Appointments collections.
 - An Appointment schedule calendar view.
-- Opening times global (legacy).
+- Opening times global (legacy, only registered when needed).
 - Optional per-host schedules with multi-shift days.
 - Optional host-specific service pricing & payment configuration.
 
@@ -103,7 +103,7 @@ export default buildConfig({
       // Enable per-host schedules embedded on your host collection (e.g. doctors).
       scheduling: {
         mode: 'embeddedOnHost',
-        hostScheduleFieldPath: 'appointments.schedule',
+        hostScheduleFieldPath: 'appointments',
         fallbackToGlobalOpeningTimes: true,
       },
       // Enable host-specific service configuration via join collection.
@@ -128,7 +128,7 @@ appointmentsPlugin({
   registerHostCollection: false,
   scheduling: {
     mode: 'embeddedOnHost',
-    hostScheduleFieldPath: 'appointments.schedule',
+    hostScheduleFieldPath: 'appointments',
     fallbackToGlobalOpeningTimes: true,
   },
   hostServices: {
@@ -139,8 +139,8 @@ appointmentsPlugin({
 ```
 
 ### Where schedules live
-- Each doctor will have `appointments.schedule` injected automatically by the plugin.\n
-- Admin path: `Doctors` → (doctor doc) → `appointments.schedule` → `weekly.<day>.shifts[]`.\n
+- Each doctor will have `appointments` injected automatically by the plugin.\n
+- Admin path: `Doctors` → (doctor doc) → `appointments` → `weekly.<day>.shifts[]`.\n
 
 ### Host-specific service pricing
 - Create `Host Service Configs` docs to enable/price services per doctor.\n

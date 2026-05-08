@@ -307,8 +307,9 @@ export const buildGetAppointmentsForDayAndHost =
       }
 
       if (!opening || !closing) {
-        const openingTimes = await req.payload.findGlobal({
-          slug: config.openingTimesSlug as 'openingTimes',
+        // In some consumers, OpeningTimes is not registered; avoid typed slug constraints.
+        const openingTimes = await (req.payload as any).findGlobal({
+          slug: config.openingTimesSlug,
           depth: 0,
         })
 

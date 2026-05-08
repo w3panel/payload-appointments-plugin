@@ -12,11 +12,13 @@ export const seedAppointmentsData = async (
   payload.logger.info('Seeding appointments plugin data...')
 
   try {
-    await payload.updateGlobal({
-      slug: config.openingTimesSlug as 'openingTimes',
-      data: openingTimesSeed,
-    })
-    payload.logger.info('Seeded opening times')
+    if (config.schedulingMode === 'global' || config.fallbackToGlobalOpeningTimes) {
+      await (payload as any).updateGlobal({
+        slug: config.openingTimesSlug,
+        data: openingTimesSeed,
+      })
+      payload.logger.info('Seeded opening times')
+    }
 
     const existingServices = await payload.find({
       collection: config.servicesSlug as 'services',

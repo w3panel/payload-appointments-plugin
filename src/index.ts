@@ -1,7 +1,6 @@
 import type { Config } from 'payload'
 
 import { buildAppointments } from './collections/Appointments'
-import GuestCustomers from './collections/GuestCustomers'
 import { buildHostServiceConfigs } from './collections/HostServiceConfigs'
 import SentEmails from './collections/SentEmails'
 import Services from './collections/Services'
@@ -111,7 +110,7 @@ export type AppointmentsPluginConfig = {
    */
   registerHostCollection?: boolean
   /**
-   * Whether to register the built-in `GuestCustomers` collection.
+   * Whether to register the built-in guest customer collection.
    *
    * @default true
    */
@@ -196,14 +195,19 @@ export const appointmentsPlugin =
     config.collections = [
       ...(config.collections || []),
       Appointments,
-      ...(registerGuestCustomerCollection ? [GuestCustomers] : []),
       SentEmails,
       ...(registerHostCollection ? [TeamMembers] : []),
       Services,
       HostServiceConfigs,
       Waitlist,
     ]
-    config.globals = [...(config.globals || []), OpeningTimes]
+    // Only register legacy OpeningTimes when needed.
+    const shouldRegisterOpeningTimes =
+      buildConfig.schedulingMode === 'global' || buildConfig.fallbackToGlobalOpeningTimes === true
+    config.globals = [
+      ...(config.globals || []),
+      ...(shouldRegisterOpeningTimes ? [OpeningTimes] : []),
+    ]
 
     if (buildConfig.schedulingMode === 'embeddedOnHost') {
       const hostCollection = config.collections.find((c) => c.slug === buildConfig.hostSlug)

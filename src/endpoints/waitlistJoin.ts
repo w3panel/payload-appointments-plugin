@@ -4,7 +4,6 @@ export type WaitlistJoinPayload = {
   serviceId: string
   hostId?: string
   customerId?: string
-  guestCustomerId?: string
   preferredDates?: string[]
   preferredTimeRange?: {
     start?: string
@@ -21,11 +20,8 @@ export const waitlistJoin: PayloadHandler = async (req: PayloadRequest) => {
       return Response.json({ error: 'Missing required field: serviceId' }, { status: 400 })
     }
 
-    if (!body.customerId && !body.guestCustomerId) {
-      return Response.json(
-        { error: 'Either customerId or guestCustomerId is required' },
-        { status: 400 },
-      )
+    if (!body.customerId) {
+      return Response.json({ error: 'Missing required field: customerId' }, { status: 400 })
     }
 
     const existingEntry = await req.payload.find({
@@ -36,9 +32,7 @@ export const waitlistJoin: PayloadHandler = async (req: PayloadRequest) => {
         and: [
           { service: { equals: body.serviceId } },
           { status: { in: ['waiting', 'notified'] } },
-          body.customerId
-            ? { customer: { equals: body.customerId } }
-            : { guestCustomer: { equals: body.guestCustomerId } },
+          { customer: { equals: body.customerId } },
         ],
       },
     })
@@ -58,7 +52,6 @@ export const waitlistJoin: PayloadHandler = async (req: PayloadRequest) => {
         service: Number(body.serviceId),
         host: body.hostId ? Number(body.hostId) : undefined,
         customer: body.customerId ? Number(body.customerId) : undefined,
-        guestCustomer: body.guestCustomerId ? Number(body.guestCustomerId) : undefined,
         preferredDates,
         preferredTimeRange: body.preferredTimeRange,
         notes: body.notes,

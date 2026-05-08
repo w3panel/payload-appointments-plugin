@@ -8,7 +8,6 @@
 export type AppointmentsBuildConfig = {
   hostSlug: string
   customerSlug: string
-  guestCustomerSlug: string
   appointmentsSlug: string
   servicesSlug: string
   /**
@@ -42,14 +41,13 @@ export type AppointmentsBuildConfig = {
 export const DEFAULT_BUILD_CONFIG: AppointmentsBuildConfig = {
   hostSlug: 'teamMembers',
   customerSlug: 'users',
-  guestCustomerSlug: 'guestCustomers',
   appointmentsSlug: 'appointments',
   servicesSlug: 'services',
   hostServiceConfigsSlug: 'hostServiceConfigs',
   waitlistSlug: 'waitlist',
   sentEmailsSlug: 'sentEmails',
   openingTimesSlug: 'openingTimes',
-  hostScheduleFieldPath: 'appointments.schedule',
+  hostScheduleFieldPath: 'appointments',
   schedulingMode: 'global',
   requireHostSchedule: false,
   fallbackToGlobalOpeningTimes: true,

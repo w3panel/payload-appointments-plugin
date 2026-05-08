@@ -52,7 +52,7 @@ export const buildHostServiceConfigs = (config: AppointmentsBuildConfig): Collec
       name: 'enabled',
       type: 'checkbox',
       defaultValue: true,
-      label: 'Enabled',
+      label: 'Service Enabled',
     },
     {
       name: 'price',
@@ -157,8 +157,8 @@ export const buildHostServiceConfigs = (config: AppointmentsBuildConfig): Collec
     },
   ],
   labels: {
-    plural: 'Host Service Configs',
-    singular: 'Host Service Config',
+    plural: 'Doctors Service Payment Configs',
+    singular: 'Doctors Service Payment Config',
   },
   timestamps: true,
 })

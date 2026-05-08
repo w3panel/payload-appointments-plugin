@@ -121,8 +121,6 @@ export const generateRecurringAppointments: CollectionAfterChangeHook = async ({
           bookedBy: doc.bookedBy,
           customer: typeof doc.customer === 'object' ? doc.customer?.id : doc.customer,
           customerNotes: doc.customerNotes,
-          guestCustomer:
-            typeof doc.guestCustomer === 'object' ? doc.guestCustomer?.id : doc.guestCustomer,
           host: typeof doc.host === 'object' ? doc.host?.id : doc.host,
           internalNotes: doc.internalNotes,
           services: doc.services?.map((s: any) => (typeof s === 'object' ? s.id : s)),

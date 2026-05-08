@@ -106,7 +106,7 @@ export const buildAppointments = (
       type: 'relationship',
       admin: {
         condition: (siblingData) => {
-          if (siblingData.appointmentType === 'appointment' && !siblingData.guestCustomer) {
+          if (siblingData.appointmentType === 'appointment') {
             return true
           }
           return false
@@ -114,20 +114,6 @@ export const buildAppointments = (
       },
       label: 'Customer',
       relationTo: config.customerSlug as any,
-    },
-    {
-      name: 'guestCustomer',
-      type: 'relationship',
-      admin: {
-        condition: (siblingData) => {
-          if (siblingData.appointmentType === 'appointment' && !siblingData.customer) {
-            return true
-          }
-          return false
-        },
-      },
-      label: 'Guest Customer',
-      relationTo: config.guestCustomerSlug as any,
     },
     {
       name: 'bookedBy',
@@ -140,10 +126,6 @@ export const buildAppointments = (
         {
           label: 'Customer',
           value: 'customer',
-        },
-        {
-          label: 'Guest',
-          value: 'guest',
         },
       ],
     },

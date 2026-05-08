@@ -11,7 +11,7 @@ const Services: CollectionConfig = {
     update: authenticated,
   },
   admin: {
-    defaultColumns: ['title', 'duration', 'paidService', 'price'],
+    defaultColumns: ['title', 'duration', 'bufferTime'],
     group: 'Appointments',
     useAsTitle: 'title',
   },
@@ -72,70 +72,6 @@ const Services: CollectionConfig = {
       label: 'Max Advance Booking (days)',
       max: 365,
       min: 0,
-    },
-    {
-      type: 'row',
-      fields: [
-        {
-          name: 'paidService',
-          type: 'checkbox',
-          defaultValue: false,
-          label: 'Paid Service',
-        },
-        {
-          name: 'price',
-          type: 'number',
-          admin: {
-            condition: (data) => data.paidService === true,
-            description: 'Price in your local currency',
-          },
-          label: 'Price',
-          min: 0,
-          required: true,
-        },
-      ],
-    },
-    {
-      name: 'paymentRequired',
-      type: 'checkbox',
-      admin: {
-        condition: (data) => data.paidService === true,
-        description: 'Require payment at time of booking',
-      },
-      defaultValue: false,
-      label: 'Require Payment to Book',
-    },
-    {
-      type: 'row',
-      admin: {
-        condition: (data) => data.paidService === true && data.paymentRequired === true,
-      },
-      fields: [
-        {
-          name: 'depositType',
-          type: 'select',
-          admin: {
-            description: 'Full payment or partial deposit',
-          },
-          defaultValue: 'full',
-          label: 'Payment Type',
-          options: [
-            { label: 'Full Payment', value: 'full' },
-            { label: 'Fixed Deposit', value: 'fixed' },
-            { label: 'Percentage Deposit', value: 'percentage' },
-          ],
-        },
-        {
-          name: 'depositAmount',
-          type: 'number',
-          admin: {
-            condition: (data) => data.depositType !== 'full',
-            description: 'Amount or percentage required as deposit',
-          },
-          label: 'Deposit Amount',
-          min: 0,
-        },
-      ],
     },
   ],
   labels: {

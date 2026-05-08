@@ -40,15 +40,6 @@ export const buildWaitlist = (config: AppointmentsBuildConfig): CollectionConfig
       relationTo: config.customerSlug as any,
     },
     {
-      name: 'guestCustomer',
-      type: 'relationship',
-      admin: {
-        condition: (siblingData) => !siblingData.customer,
-      },
-      label: 'Guest Customer',
-      relationTo: config.guestCustomerSlug as any,
-    },
-    {
       name: 'preferredDates',
       type: 'array',
       admin: {

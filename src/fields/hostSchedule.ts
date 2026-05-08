@@ -65,7 +65,9 @@ function validateNoShiftOverlaps(value: unknown): true | string {
 export const buildHostScheduleLeafField = (): Field => ({
   name: 'schedule',
   type: 'group',
-  label: 'Schedule',
+  // Intentionally labeled "Appointments" so when injected at `appointments`
+  // it reads naturally and avoids an extra nested "Schedule" heading.
+  label: 'Opening Times',
   fields: [
     {
       name: 'timezone',
@@ -102,6 +104,12 @@ export const buildHostScheduleLeafField = (): Field => ({
               validate: validateNoShiftOverlaps,
               fields: [
                 {
+                  name: 'title',
+                  type: 'text',
+                  label: 'Title',
+                  required: true,
+                },
+                {
                   type: 'row',
                   fields: [
                     {
@@ -119,10 +127,6 @@ export const buildHostScheduleLeafField = (): Field => ({
                       required: true,
                     },
                   ],
-                },
-                {
-                  name: 'note',
-                  type: 'text',
                 },
               ],
             },

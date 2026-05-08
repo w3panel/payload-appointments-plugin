@@ -65,9 +65,12 @@ function validateNoShiftOverlaps(value: unknown): true | string {
 export const buildHostScheduleLeafField = (): Field => ({
   name: 'schedule',
   type: 'group',
+  admin: {
+    position: 'sidebar',
+  },
   // Intentionally labeled "Appointments" so when injected at `appointments`
   // it reads naturally and avoids an extra nested "Schedule" heading.
-  label: 'Opening Times',
+  label: 'Opening Times (Weekly Schedule)',
   fields: [
     {
       name: 'timezone',
@@ -76,64 +79,62 @@ export const buildHostScheduleLeafField = (): Field => ({
       label: 'Timezone',
       options: [...commonTimezones],
       required: true,
-    },
-    {
-      name: 'weekly',
-      type: 'group',
-      label: 'Weekly Schedule',
-      fields: daysOfWeek.map(
-        (day): Field => ({
-          name: day,
-          type: 'group',
-          label: day.charAt(0).toUpperCase() + day.slice(1),
-          fields: [
-            {
-              name: 'isWorking',
-              type: 'checkbox',
-              defaultValue: false,
-              label: 'Working',
+      admin: {
+        position: 'sidebar',
+      },
+    }, 
+    ...daysOfWeek.map(
+      (day): Field => ({
+        name: day,
+        type: 'group',
+        label: day.charAt(0).toUpperCase() + day.slice(1),
+        fields: [
+          {
+            name: 'isWorking',
+            type: 'checkbox',
+            defaultValue: false,
+            label: 'Working',
+          },
+          {
+            name: 'shifts',
+            type: 'array',
+            admin: {
+              condition: (_: any, siblingData: any) => siblingData?.isWorking === true,
+              description: 'Add one or more shifts (e.g. morning + evening).',
             },
-            {
-              name: 'shifts',
-              type: 'array',
-              admin: {
-                condition: (_: any, siblingData: any) => siblingData?.isWorking === true,
-                description: 'Add one or more shifts (e.g. morning + evening).',
+            labels: { plural: 'Shifts', singular: 'Shift' },
+            validate: validateNoShiftOverlaps,
+            fields: [
+              {
+                name: 'title',
+                type: 'text',
+                label: 'Title',
+                required: true,
               },
-              labels: { plural: 'Shifts', singular: 'Shift' },
-              validate: validateNoShiftOverlaps,
-              fields: [
-                {
-                  name: 'title',
-                  type: 'text',
-                  label: 'Title',
-                  required: true,
-                },
-                {
-                  type: 'row',
-                  fields: [
-                    {
-                      name: 'start',
-                      type: 'date',
-                      admin: timeOnlyAdmin,
-                      label: 'Start',
-                      required: true,
-                    },
-                    {
-                      name: 'end',
-                      type: 'date',
-                      admin: timeOnlyAdmin,
-                      label: 'End',
-                      required: true,
-                    },
-                  ],
-                },
-              ],
-            },
-          ],
-        }),
-      ),
-    },
+              {
+                type: 'row',
+                fields: [
+                  {
+                    name: 'start',
+                    type: 'date',
+                    admin: timeOnlyAdmin,
+                    label: 'Start',
+                    required: true,
+                  },
+                  {
+                    name: 'end',
+                    type: 'date',
+                    admin: timeOnlyAdmin,
+                    label: 'End',
+                    required: true,
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      }),
+    ),
   ],
 })
 

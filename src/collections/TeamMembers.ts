@@ -73,68 +73,6 @@ const TeamMembers: CollectionConfig = {
       label: 'Available for Appointments',
     },
     {
-      name: 'useCustomHours',
-      type: 'checkbox',
-      admin: {
-        condition: (data) => data.takingAppointments === true,
-        description: 'Override global opening times with custom hours for this team member',
-      },
-      defaultValue: false,
-      label: 'Use Custom Working Hours',
-    },
-    {
-      name: 'customHours',
-      type: 'group',
-      admin: {
-        condition: (data) => data.takingAppointments === true && data.useCustomHours === true,
-      },
-      fields: daysOfWeek.map((day) => ({
-        name: day,
-        type: 'group',
-        fields: [
-          {
-            name: 'isWorking',
-            type: 'checkbox',
-            defaultValue: false,
-            label: `Working on ${day.charAt(0).toUpperCase() + day.slice(1)}`,
-          },
-          {
-            type: 'row',
-            admin: { condition: (_: any, siblingData: any) => siblingData?.isWorking },
-            fields: [
-              {
-                name: 'start',
-                type: 'date',
-                admin: {
-                  condition: (_: any, siblingData: any) => siblingData?.isWorking,
-                  date: {
-                    displayFormat: 'h:mm a',
-                    pickerAppearance: 'timeOnly',
-                  },
-                  width: '50%',
-                },
-                label: 'Start Time',
-              },
-              {
-                name: 'end',
-                type: 'date',
-                admin: {
-                  condition: (_: any, siblingData: any) => siblingData?.isWorking,
-                  date: {
-                    displayFormat: 'h:mm a',
-                    pickerAppearance: 'timeOnly',
-                  },
-                  width: '50%',
-                },
-                label: 'End Time',
-              },
-            ],
-          },
-        ],
-      })),
-      label: 'Custom Working Hours',
-    },
-    {
       name: 'maxAppointmentsPerDay',
       type: 'number',
       admin: {

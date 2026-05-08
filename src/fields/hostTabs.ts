@@ -6,6 +6,11 @@ import { buildHostScheduleLeafField } from './hostSchedule'
 type GroupField = Field & { type: 'group'; fields: Field[]; name: string }
 type TabsField = Field & { type: 'tabs'; tabs: Array<{ label: string; fields: Field[] }> }
 
+const capitalize = (value: string): string => {
+  if (!value) return value
+  return value.charAt(0).toUpperCase() + value.slice(1)
+}
+
 const isNamedField = (field: Field): field is Field & { name: string } =>
   typeof (field as any)?.name === 'string' || (field as any)?.type === 'raw'
 
@@ -49,7 +54,7 @@ function ensureScheduleAtPath(hostFields: Field[], hostScheduleFieldPath: string
   if (existing) return
 
   const scheduleLeaf = buildHostScheduleLeafField()
-  currentFields.push({ ...(scheduleLeaf as any), name: leafName } as any)
+  currentFields.push(scheduleLeaf)
 }
 
 /**
@@ -84,7 +89,7 @@ export function applyHostTabs(
   // Avoid double-wrapping if called more than once.
   const existingTabs = mainFields.find((f) => (f as any)?.type === 'tabs') as TabsField | undefined
   if (existingTabs) {
-    hostCollection.fields = [...sidebarOrUntabbed, ...mainFields]
+    hostCollection.fields = [ ...mainFields]
     return hostCollection
   }
 
@@ -108,32 +113,22 @@ export function applyHostTabs(
     openingTimesFields.push(ensured)
   }
 
-  const servicesUIField: Field = {
-      name: 'doctorServicePaymentConfigs',
-      type: 'join',
-      collection: 'doctorServicePaymentConfigs',
-      on: 'doctor',
-    }
+  // Render Opening Times in the sidebar (not as a main tab).
+  // This keeps the schedule always accessible and avoids "override" style UX.
+  const openingTimesSidebarFields: Field[] = openingTimesFields.map((field) => {
+    const existingAdmin = ((field as any)?.admin ?? {}) as Record<string, unknown>
+    return {
+      ...(field as any),
+      admin: {
+        ...existingAdmin,
+        position: 'sidebar',
+      },
+    } as any
+  })
 
-  const tabsField: Field = {
-    type: 'tabs',
-    tabs: [
-      {
-        label: 'Host',
-        fields: hostFields,
-      },
-      {
-        label: 'Opening Times',
-        fields: openingTimesFields,
-      },
-      {
-        label: 'Services',
-        fields: [servicesUIField],
-      },
-    ],
-  }
 
-  hostCollection.fields = [...sidebarOrUntabbed, tabsField]
+
+  hostCollection.fields = [...sidebarOrUntabbed, buildHostScheduleLeafField()]
   return hostCollection
 }
 

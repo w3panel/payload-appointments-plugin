@@ -3,7 +3,11 @@
 
 .pnpm-store
 
-/dev/.next
+ /dev/.next
+
+# Turborepo
+.turbo/
+**/.turbo/
 
 **/.env
 

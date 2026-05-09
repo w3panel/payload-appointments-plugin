@@ -1,4 +1,4 @@
 $ bunx oxlint src --tsconfig ./tsconfig.oxlint.json --quiet
 
 Found 15 warnings and 0 errors.
-Finished in 6ms on 76 files using 10 threads.
+Finished in 291ms on 76 files using 8 threads.

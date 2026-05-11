@@ -1,5 +1,5 @@
-@import 'react-big-calendar/lib/sass/styles';
-@import 'react-big-calendar/lib/addons/dragAndDrop/styles';
+@import 'react-big-calendar/lib/css/react-big-calendar.css';
+@import 'react-big-calendar/lib/addons/dragAndDrop/styles.css';
 
 .appointments-calendar-view.collection-list {
   padding-left: var(--gutter-h) !important;

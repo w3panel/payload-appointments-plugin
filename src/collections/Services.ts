@@ -11,7 +11,7 @@ const Services: CollectionConfig = {
     update: authenticated,
   },
   admin: {
-    defaultColumns: ['title', 'duration', 'paidService', 'price'],
+    defaultColumns: ['title', 'duration', 'bufferTime'],
     group: 'Appointments',
     useAsTitle: 'title',
   },
@@ -34,32 +34,44 @@ const Services: CollectionConfig = {
         description: 'Duration of the service in minutes',
       },
       label: 'Duration (minutes)',
-      max: 480, // 8 hours max
+      max: 480,
       min: 1,
       required: true,
     },
     {
-      type: 'row',
-      fields: [
-        {
-          name: 'paidService',
-          type: 'checkbox',
-          defaultValue: false,
-          label: 'Paid Service',
-        },
-        {
-          name: 'price',
-          type: 'number',
-          admin: {
-            condition: (data) => data.paidService === true,
-            description: 'Price in your local currency',
-          },
-          label: 'Price',
-          min: 0,
-          required: true,
-          // step: 0.01,
-        },
-      ],
+      name: 'bufferTime',
+      type: 'number',
+      admin: {
+        description: 'Buffer time after this service before next appointment (minutes)',
+      },
+      defaultValue: 0,
+      label: 'Buffer Time (minutes)',
+      max: 120,
+      min: 0,
+    },
+    {
+      name: 'minLeadTime',
+      type: 'number',
+      admin: {
+        description:
+          'Minimum hours before appointment that booking is allowed (e.g., 2 = must book at least 2 hours ahead)',
+      },
+      defaultValue: 0,
+      label: 'Minimum Lead Time (hours)',
+      max: 168,
+      min: 0,
+    },
+    {
+      name: 'maxAdvanceBooking',
+      type: 'number',
+      admin: {
+        description:
+          'Maximum days in advance that booking is allowed (e.g., 30 = can only book up to 30 days ahead, 0 = unlimited)',
+      },
+      defaultValue: 0,
+      label: 'Max Advance Booking (days)',
+      max: 365,
+      min: 0,
     },
   ],
   labels: {

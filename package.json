@@ -3,12 +3,27 @@
   "version": "3.0.0",
   "description": "A blank template to get started with Payload 3.0",
   "license": "MIT",
+  "files": [
+    "dist"
+  ],
   "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
   "exports": {
     ".": {
       "import": "./src/index.ts",
       "types": "./src/index.ts",
       "default": "./src/index.ts"
+    },
+    "./types": {
+      "import": "./src/exports/types.ts",
+      "types": "./src/exports/types.ts",
+      "default": "./src/exports/types.ts"
+    },
+    "./client": {
+      "import": "./src/exports/client.ts",
+      "types": "./src/exports/client.ts",
+      "default": "./src/exports/client.ts"
     },
     "./BeforeDashboard": {
       "import": "./src/components/BeforeDashboard/index.tsx",
@@ -24,82 +39,22 @@
       "import": "./src/views/AppointmentsList/index.tsx",
       "types": "./src/views/AppointmentsList/index.tsx",
       "default": "./src/views/AppointmentsList/index.tsx"
+    },
+    "./AnalyticsView": {
+      "import": "./src/views/Analytics/index.tsx",
+      "types": "./src/views/Analytics/index.tsx",
+      "default": "./src/views/Analytics/index.tsx"
+    },
+    "./EmailHtmlPreview": {
+      "import": "./src/components/EmailHtmlPreview/index.tsx",
+      "types": "./src/components/EmailHtmlPreview/index.tsx",
+      "default": "./src/components/EmailHtmlPreview/index.tsx"
+    },
+    "./HostServiceConfigsField": {
+      "import": "./src/components/HostServiceConfigsField/index.tsx",
+      "types": "./src/components/HostServiceConfigsField/index.tsx",
+      "default": "./src/components/HostServiceConfigsField/index.tsx"
     }
-  },
-  "main": "./src/index.ts",
-  "types": "./src/index.ts",
-  "files": [
-    "dist"
-  ],
-  "scripts": {
-    "build": "pnpm copyfiles && pnpm build:types && pnpm build:swc",
-    "build:swc": "swc ./src -d ./dist --config-file .swcrc --strip-leading-paths",
-    "build:types": "tsc --outDir dist --rootDir ./src",
-    "clean": "rimraf {dist,*.tsbuildinfo}",
-    "copyfiles": "copyfiles -u 1 \"src/**/*.{html,css,scss,ttf,woff,woff2,eot,svg,jpg,png,json}\" dist/",
-    "dev": "next dev dev --turbo",
-    "dev:generate-importmap": "pnpm dev:payload generate:importmap",
-    "dev:generate-types": "pnpm dev:payload generate:types",
-    "dev:payload": "cross-env PAYLOAD_CONFIG_PATH=./dev/payload.config.ts payload",
-    "generate:importmap": "pnpm dev:generate-importmap",
-    "generate:types": "pnpm dev:generate-types",
-    "lint": "eslint",
-    "lint:fix": "eslint ./src --fix",
-    "test": "pnpm test:int && pnpm test:e2e",
-    "test:e2e": "playwright test",
-    "test:int": "vitest"
-  },
-  "dependencies": {
-    "@payloadcms/next": "3.68.3",
-    "@payloadcms/ui": "3.68.3",
-    "@react-email/components": "^1.0.1",
-    "@react-email/render": "^2.0.0",
-    "clsx": "^2.1.1",
-    "moment": "^2.30.1",
-    "react-big-calendar": "^1.19.4",
-    "recharts": "2.15.4",
-    "tailwind-merge": "^3.4.0"
-  },
-  "devDependencies": {
-    "@eslint/eslintrc": "^3.3.3",
-    "@payloadcms/db-postgres": "3.68.3",
-    "@payloadcms/eslint-config": "3.28.0",
-    "@payloadcms/richtext-lexical": "3.68.3",
-    "@playwright/test": "1.57.0",
-    "@swc-node/register": "1.11.1",
-    "@swc/cli": "0.7.9",
-    "@types/node": "^25.0.1",
-    "@types/react": "19.2.7",
-    "@types/react-big-calendar": "^1.16.3",
-    "@types/react-dom": "19.2.3",
-    "copyfiles": "2.4.1",
-    "cross-env": "^10.1.0",
-    "eslint": "^9.39.2",
-    "eslint-config-next": "16.0.10",
-    "graphql": "^16.12.0",
-    "next": "^15.5.8",
-    "open": "^11.0.0",
-    "payload": "3.68.3",
-    "prettier": "^3.7.4",
-    "qs-esm": "7.0.2",
-    "react": "19.2.3",
-    "react-dom": "19.2.3",
-    "rimraf": "6.1.2",
-    "sharp": "0.34.5",
-    "sort-package-json": "^3.5.1",
-    "typescript": "5.9.3",
-    "vite-tsconfig-paths": "^5.1.4",
-    "vitest": "^4.0.15"
-  },
-  "peerDependencies": {
-    "next": "^15.0.0 || ^16.0.0",
-    "payload": "^3.37.0",
-    "react": "^18.0.0 || ^19.0.0",
-    "react-dom": "^18.0.0 || ^19.0.0"
-  },
-  "engines": {
-    "node": "^18.20.2 || >=20.9.0",
-    "pnpm": "^9 || ^10"
   },
   "publishConfig": {
     "exports": {
@@ -107,6 +62,11 @@
         "import": "./dist/index.js",
         "types": "./dist/index.d.ts",
         "default": "./dist/index.js"
+      },
+      "./types": {
+        "import": "./dist/exports/types.js",
+        "types": "./dist/exports/types.d.ts",
+        "default": "./dist/exports/types.js"
       },
       "./client": {
         "import": "./dist/exports/client.js",
@@ -117,17 +77,87 @@
         "import": "./dist/exports/rsc.js",
         "types": "./dist/exports/rsc.d.ts",
         "default": "./dist/exports/rsc.js"
+      },
+      "./HostServiceConfigsField": {
+        "import": "./dist/components/HostServiceConfigsField/index.js",
+        "types": "./dist/components/HostServiceConfigsField/index.d.ts",
+        "default": "./dist/components/HostServiceConfigsField/index.js"
       }
     },
     "main": "./dist/index.js",
     "types": "./dist/index.d.ts"
   },
-  "pnpm": {
-    "onlyBuiltDependencies": [
-      "sharp",
-      "esbuild",
-      "unrs-resolver"
-    ]
+  "scripts": {
+    "build": "bun run copyfiles && bun run build:types && bun run build:swc",
+    "build:swc": "swc ./src -d ./dist --config-file .swcrc --strip-leading-paths",
+    "build:types": "tsgo --outDir dist --rootDir ./src",
+    "clean": "rimraf {dist,*.tsbuildinfo}",
+    "copyfiles": "copyfiles -u 1 \"src/**/*.{html,css,scss,ttf,woff,woff2,eot,svg,jpg,png,json}\" dist/",
+    "generate:importmap": "echo \"skip (handled by host app)\"",
+    "generate:types": "echo \"skip (handled by host app)\"",
+    "lint": "bunx oxlint src --tsconfig ./tsconfig.oxlint.json --quiet",
+    "lint:fix": "bunx oxlint src --tsconfig ./tsconfig.oxlint.json --fix",
+    "format": "bunx oxfmt src package.json tsconfig.json tsconfig.oxlint.json lint-staged.config.mjs --write",
+    "format:check": "bunx oxfmt src package.json tsconfig.json tsconfig.oxlint.json lint-staged.config.mjs --check",
+    "typecheck": "tsgo --noEmit",
+    "check": "bun run lint && bun run format:check && bun run typecheck",
+    "lint-staged": "lint-staged --no-stash",
+    "prepare": "husky",
+    "test": "bun run test:int && bun run test:e2e",
+    "test:e2e": "playwright test",
+    "test:int": "vitest"
   },
-  "registry": "https://registry.npmjs.org/"
+  "dependencies": {
+    "@payloadcms/ui": "catalog:",
+    "@react-email/components": "catalog:",
+    "@react-email/render": "catalog:",
+    "clsx": "catalog:",
+    "moment": "^2.30.1",
+    "moment-timezone": "catalog:",
+    "react-big-calendar": "^1.19.4",
+    "recharts": "catalog:",
+    "tailwind-merge": "catalog:"
+  },
+  "devDependencies": {
+    "@eslint/eslintrc": "catalog:",
+    "@payloadcms/db-postgres": "catalog:",
+    "@payloadcms/eslint-config": "3.28.0",
+    "@payloadcms/richtext-lexical": "catalog:",
+    "@playwright/test": "catalog:",
+    "@swc-node/register": "1.11.1",
+    "@swc/cli": "0.8.1",
+    "@types/node": "catalog:",
+    "@types/react": "catalog:",
+    "@types/react-big-calendar": "^1.16.3",
+    "@types/react-dom": "catalog:",
+    "@typescript/native-preview": "catalog:",
+    "copyfiles": "2.4.1",
+    "cross-env": "catalog:",
+    "eslint": "catalog:",
+    "eslint-config-next": "catalog:",
+    "graphql": "catalog:",
+    "husky": "^9.1.7",
+    "lint-staged": "^17.0.3",
+    "open": "^11.0.0",
+    "oxfmt": "catalog:",
+    "payload": "catalog:",
+    "prettier": "catalog:",
+    "qs-esm": "8.0.1",
+    "react": "catalog:",
+    "react-dom": "catalog:",
+    "rimraf": "6.1.3",
+    "sharp": "0.34.5",
+    "sort-package-json": "^3.5.1",
+    "vite-tsconfig-paths": "catalog:",
+    "vitest": "catalog:"
+  },
+  "peerDependencies": {
+    "payload": "^3.84.0",
+    "react": "^19.2.6",
+    "react-dom": "^19.2.6"
+  },
+  "engines": {
+    "bun": ">=1.3.12",
+    "node": "^18.20.2 || >=20.9.0"
+  }
 }

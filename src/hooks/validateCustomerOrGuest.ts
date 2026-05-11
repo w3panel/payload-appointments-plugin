@@ -7,14 +7,9 @@ export const validateCustomerOrGuest: CollectionBeforeValidateHook = async ({ da
 
   if (data?.appointmentType === 'appointment') {
     const hasCustomer = !!data?.customer
-    const hasGuestCustomer = !!data?.guestCustomer
 
-    if (!hasCustomer && !hasGuestCustomer) {
-      throw new Error('Either a customer or guest customer is required for appointments')
-    }
-
-    if (hasCustomer && hasGuestCustomer) {
-      throw new Error('An appointment cannot have both a customer and guest customer')
+    if (!hasCustomer) {
+      throw new Error('Customer is required for appointments')
     }
   }
 

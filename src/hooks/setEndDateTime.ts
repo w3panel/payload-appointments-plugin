@@ -27,8 +27,14 @@ export const setEndDateTime: FieldHook = async ({ req, siblingData }) => {
       (total, service) => total + (service.duration || 0),
       0,
     )
+
+    const maxBufferTime = services.docs.reduce(
+      (max, service) => Math.max(max, service.bufferTime || 0),
+      0,
+    )
+
     return moment(siblingData.start)
-      .add(totalDuration, 'minutes')
+      .add(totalDuration + maxBufferTime, 'minutes')
       .format('YYYY-MM-DDTHH:mm:ss.SSSZ')
   } catch (error) {
     req.payload.logger.error(`Error calculating end time: ${error}`)

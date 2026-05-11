@@ -1,13 +1,25 @@
 import type { CollectionConfig } from 'payload'
 
 import { anyone } from '../access/anyone'
-import { addAdminTitle } from '../hooks/addAdminTitle'
+import { buildAddAdminTitle } from '../hooks/addAdminTitle'
+import { autoCompleteAppointments } from '../hooks/autoCompleteAppointments'
+import { calculatePaymentAmount } from '../hooks/calculatePaymentAmount'
+import { buildDispatchPaymentRequired } from '../hooks/dispatchPaymentRequired'
+import { generateCancellationToken } from '../hooks/generateCancellationToken'
+import { generateRecurringAppointments } from '../hooks/generateRecurringAppointments'
+import { notifyWaitlist } from '../hooks/notifyWaitlist'
 import { sendCustomerEmail } from '../hooks/sendCustomerEmail'
 import { setEndDateTime } from '../hooks/setEndDateTime'
 import { validateCustomerOrGuest } from '../hooks/validateCustomerOrGuest'
+import { validateNoOverlap } from '../hooks/validateNoOverlap'
+import type { PaymentHooks } from '../types'
+import type { AppointmentsBuildConfig } from '../types/config'
 
-const Appointments: CollectionConfig = {
-  slug: 'appointments',
+export const buildAppointments = (
+  config: AppointmentsBuildConfig,
+  paymentHooks?: PaymentHooks,
+): CollectionConfig => ({
+  slug: config.appointmentsSlug,
   access: {
     create: anyone,
   },
@@ -33,8 +45,39 @@ const Appointments: CollectionConfig = {
       required: true,
     },
     {
+      name: 'status',
+      type: 'select',
+      admin: {
+        condition: (data, siblingData) => siblingData.appointmentType === 'appointment',
+        position: 'sidebar',
+      },
+      defaultValue: 'confirmed',
+      label: 'Status',
+      options: [
+        { label: 'Pending', value: 'pending' },
+        { label: 'Confirmed', value: 'confirmed' },
+        { label: 'Cancelled', value: 'cancelled' },
+        { label: 'Completed', value: 'completed' },
+        { label: 'No Show', value: 'no-show' },
+      ],
+    },
+    {
+      name: 'cancelledAt',
+      type: 'date',
+      admin: {
+        condition: (data, siblingData) => siblingData.status === 'cancelled',
+        position: 'sidebar',
+        readOnly: true,
+      },
+      label: 'Cancelled At',
+    },
+    {
       name: 'host',
       type: 'relationship',
+      // Workaround for D1/Drizzle schema sync occasionally attempting to create an
+      // already-existing index (`appointments_host_idx`) and failing Payload init.
+      // This index is an optimization; disabling it avoids a hard startup failure.
+      index: false,
       admin: {
         condition: (siblingData) => {
           if (siblingData.appointmentType === 'appointment') {
@@ -46,7 +89,7 @@ const Appointments: CollectionConfig = {
           return false
         },
       },
-      filterOptions: ({ data }) => {
+      filterOptions: () => {
         return {
           takingAppointments: {
             equals: true,
@@ -54,7 +97,8 @@ const Appointments: CollectionConfig = {
         }
       },
       label: 'Host',
-      relationTo: 'teamMembers',
+      // `relationTo` is intentionally loose so consumers can supply their own host collection.
+      relationTo: config.hostSlug as any,
       required: true,
     },
     {
@@ -62,28 +106,14 @@ const Appointments: CollectionConfig = {
       type: 'relationship',
       admin: {
         condition: (siblingData) => {
-          if (siblingData.appointmentType === 'appointment' && !siblingData.guestCustomer) {
+          if (siblingData.appointmentType === 'appointment') {
             return true
           }
           return false
         },
       },
       label: 'Customer',
-      relationTo: 'users',
-    },
-    {
-      name: 'guestCustomer',
-      type: 'relationship',
-      admin: {
-        condition: (siblingData) => {
-          if (siblingData.appointmentType === 'appointment' && !siblingData.customer) {
-            return true
-          }
-          return false
-        },
-      },
-      label: 'Guest Customer',
-      relationTo: 'guestCustomers',
+      relationTo: config.customerSlug as any,
     },
     {
       name: 'bookedBy',
@@ -96,10 +126,6 @@ const Appointments: CollectionConfig = {
         {
           label: 'Customer',
           value: 'customer',
-        },
-        {
-          label: 'Guest',
-          value: 'guest',
         },
       ],
     },
@@ -114,9 +140,31 @@ const Appointments: CollectionConfig = {
           return false
         },
       },
+      filterOptions: async ({ siblingData, req }) => {
+        if (!config.requireEnabledServicesOnly) return true
+        const host = (siblingData as any)?.host
+        const hostId = typeof host === 'object' ? host?.id : host
+        if (!hostId) return true
+
+        const enabledConfigs = await req.payload.find({
+          collection: config.hostServiceConfigsSlug as any,
+          depth: 0,
+          limit: 500,
+          where: {
+            and: [{ host: { equals: hostId } }, { enabled: { equals: true } }],
+          },
+        })
+
+        const enabledServiceIds = enabledConfigs.docs
+          .map((d: any) => (typeof d.service === 'object' ? d.service?.id : d.service))
+          .filter(Boolean)
+
+        if (enabledServiceIds.length === 0) return { id: { in: ['__none__'] } }
+        return { id: { in: enabledServiceIds } }
+      },
       hasMany: true,
       label: 'Services',
-      relationTo: 'services',
+      relationTo: config.servicesSlug as any,
       required: true,
     },
     {
@@ -183,24 +231,219 @@ const Appointments: CollectionConfig = {
       ],
     },
     {
+      name: 'customerNotes',
+      type: 'textarea',
+      admin: {
+        condition: (data, siblingData) => siblingData.appointmentType === 'appointment',
+        description: 'Special requests or notes from the customer',
+      },
+      label: 'Customer Notes',
+    },
+    {
+      name: 'internalNotes',
+      type: 'textarea',
+      admin: {
+        condition: (data, siblingData) => siblingData.appointmentType === 'appointment',
+        description: 'Internal notes visible only to staff',
+      },
+      label: 'Internal Notes',
+    },
+    {
       name: 'adminTitle',
       type: 'text',
       admin: {
         hidden: true,
       },
       hooks: {
-        beforeValidate: [addAdminTitle],
+        beforeValidate: [buildAddAdminTitle(config)],
       },
+    },
+    {
+      name: 'cancellationToken',
+      type: 'text',
+      admin: {
+        condition: (data, siblingData) => siblingData.appointmentType === 'appointment',
+        position: 'sidebar',
+        readOnly: true,
+      },
+      hooks: {
+        beforeValidate: [generateCancellationToken],
+      },
+      index: true,
+      label: 'Cancellation Token',
+      unique: true,
+    },
+    {
+      name: 'payment',
+      type: 'group',
+      admin: {
+        condition: (data, siblingData) => siblingData.appointmentType === 'appointment',
+      },
+      fields: [
+        {
+          name: 'status',
+          type: 'select',
+          defaultValue: 'not-required',
+          label: 'Payment Status',
+          options: [
+            { label: 'Not Required', value: 'not-required' },
+            { label: 'Pending', value: 'pending' },
+            { label: 'Deposit Paid', value: 'deposit-paid' },
+            { label: 'Fully Paid', value: 'paid' },
+            { label: 'Refunded', value: 'refunded' },
+            { label: 'Partially Refunded', value: 'partial-refund' },
+          ],
+        },
+        {
+          type: 'row',
+          fields: [
+            {
+              name: 'amountDue',
+              type: 'number',
+              admin: {
+                readOnly: true,
+              },
+              label: 'Amount Due',
+              min: 0,
+            },
+            {
+              name: 'amountPaid',
+              type: 'number',
+              defaultValue: 0,
+              label: 'Amount Paid',
+              min: 0,
+            },
+          ],
+        },
+        {
+          name: 'externalPaymentId',
+          type: 'text',
+          admin: {
+            description: 'Payment ID from external provider (Stripe, etc.)',
+          },
+          label: 'External Payment ID',
+        },
+        {
+          name: 'paymentUrl',
+          type: 'text',
+          admin: {
+            description: 'Hosted payment URL returned by the provider',
+            readOnly: true,
+          },
+          label: 'Payment URL',
+        },
+        {
+          name: 'paidAt',
+          type: 'date',
+          admin: {
+            date: {
+              pickerAppearance: 'dayAndTime',
+            },
+            readOnly: true,
+          },
+          label: 'Paid At',
+        },
+      ],
+      label: 'Payment',
+    },
+    {
+      name: 'recurrence',
+      type: 'group',
+      admin: {
+        condition: (data, siblingData) => siblingData.appointmentType === 'appointment',
+      },
+      fields: [
+        {
+          name: 'isRecurring',
+          type: 'checkbox',
+          defaultValue: false,
+          label: 'Recurring Appointment',
+        },
+        {
+          name: 'pattern',
+          type: 'select',
+          admin: {
+            condition: (data, siblingData) => siblingData?.isRecurring === true,
+          },
+          label: 'Recurrence Pattern',
+          options: [
+            { label: 'Weekly', value: 'weekly' },
+            { label: 'Bi-weekly', value: 'biweekly' },
+            { label: 'Monthly', value: 'monthly' },
+          ],
+        },
+        {
+          name: 'endType',
+          type: 'select',
+          admin: {
+            condition: (data, siblingData) => siblingData?.isRecurring === true,
+          },
+          defaultValue: 'occurrences',
+          label: 'End After',
+          options: [
+            { label: 'Number of occurrences', value: 'occurrences' },
+            { label: 'End date', value: 'endDate' },
+          ],
+        },
+        {
+          name: 'occurrences',
+          type: 'number',
+          admin: {
+            condition: (data, siblingData) =>
+              siblingData?.isRecurring === true && siblingData?.endType === 'occurrences',
+            description: 'Number of total occurrences (including this one)',
+          },
+          defaultValue: 4,
+          label: 'Occurrences',
+          max: 52,
+          min: 2,
+        },
+        {
+          name: 'endDate',
+          type: 'date',
+          admin: {
+            condition: (data, siblingData) =>
+              siblingData?.isRecurring === true && siblingData?.endType === 'endDate',
+            description: 'Recurring appointments will be created until this date',
+          },
+          label: 'End Date',
+        },
+        {
+          name: 'seriesId',
+          type: 'text',
+          admin: {
+            hidden: true,
+            readOnly: true,
+          },
+          index: true,
+          label: 'Series ID',
+        },
+      ],
+      label: 'Recurrence',
     },
   ],
   hooks: {
-    afterChange: [sendCustomerEmail],
-    beforeValidate: [validateCustomerOrGuest],
+    afterChange: [
+      sendCustomerEmail,
+      autoCompleteAppointments,
+      generateRecurringAppointments,
+      notifyWaitlist,
+      buildDispatchPaymentRequired(config, paymentHooks),
+    ],
+    beforeChange: [calculatePaymentAmount],
+    beforeValidate: [validateCustomerOrGuest, validateNoOverlap],
   },
   labels: {
     plural: 'Appointments',
     singular: 'Appointment',
   },
-}
+})
+
+/**
+ * Backwards-compatible default export. Uses the default slug configuration.
+ * Prefer importing `buildAppointments` and passing your resolved config.
+ */
+import { DEFAULT_BUILD_CONFIG } from '../types/config'
+const Appointments = buildAppointments(DEFAULT_BUILD_CONFIG)
 
 export default Appointments

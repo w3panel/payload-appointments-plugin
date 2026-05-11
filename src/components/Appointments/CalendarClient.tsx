@@ -10,47 +10,86 @@ import withDragAndDrop from 'react-big-calendar/lib/addons/dragAndDrop'
 
 import type {
   Appointment as AppointmentType,
+  AppointmentStatus,
   BigCalendarAppointment,
-  TeamMember,
+  Host,
 } from '../../types'
 
 import Appointment from './Appointment'
 import Blockout from './Blockout'
+import StatsCard from './StatsCard'
+import Toolbar from './Toolbar'
 
 const localizer = momentLocalizer(moment)
-const DnDCalendar = withDragAndDrop<BigCalendarAppointment, TeamMember>(ReactBigCalendar)
+const DnDCalendar = withDragAndDrop<BigCalendarAppointment, Host>(ReactBigCalendar)
 
 interface CalendarClientProps {
   apiRoute: string
   collectionSlug: string
+  hostSlug: string
   initialAppointments: AppointmentType[]
-  initialTeamMembers: TeamMember[]
+  initialHosts: Host[]
+}
+
+function getDateRangeForView(date: Date, view: View): { start: Date; end: Date } {
+  const m = moment(date)
+  if (view === 'week') {
+    return {
+      start: m.clone().startOf('week').toDate(),
+      end: m.clone().endOf('week').toDate(),
+    }
+  }
+  return {
+    start: m.clone().startOf('day').toDate(),
+    end: m.clone().endOf('day').toDate(),
+  }
 }
 
 export default function CalendarClient({
   apiRoute,
   collectionSlug,
   initialAppointments,
-  initialTeamMembers,
+  initialHosts,
 }: CalendarClientProps) {
   const [view, setView] = useState<View>('day')
+  const [currentDate, setCurrentDate] = useState<Date>(new Date())
   const [appointments, setAppointments] = useState<AppointmentType[]>(initialAppointments)
+  const [statusFilter, setStatusFilter] = useState<AppointmentStatus | 'all'>('all')
+  const [teamFilter, setTeamFilter] = useState<string | 'all'>('all')
+  const [isLoading, setIsLoading] = useState(false)
 
   const takingAppointments = useMemo(
-    () => initialTeamMembers.filter((user: TeamMember) => user.takingAppointments),
-    [initialTeamMembers],
+    () => initialHosts.filter((host: Host) => host.takingAppointments),
+    [initialHosts],
   )
 
-  const [DocumentDrawer, _DocumentDrawerToggler, { isDrawerOpen, toggleDrawer }] =
-    useDocumentDrawer({
-      collectionSlug,
-    })
+  const filteredHosts = useMemo(() => {
+    if (teamFilter === 'all') return takingAppointments
+    return takingAppointments.filter((host) => String(host.id) === teamFilter)
+  }, [takingAppointments, teamFilter])
+
+  const [DocumentDrawer, , { isDrawerOpen, toggleDrawer }] = useDocumentDrawer({
+    collectionSlug,
+  })
 
   const fetchAppointments = useCallback(async () => {
-    const res = await fetch(`${apiRoute}/${collectionSlug}`)
-    const appointmentsRes = await res.json()
-    setAppointments(appointmentsRes.docs)
-  }, [apiRoute, collectionSlug])
+    const { start, end } = getDateRangeForView(currentDate, view)
+
+    const params = new URLSearchParams()
+    params.set('where[start][greater_than_equal]', start.toISOString())
+    params.set('where[end][less_than_equal]', end.toISOString())
+    params.set('limit', '500')
+    params.set('depth', '1')
+
+    setIsLoading(true)
+    try {
+      const res = await fetch(`${apiRoute}/${collectionSlug}?${params.toString()}`)
+      const appointmentsRes = (await res.json()) as { docs: AppointmentType[] }
+      setAppointments(appointmentsRes.docs)
+    } finally {
+      setIsLoading(false)
+    }
+  }, [apiRoute, collectionSlug, currentDate, view])
 
   useEffect(() => {
     if (!isDrawerOpen) {
@@ -59,13 +98,20 @@ export default function CalendarClient({
   }, [isDrawerOpen, fetchAppointments])
 
   const remappedAppointments = useMemo(() => {
-    return appointments.map((doc: AppointmentType) => ({
-      ...doc,
-      end: moment(doc.end).toDate(),
-      hostId: doc.host.id,
-      start: moment(doc.start).toDate(),
-    }))
-  }, [appointments])
+    return appointments
+      .filter((doc: AppointmentType) => {
+        if (statusFilter !== 'all' && doc.status !== statusFilter) {
+          return false
+        }
+        return true
+      })
+      .map((doc: AppointmentType) => ({
+        ...doc,
+        end: moment(doc.end).toDate(),
+        hostId: String(doc.host?.id ?? ''),
+        start: moment(doc.start).toDate(),
+      }))
+  }, [appointments, statusFilter])
 
   const handleSlotSelect = useCallback(
     (_slotInfo: SlotInfo) => {
@@ -95,7 +141,15 @@ export default function CalendarClient({
     [apiRoute, collectionSlug, fetchAppointments],
   )
 
-  const components: Components<BigCalendarAppointment, TeamMember> = useMemo(
+  const handleDateChange = useCallback((date: Date) => {
+    setCurrentDate(date)
+  }, [])
+
+  const handleNewAppointment = useCallback(() => {
+    toggleDrawer()
+  }, [toggleDrawer])
+
+  const components: Components<BigCalendarAppointment, Host> = useMemo(
     () => ({
       event: ({ event }) => {
         if (event.appointmentType === 'appointment') {
@@ -110,33 +164,46 @@ export default function CalendarClient({
     [],
   )
 
-  if (!remappedAppointments.length && !takingAppointments.length) {
-    return null
-  }
-
   return (
     <React.Fragment>
-      <DnDCalendar
-        components={components}
-        defaultDate={moment().subtract(1, 'd').toDate()}
-        defaultView={view}
-        events={remappedAppointments}
-        localizer={localizer}
-        max={new Date(1970, 0, 0, 19, 0, 0, 0)}
-        min={new Date(1970, 0, 0, 9, 0, 0, 0)}
-        onEventDrop={handleEventDrop}
-        onSelectSlot={handleSlotSelect}
-        onView={(newView: View) => setView(newView)}
-        resizable={false}
-        resourceAccessor="hostId"
-        resourceIdAccessor="id"
-        resources={takingAppointments}
-        resourceTitleAccessor="preferredNameAppointments"
-        selectable
-        step={15}
-        titleAccessor="title"
-        views={['week', 'day']}
+      <Toolbar
+        currentDate={currentDate}
+        hosts={takingAppointments}
+        onDateChange={handleDateChange}
+        onNewAppointment={handleNewAppointment}
+        onStatusFilterChange={setStatusFilter}
+        onTeamFilterChange={setTeamFilter}
+        statusFilter={statusFilter}
+        teamFilter={teamFilter}
       />
+
+      <StatsCard appointments={appointments} currentDate={currentDate} />
+
+      <div className={`appointments-calendar ${isLoading ? 'appointments-calendar--loading' : ''}`}>
+        <DnDCalendar
+          components={components}
+          date={currentDate}
+          defaultView={view}
+          events={remappedAppointments}
+          localizer={localizer}
+          max={new Date(1970, 0, 0, 19, 0, 0, 0)}
+          min={new Date(1970, 0, 0, 9, 0, 0, 0)}
+          onEventDrop={handleEventDrop}
+          onNavigate={(date) => setCurrentDate(date)}
+          onSelectSlot={handleSlotSelect}
+          onView={(newView: View) => setView(newView)}
+          resizable={false}
+          resourceAccessor="hostId"
+          resourceIdAccessor="id"
+          resources={filteredHosts}
+          resourceTitleAccessor="preferredNameAppointments"
+          selectable
+          step={15}
+          titleAccessor="title"
+          views={['week', 'day']}
+        />
+      </div>
+
       <DocumentDrawer />
     </React.Fragment>
   )

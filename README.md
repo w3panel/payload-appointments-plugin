@@ -7,7 +7,9 @@ This plugin allows you to add appointment scheduling capabilities to your payloa
 
 - Services and Appointments collections.
 - An Appointment schedule calendar view.
-- Opening times global.
+- Opening times global (legacy, only registered when needed).
+- Optional per-host schedules with multi-shift days.
+- Optional host-specific service pricing & payment configuration.
 
 ### Appointments Schedule View For Everyone
 
@@ -96,10 +98,76 @@ import appointments from 'payload-appointments-plugin';
 
 export default buildConfig({
   /* ... */
-  plugins: [appointmentsPlugin()],
+  plugins: [
+    appointmentsPlugin({
+      // Enable per-host schedules embedded on your host collection (e.g. doctors).
+      scheduling: {
+        mode: 'embeddedOnHost',
+        hostScheduleFieldPath: 'appointments',
+        fallbackToGlobalOpeningTimes: true,
+      },
+      // Enable host-specific service configuration via join collection.
+      hostServices: {
+        hostServiceConfigSlug: 'hostServiceConfigs',
+        // If true, appointment booking only allows services enabled for that host.
+        requireEnabledServicesOnly: true,
+      },
+    }),
+  ],
   /* ... */
 });
 ```
+
+## Doctors booking (apps/web style integration)
+
+If your app uses an existing `doctors` collection as the host, configure the plugin like this:
+
+```ts
+appointmentsPlugin({
+  hostCollectionSlug: 'doctors',
+  registerHostCollection: false,
+  scheduling: {
+    mode: 'embeddedOnHost',
+    hostScheduleFieldPath: 'appointments',
+    fallbackToGlobalOpeningTimes: true,
+  },
+  hostServices: {
+    hostServiceConfigSlug: 'hostServiceConfigs',
+    requireEnabledServicesOnly: true,
+  },
+})
+```
+
+### Where schedules live
+- Each doctor will have `appointments` injected automatically by the plugin.\n
+- Admin path: `Doctors` → (doctor doc) → `appointments` → `weekly.<day>.shifts[]`.\n
+
+### Host-specific service pricing
+- Create `Host Service Configs` docs to enable/price services per doctor.\n
+- Each row is unique per `(host, service)` via the auto-generated `key = \"<hostId>:<serviceId>\"`.\n
+
+## Migration notes (legacy -> per-host schedules + host-priced services)
+
+### Schedules
+- **Legacy**: Global `openingTimes` + (optional) host `customHours` single window per day.\n
+- **New**: Host embedded schedule with `weekly.<day>.shifts[]`.\n
+\n
+Recommended migration approach:\n
+1. Enable `scheduling.mode: 'embeddedOnHost'`.\n
+2. For each host:\n
+   - If they previously used `customHours.<day>.start/end`, convert each day into `shifts=[{ start, end }]`.\n
+   - If they had no custom hours, optionally copy the legacy global `openingTimes` window into their schedule.\n
+3. Once all hosts are migrated, set `fallbackToGlobalOpeningTimes: false` (and optionally `requireHostSchedule: true`).\n
+\n
+### Services pricing/payment\n
+- **Legacy**: payment/pricing fields live directly on `services`.\n
+- **New**: create one `hostServiceConfigs` doc per (host, service) with:\n
+  - `enabled`, `price`, `paidService`, `paymentRequired`, deposits, and platform fee.\n
+\n
+Suggested migration:\n
+1. Create `hostServiceConfigs` docs for each host+service pair.\n
+2. Copy price/payment fields from the service catalog as initial defaults.\n
+3. After verifying payment calculations, treat the service catalog as a reusable template and manage pricing per host.\n
 
 #### 4. add email config
 

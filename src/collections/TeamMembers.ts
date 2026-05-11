@@ -2,6 +2,8 @@ import type { CollectionConfig } from 'payload'
 
 import { authenticated } from '../access/authenticated'
 
+const daysOfWeek = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday']
+
 const TeamMembers: CollectionConfig = {
   slug: 'teamMembers',
   access: {
@@ -70,19 +72,42 @@ const TeamMembers: CollectionConfig = {
       defaultValue: false,
       label: 'Available for Appointments',
     },
-    // {
-    //   name: "maxAppointmentsPerDay",
-    //   type: "number",
-    //   label: "Max Daily Appointments",
-    //   defaultValue: 8,
-    //   required: true,
-    //   min: 1,
-    //   max: 50,
-    //   admin: {
-    //     description: "Maximum number of appointments this team member can take per day",
-    //     condition: (data) => data.takingAppointments === true,
-    //   },
-    // },
+    {
+      name: 'maxAppointmentsPerDay',
+      type: 'number',
+      admin: {
+        condition: (data) => data.takingAppointments === true,
+        description:
+          'Maximum number of appointments this team member can take per day (0 = unlimited)',
+      },
+      defaultValue: 0,
+      label: 'Max Daily Appointments',
+      max: 50,
+      min: 0,
+    },
+    {
+      name: 'icalToken',
+      type: 'text',
+      admin: {
+        condition: (data) => data.takingAppointments === true,
+        description: 'Token for subscribing to iCal feed (auto-generated)',
+        readOnly: true,
+      },
+      hooks: {
+        beforeValidate: [
+          async ({ value, operation }) => {
+            if (operation === 'create' || !value) {
+              const crypto = await import('crypto')
+              return crypto.randomBytes(32).toString('hex')
+            }
+            return value
+          },
+        ],
+      },
+      index: true,
+      label: 'iCal Feed Token',
+      unique: true,
+    },
   ],
   timestamps: true,
 }

@@ -76,13 +76,24 @@ export function applyHostTabs(
 
   const all = hostCollection.fields as Field[]
 
+  const rootSegment = config.hostScheduleFieldPath
+    .split('.')
+    .map((s) => s.trim())
+    .filter(Boolean)[0]
+
   // Keep any sidebar fields (and any unnamed layout-only fields) outside tabs.
+  // The injected host schedule group defaults to `admin.position: 'sidebar'`, but it must
+  // still participate in opening-times partitioning — otherwise it is duplicated (sidebar
+  // bucket + openingTimesSidebarFields).
   const sidebarOrUntabbed: Field[] = []
   const mainFields: Field[] = []
 
   for (const field of all) {
     const isSidebar = Boolean((field as any)?.admin?.position === 'sidebar')
-    if (!isNamedField(field) || isSidebar) {
+    const isScheduleRootField =
+      Boolean(rootSegment && isNamedField(field) && (field as any).name === rootSegment)
+
+    if (!isNamedField(field) || (isSidebar && !isScheduleRootField)) {
       sidebarOrUntabbed.push(field)
     } else {
       mainFields.push(field)
@@ -92,14 +103,10 @@ export function applyHostTabs(
   // Avoid double-wrapping if called more than once.
   const existingTabs = mainFields.find((f) => (f as any)?.type === 'tabs') as TabsField | undefined
   if (existingTabs) {
-    hostCollection.fields = [...mainFields]
+    hostCollection.fields = [...sidebarOrUntabbed, ...mainFields]
     return hostCollection
   }
 
-  const rootSegment = config.hostScheduleFieldPath
-    .split('.')
-    .map((s) => s.trim())
-    .filter(Boolean)[0]
   const openingTimesFields: Field[] = []
   const hostFields: Field[] = []
 
@@ -132,9 +139,23 @@ export function applyHostTabs(
     } as any
   })
 
+  const composed: Field[] = [...sidebarOrUntabbed, ...openingTimesSidebarFields]
+
+  if (hostFields.length > 0) {
+    composed.push({
+      type: 'tabs',
+      tabs: [
+        {
+          label: 'Details',
+          fields: hostFields,
+        },
+      ],
+    } as Field)
+  }
+
   const nextFields: Field[] = []
   const seenNames = new Set<string>()
-  for (const field of [...sidebarOrUntabbed, ...openingTimesSidebarFields]) {
+  for (const field of composed) {
     const name = (field as any)?.name
     if (typeof name === 'string') {
       if (seenNames.has(name)) continue

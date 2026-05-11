@@ -1,5 +1,7 @@
 import type { Field } from 'payload'
 
+import { validateShiftsArrayNoOverlap } from '../validation/hostScheduleShifts'
+
 const daysOfWeek = [
   'monday',
   'tuesday',
@@ -37,38 +39,6 @@ const timeOnlyAdmin = {
     pickerAppearance: 'timeOnly' as const,
   },
   width: '50%',
-}
-
-function validateNoShiftOverlaps(value: unknown): true | string {
-  if (!Array.isArray(value) || value.length <= 1) return true
-
-  const shifts = value
-    .map((v) => {
-      if (!v || typeof v !== 'object') return null
-      const start = (v as any).start ? new Date((v as any).start) : null
-      const end = (v as any).end ? new Date((v as any).end) : null
-      if (!start || !end || Number.isNaN(start.getTime()) || Number.isNaN(end.getTime()))
-        return null
-      return { start, end }
-    })
-    .filter(Boolean) as Array<{ start: Date; end: Date }>
-
-  shifts.sort((a, b) => a.start.getTime() - b.start.getTime())
-
-  for (let i = 0; i < shifts.length; i++) {
-    const { start, end } = shifts[i]
-    if (end.getTime() <= start.getTime()) {
-      return 'Shift end time must be after start time.'
-    }
-    if (i > 0) {
-      const prev = shifts[i - 1]
-      if (start.getTime() < prev.end.getTime()) {
-        return 'Shifts in a day cannot overlap.'
-      }
-    }
-  }
-
-  return true
 }
 
 export const buildHostScheduleLeafField = (): Field => ({
@@ -112,7 +82,7 @@ export const buildHostScheduleLeafField = (): Field => ({
               description: 'Add one or more shifts (e.g. morning + evening).',
             },
             labels: { plural: 'Shifts', singular: 'Shift' },
-            validate: validateNoShiftOverlaps,
+            validate: validateShiftsArrayNoOverlap,
             fields: [
               {
                 name: 'title',

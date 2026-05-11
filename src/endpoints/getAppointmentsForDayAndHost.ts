@@ -3,6 +3,7 @@ import type { PayloadHandler, PayloadRequest } from 'payload'
 import moment from 'moment'
 import momentTz from 'moment-timezone'
 
+import { getAtPath } from '../lib/getAtPath'
 import type { AppointmentsBuildConfig } from '../types/config'
 import { DEFAULT_BUILD_CONFIG } from '../types/config'
 
@@ -40,20 +41,6 @@ type BookingWindowConfig = {
   maxAdvanceBooking: number
   earliestBookableTime: string | null
   latestBookableDate: string | null
-}
-
-const getAtPath = (doc: unknown, path: string): unknown => {
-  if (!doc || typeof doc !== 'object') return undefined
-  const segments = path
-    .split('.')
-    .map((s) => s.trim())
-    .filter(Boolean)
-  let current: any = doc
-  for (const seg of segments) {
-    if (!current || typeof current !== 'object') return undefined
-    current = current[seg]
-  }
-  return current
 }
 
 const buildDayTimeInTimezone = (

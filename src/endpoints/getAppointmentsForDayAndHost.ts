@@ -3,6 +3,7 @@ import type { PayloadHandler, PayloadRequest } from 'payload'
 import moment from 'moment'
 import momentTz from 'moment-timezone'
 
+import { getAtPath } from '../lib/getAtPath'
 import type { AppointmentsBuildConfig } from '../types/config'
 import { DEFAULT_BUILD_CONFIG } from '../types/config'
 
@@ -40,20 +41,6 @@ type BookingWindowConfig = {
   maxAdvanceBooking: number
   earliestBookableTime: string | null
   latestBookableDate: string | null
-}
-
-const getAtPath = (doc: unknown, path: string): unknown => {
-  if (!doc || typeof doc !== 'object') return undefined
-  const segments = path
-    .split('.')
-    .map((s) => s.trim())
-    .filter(Boolean)
-  let current: any = doc
-  for (const seg of segments) {
-    if (!current || typeof current !== 'object') return undefined
-    current = current[seg]
-  }
-  return current
 }
 
 const buildDayTimeInTimezone = (
@@ -264,19 +251,25 @@ export const buildGetAppointmentsForDayAndHost =
           return Response.json({ availableSlots: [], filteredSlots: [] })
         } else if (Array.isArray(dayConfig.shifts) && dayConfig.shifts.length > 0) {
           const allSlots: string[] = []
+          let timelineStart: string | null = null
+          let timelineEnd: string | null = null
+
           for (const shift of dayConfig.shifts) {
             if (!shift?.start || !shift?.end) continue
             const shiftStart = buildDayTimeInTimezone(day, shift.start, tz)
             const shiftEnd = buildDayTimeInTimezone(day, shift.end, tz)
             if (!shiftEnd.isAfter(shiftStart)) continue
-            allSlots.push(
-              ...curateSlots(
-                totalDuration,
-                shiftStart.toISOString(),
-                shiftEnd.toISOString(),
-                bookingWindow,
-              ),
-            )
+
+            const startIso = shiftStart.toISOString()
+            const endIso = shiftEnd.toISOString()
+            if (!timelineStart || shiftStart.isBefore(moment(timelineStart))) {
+              timelineStart = startIso
+            }
+            if (!timelineEnd || shiftEnd.isAfter(moment(timelineEnd))) {
+              timelineEnd = endIso
+            }
+
+            allSlots.push(...curateSlots(totalDuration, startIso, endIso, bookingWindow))
           }
 
           const filteredSlots = await filterSlotsForHost(
@@ -295,6 +288,8 @@ export const buildGetAppointmentsForDayAndHost =
             bufferTime: maxBufferTime,
             filteredSlots,
             slotDuration,
+            timelineStart: timelineStart ?? undefined,
+            timelineEnd: timelineEnd ?? undefined,
           })
         } else {
           return Response.json({ availableSlots: [], filteredSlots: [] })
@@ -327,12 +322,10 @@ export const buildGetAppointmentsForDayAndHost =
         second: 0,
       })
 
-      const availableSlots = curateSlots(
-        totalDuration,
-        startTime.toISOString(),
-        endTime.toISOString(),
-        bookingWindow,
-      )
+      const timelineStart = startTime.toISOString()
+      const timelineEnd = endTime.toISOString()
+
+      const availableSlots = curateSlots(totalDuration, timelineStart, timelineEnd, bookingWindow)
       const filteredSlots = await filterSlotsForHost(
         config,
         req,
@@ -349,6 +342,8 @@ export const buildGetAppointmentsForDayAndHost =
         bufferTime: maxBufferTime,
         filteredSlots,
         slotDuration,
+        timelineStart,
+        timelineEnd,
       })
     } catch (error) {
       req.payload.logger.error(`Error getting appointments: ${error}`)

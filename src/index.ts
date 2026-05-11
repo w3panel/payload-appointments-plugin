@@ -19,6 +19,7 @@ import { waitlistJoin } from './endpoints/waitlistJoin'
 import { waitlistLeave } from './endpoints/waitlistLeave'
 import { waitlistPosition } from './endpoints/waitlistPosition'
 import { applyHostTabs } from './fields/hostTabs'
+import { buildValidateHostScheduleShiftsHook } from './hooks/validateHostScheduleShiftOverlaps'
 import { seedAppointmentsData } from './seed'
 import { CUSTOM_CONFIG_KEY, DEFAULT_BUILD_CONFIG } from './types/config'
 import type { AppointmentsBuildConfig } from './types/config'
@@ -183,6 +184,16 @@ export const appointmentsPlugin =
       )
     }
     applyHostTabs(hostCollection, buildConfig)
+
+    const validateHostScheduleShifts = buildValidateHostScheduleShiftsHook(
+      buildConfig.hostScheduleFieldPath,
+    )
+    const hostHooks = hostCollection.hooks ?? {}
+    const hostBeforeValidate = hostHooks.beforeValidate ?? []
+    hostCollection.hooks = {
+      ...hostHooks,
+      beforeValidate: [...hostBeforeValidate, validateHostScheduleShifts],
+    }
 
     config.admin = {
       ...config.admin,

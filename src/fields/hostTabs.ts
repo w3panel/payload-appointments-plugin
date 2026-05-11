@@ -132,6 +132,17 @@ export function applyHostTabs(
     } as any
   })
 
-  hostCollection.fields = [...sidebarOrUntabbed, buildHostScheduleLeafField()]
+  const nextFields: Field[] = []
+  const seenNames = new Set<string>()
+  for (const field of [...sidebarOrUntabbed, ...openingTimesSidebarFields]) {
+    const name = (field as any)?.name
+    if (typeof name === 'string') {
+      if (seenNames.has(name)) continue
+      seenNames.add(name)
+    }
+    nextFields.push(field)
+  }
+
+  hostCollection.fields = nextFields
   return hostCollection
 }
